@@ -1,6 +1,7 @@
-import app from "./app";
 import dotenv from "dotenv";
 dotenv.config();
+import app from "./app";
+import { logger } from "./utils/logger";
 import { appDataSouce } from "./data-source";
 if (!process.env.PORT) {
   throw new Error("PORT is not defined in environment variables");
@@ -9,13 +10,13 @@ if (!process.env.PORT) {
 (async () => {
   try {
     await appDataSouce.initialize();
-    console.log("Database connected");
+    logger.info("database connected success fully")
   } catch (error) {
-    console.error("Database connection failed", error);
+    logger.error(" errorr connecting tehe data bse")
     process.exit(1);
   }
 })();
 
 app.listen(process.env.PORT, () => {
-  console.log("server running");
+  logger.info("server started dont need worry")
 });
