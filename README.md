@@ -8,6 +8,7 @@ This repository contains both the frontend and backend code in a single reposito
 ## Structure
 
 mysocialcode/
+
 - frontend/ – Frontend application (Expo / React Native)
 - backend/ – Backend API (Node.js / Express)
 
