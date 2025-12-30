@@ -4,7 +4,7 @@
   "packageManager": "pnpm@10.26.2",
   "scripts": {
     "format": "prettier --write .",
-    "prepare": "husky install"
+    "prepare": "husky"
   },
   "devDependencies": {
     "husky": "^9.1.7",

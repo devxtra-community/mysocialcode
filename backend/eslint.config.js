@@ -1,13 +1,13 @@
-import js from "@eslint/js";
-import tseslint from "typescript-eslint";
+import js from '@eslint/js';
+import tseslint from 'typescript-eslint';
 
 export default [
   {
-    ignores: ["dist/**", "build/**", "node_modules/**"],
+    ignores: ['dist/**', 'build/**', 'node_modules/**'],
     rules: {
-      "@typescript-eslint/no-unused-vars": [
-        "error",
-        { argsIgnorePattern: "^_" }
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        { argsIgnorePattern: '^_' },
       ],
     },
   },

@@ -4,13 +4,11 @@ const Healthrouter = express.Router();
 Healthrouter.get('/health', async (req, res) => {
   try {
     if (!appDataSouce.isInitialized) {
-      return res
-        .status(503)
-        .json({
-          status: 'eroor',
-          service: 'mysocial-code-backend',
-          db: 'not initialized',
-        });
+      return res.status(503).json({
+        status: 'eroor',
+        service: 'mysocial-code-backend',
+        db: 'not initialized',
+      });
     }
     await appDataSouce.query('SELECT 1');
     return res.status(200).json({
