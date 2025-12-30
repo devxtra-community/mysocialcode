@@ -17,6 +17,8 @@
     "typeorm": "^0.3.28"
   },
   "devDependencies": {
+    "@commitlint/cli": "^20.2.0",
+    "@commitlint/config-conventional": "^20.2.0",
     "@eslint/js": "^9.39.2",
     "@types/express": "^5.0.6",
     "@types/node": "^25.0.3",
