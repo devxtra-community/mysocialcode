@@ -1,7 +1,7 @@
 import express from 'express';
 import { appDataSouce } from '../data-source';
 const Healthrouter = express.Router();
-Healthrouter.get('/health', async (req, res) => {
+Healthrouter.get('/', async (req, res) => {
   try {
     if (!appDataSouce.isInitialized) {
       return res.status(503).json({
