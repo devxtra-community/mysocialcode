@@ -13,7 +13,6 @@ if (!process.env.PORT) {
     logger.info('database connected success fully');
   } catch (error) {
     logger.error({ err: error }, 'error connecting the database');
-
     process.exit(1);
   }
 })();
@@ -21,3 +20,5 @@ if (!process.env.PORT) {
 app.listen(process.env.PORT, () => {
   logger.info('server started dont need worry');
 });
+
+
