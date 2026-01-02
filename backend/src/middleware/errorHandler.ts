@@ -1,4 +1,10 @@
 import { Request, Response, NextFunction } from 'express';
+import { logger } from '../utils/logger';
+
+type AppError = {
+  statusCode?: number;
+  message?: string;
+};
 
 export const errorHandler = (
   err: unknown,
@@ -6,13 +12,26 @@ export const errorHandler = (
   res: Response,
   _next: NextFunction,
 ) => {
-  console.error(err);
+  logger.info('reached inside global error');
+  const error = err as AppError;
 
-  let message = 'Internal Server Error';
+  const statusCode = error.statusCode ?? 500;
+  const message =
+    statusCode === 500
+      ? 'Internal Server Error'
+      : (error.message ?? 'Something went wrong');
 
-  if (err instanceof Error) {
-    message = err.message;
-  }
+  logger.error(
+    {
+      err,
+      path: req.path,
+      method: req.method,
+    },
+    'Unhandled error',
+  );
 
-  res.status(500).json({ message });
+  res.status(statusCode).json({
+    success: false,
+    message,
+  });
 };
