@@ -11,6 +11,6 @@ export const appDataSouce = new DataSource({
   ssl: {
     rejectUnauthorized: false,
   },
-  entities: [User,Otp],
+  entities: [User, Otp],
   synchronize: true,
 });

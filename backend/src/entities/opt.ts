@@ -15,7 +15,7 @@ export class Otp {
   otp!: string;
   @Column({ type: 'timestamp' })
   expiresAt!: Date;
-  @Column({default:false})
+  @Column({ default: false })
   verified!: boolean;
   @CreateDateColumn()
   createdAt!: Date;
