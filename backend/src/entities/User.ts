@@ -1,8 +1,33 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
-@Entity()
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+} from 'typeorm';
+
+@Entity('users')
 export class User {
-  @PrimaryGeneratedColumn()
-  id!: number;
+  @PrimaryGeneratedColumn('uuid')
+  id!: string;
+
+  @Column({ unique: true })
+  email!: string;
+
   @Column()
-  phone!: string;
+  name!: string;
+
+  @Column({ nullable: true })
+  age?: number;
+
+  @Column({ nullable: true })
+  gender?: string;
+
+  @Column('text', { array: true, nullable: true })
+  interests?: string[];
+
+  @Column({ nullable: true })
+  profileImageUrl?: string;
+
+  @CreateDateColumn()
+  createdAt!: Date;
 }

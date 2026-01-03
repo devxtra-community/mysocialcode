@@ -1,5 +1,5 @@
 import express from 'express';
-import { appDataSouce } from '../data-source';
+import { appDataSouce } from '../../data-source';
 const Healthrouter = express.Router();
 Healthrouter.get('/', async (req, res) => {
   try {
