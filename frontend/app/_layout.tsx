@@ -1,31 +1,40 @@
-import {
-  DarkTheme,
-  DefaultTheme,
-  ThemeProvider,
-} from '@react-navigation/native';
-import { Stack } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import 'react-native-reanimated';
-
-import { useColorScheme } from '@/hooks/use-color-scheme';
-
-export const unstable_settings = {
-  anchor: '(tabs)',
-};
+import { Stack } from "expo-router";
+import {useState,useEffect} from "react"
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
+  const [hasSeenInro,setHasSeenIntro] = useState<boolean|null>(null)
+  const [isAuthenticated,setIsAuthenticated] = useState(false)
 
-  return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen
-          name="modal"
-          options={{ presentation: 'modal', title: 'Modal' }}
-        />
+  useEffect(()=>{
+    async function loadIntro() {
+      const value  = await AsyncStorage.getItem("hasSeenInto")
+      setHasSeenIntro(value==="true")
+    }
+    loadIntro()
+  },[])
+  
+  if(hasSeenInro===null){
+    return null
+  }
+  if(!hasSeenInro){
+    return(
+      <Stack screenOptions={{headerShown:false}}>
+        <Stack.Screen name="(auth)/intro" />
       </Stack>
-      <StatusBar style="auto" />
-    </ThemeProvider>
+    )
+  }
+   if (!isAuthenticated) {
+    return (
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="(auth)" />
+      </Stack>
+    );
+  }
+
+   return (
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="(tabs)" />
+    </Stack>
   );
 }

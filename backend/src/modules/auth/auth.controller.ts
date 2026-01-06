@@ -1,11 +1,13 @@
 import { Request, Response, NextFunction } from 'express';
 import { logger } from '../../utils/logger';
-import { emailSchema, registerSchema } from './auth.schema';
-import { sendOtpEmail } from '../../Services/email.service';
+import {  registerSchema,phoneSchema } from './auth.schema';
+import { sendOtpSms } from '../../Services/sms.service';
 import { generateotp } from '../../utils/otp';
 import { appDataSouce } from '../../data-source';
 import { Otp } from '../../entities/opt';
 import { User } from '../../entities/User';
+import { signAccessToken } from '../../Services/jwt.service';
+import { createRefreshTokenSession } from '../../Services/authToken';
 
 export const sendOtp = async (
   req: Request,
@@ -14,7 +16,7 @@ export const sendOtp = async (
 ) => {
   try {
     logger.info('reached');
-    const result = emailSchema.safeParse(req.body);
+    const result = phoneSchema.safeParse(req.body);
     if (!result.success) {
       return res
         .status(400)
@@ -23,11 +25,11 @@ export const sendOtp = async (
     const otpRep = appDataSouce.getRepository(Otp);
     const otpcode = generateotp();
     logger.debug({ otpcode }, 'otp is');
-    const email = result.data?.email;
-    await sendOtpEmail(email.toString(), otpcode.toString());
-    await otpRep.delete({ email });
+    const phoneNumber = result.data?.phoneNumber;
+    await sendOtpSms(phoneNumber, otpcode.toString());
+    await otpRep.delete({ phoneNumber })
     await otpRep.save({
-      email,
+      phoneNumber,
       otp: otpcode.toString(),
       expiresAt: new Date(Date.now() + 5 * 60 * 1000),
     });
@@ -43,16 +45,20 @@ export const verifyotp = async (
   res: Response,
   next: NextFunction,
 ) => {
+  console.log(req.body);
+  
+  
   try {
-    const { email, otp } = req.body;
-    if (!otp || !email) {
-      return res.status(400).json({ message: ' otp and email are required' });
+    const { phoneNumber, otp } = req.body;
+    if (!otp || !phoneNumber) {
+      return res.status(400).json({ message: ' otp and phoneNumber are required' });
     }
 
     const otpRepo = appDataSouce.getRepository(Otp);
+    const userRepo = appDataSouce.getRepository(User)
     const otpRecord = await otpRepo.findOne({
       where: {
-        email,
+        phoneNumber,
         verified: false,
       },
       order: {
@@ -72,10 +78,31 @@ export const verifyotp = async (
       return res.status(400).json({ message: 'Invalid OTP' });
     }
     otpRecord.verified = true;
+    const  existingUser = await userRepo.findOne({
+      where:{phoneNumber}
+    })
     await otpRepo.save(otpRecord);
-    res.status(200).json({
-      message: 'OTP verified successfully',
+    console.log("ACCESS_TOKEN_SECRET:", process.env.ACCESS_TOKEN_SECRET);
+
+    if (existingUser) {
+  const accessToken = signAccessToken({
+    userId: existingUser.id,
+  });
+
+  const refreshToken = await createRefreshTokenSession(existingUser);
+
+  return res.status(200).json({
+    success: true,
+    userExists: true,
+    accessToken,
+    refreshToken,
+  });
+}
+
+     return res.status(200).json({
       success: true,
+      userExists: false,
+      message: 'OTP verified, new user',
       otpId: otpRecord.id,
     });
   } catch (err) {
@@ -97,7 +124,7 @@ export const register = async (
         errors: result.error.format(),
       });
     }
-    const { otpId, name, age, gender, interests } = result.data;
+    const { otpId, name, age, gender, interests,email } = result.data;
     if (!otpId) {
       return res.status(400).json({ message: 'otpid requuired' });
     }
@@ -116,23 +143,35 @@ export const register = async (
       });
     }
 
-    const email = otpRecord.email;
+    const phoneNumber = otpRecord.phoneNumber;
 
     const existingUser = await userRepo.findOne({
-      where: { email },
+      where: { phoneNumber },
     });
 
     if (existingUser) {
       return res.status(409).json({ message: 'User already exists' });
     }
+    // const hashedPassword = await bcrypt.hash(password,10)
 
-    const user = userRepo.create({ email, name, age, gender, interests });
+    const user = userRepo.create({ phoneNumber, name, age, gender, interests,email });
 
-    await userRepo.save(user);
-    await otpRepo.delete({ id: otpId });
-    return res
-      .status(201)
-      .json({ message: 'User registered successfully', success: true });
+  await userRepo.save(user);
+await otpRepo.delete({ id: otpId });
+
+const accessToken = signAccessToken({
+  userId: user.id,
+});
+
+const refreshToken = await createRefreshTokenSession(user);
+
+return res.status(201).json({
+  success: true,
+  message: 'User registered successfully',
+  accessToken,
+  refreshToken,
+});
+
   } catch (err) {
     logger.error({ err }, 'error in register');
     next(err);

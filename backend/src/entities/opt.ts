@@ -10,7 +10,7 @@ export class Otp {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
   @Column()
-  email!: string;
+  phoneNumber!: string;
   @Column()
   otp!: string;
   @Column({ type: 'timestamp' })
