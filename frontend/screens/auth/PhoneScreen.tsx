@@ -1,25 +1,24 @@
-import { View, Text, TextInput, Button } from "react-native";
-import { sendOtp } from "@/services/auth/otp.service";
-import { useState } from "react";
-import { useRouter } from "expo-router";
+import { View, Text, TextInput, Button } from 'react-native';
+import { sendOtp } from '@/services/auth/otp.service';
+import { useState } from 'react';
+import { useRouter } from 'expo-router';
 
 export default function PhoneScreen() {
-  const [phone, setPhone] = useState("");
+  const [phone, setPhone] = useState('');
   const router = useRouter();
 
-  const handleContinue = async() => {
-    const res = await sendOtp(phone)
+  const handleContinue = async () => {
+    const res = await sendOtp(phone);
     console.log(res);
-    
-    if(res.success){
-        router.push({
-            pathname:"/(auth)/otp",
-            params:{
-                phoneNumber:phone
-            }
-        });
+
+    if (res.success) {
+      router.push({
+        pathname: '/(auth)/otp',
+        params: {
+          phoneNumber: phone,
+        },
+      });
     }
-    
   };
 
   return (

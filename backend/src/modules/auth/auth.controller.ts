@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { logger } from '../../utils/logger';
-import {  registerSchema,phoneSchema } from './auth.schema';
+import { registerSchema, phoneSchema } from './auth.schema';
 import { sendOtpSms } from '../../Services/sms.service';
 import { generateotp } from '../../utils/otp';
 import { appDataSouce } from '../../data-source';
@@ -27,7 +27,7 @@ export const sendOtp = async (
     logger.debug({ otpcode }, 'otp is');
     const phoneNumber = result.data?.phoneNumber;
     await sendOtpSms(phoneNumber, otpcode.toString());
-    await otpRep.delete({ phoneNumber })
+    await otpRep.delete({ phoneNumber });
     await otpRep.save({
       phoneNumber,
       otp: otpcode.toString(),
@@ -46,16 +46,17 @@ export const verifyotp = async (
   next: NextFunction,
 ) => {
   console.log(req.body);
-  
-  
+
   try {
     const { phoneNumber, otp } = req.body;
     if (!otp || !phoneNumber) {
-      return res.status(400).json({ message: ' otp and phoneNumber are required' });
+      return res
+        .status(400)
+        .json({ message: ' otp and phoneNumber are required' });
     }
 
     const otpRepo = appDataSouce.getRepository(Otp);
-    const userRepo = appDataSouce.getRepository(User)
+    const userRepo = appDataSouce.getRepository(User);
     const otpRecord = await otpRepo.findOne({
       where: {
         phoneNumber,
@@ -78,28 +79,28 @@ export const verifyotp = async (
       return res.status(400).json({ message: 'Invalid OTP' });
     }
     otpRecord.verified = true;
-    const  existingUser = await userRepo.findOne({
-      where:{phoneNumber}
-    })
+    const existingUser = await userRepo.findOne({
+      where: { phoneNumber },
+    });
     await otpRepo.save(otpRecord);
-    console.log("ACCESS_TOKEN_SECRET:", process.env.ACCESS_TOKEN_SECRET);
+    console.log('ACCESS_TOKEN_SECRET:', process.env.ACCESS_TOKEN_SECRET);
 
     if (existingUser) {
-  const accessToken = signAccessToken({
-    userId: existingUser.id,
-  });
+      const accessToken = signAccessToken({
+        userId: existingUser.id,
+      });
 
-  const refreshToken = await createRefreshTokenSession(existingUser);
+      const refreshToken = await createRefreshTokenSession(existingUser);
 
-  return res.status(200).json({
-    success: true,
-    userExists: true,
-    accessToken,
-    refreshToken,
-  });
-}
+      return res.status(200).json({
+        success: true,
+        userExists: true,
+        accessToken,
+        refreshToken,
+      });
+    }
 
-     return res.status(200).json({
+    return res.status(200).json({
       success: true,
       userExists: false,
       message: 'OTP verified, new user',
@@ -124,7 +125,7 @@ export const register = async (
         errors: result.error.format(),
       });
     }
-    const { otpId, name, age, gender, interests,email } = result.data;
+    const { otpId, name, age, gender, interests, email } = result.data;
     if (!otpId) {
       return res.status(400).json({ message: 'otpid requuired' });
     }
@@ -154,24 +155,30 @@ export const register = async (
     }
     // const hashedPassword = await bcrypt.hash(password,10)
 
-    const user = userRepo.create({ phoneNumber, name, age, gender, interests,email });
+    const user = userRepo.create({
+      phoneNumber,
+      name,
+      age,
+      gender,
+      interests,
+      email,
+    });
 
-  await userRepo.save(user);
-await otpRepo.delete({ id: otpId });
+    await userRepo.save(user);
+    await otpRepo.delete({ id: otpId });
 
-const accessToken = signAccessToken({
-  userId: user.id,
-});
+    const accessToken = signAccessToken({
+      userId: user.id,
+    });
 
-const refreshToken = await createRefreshTokenSession(user);
+    const refreshToken = await createRefreshTokenSession(user);
 
-return res.status(201).json({
-  success: true,
-  message: 'User registered successfully',
-  accessToken,
-  refreshToken,
-});
-
+    return res.status(201).json({
+      success: true,
+      message: 'User registered successfully',
+      accessToken,
+      refreshToken,
+    });
   } catch (err) {
     logger.error({ err }, 'error in register');
     next(err);

@@ -1,30 +1,30 @@
-import { Stack } from "expo-router";
-import {useState,useEffect} from "react"
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Stack } from 'expo-router';
+import { useState, useEffect } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function RootLayout() {
-  const [hasSeenInro,setHasSeenIntro] = useState<boolean|null>(null)
-  const [isAuthenticated,setIsAuthenticated] = useState(false)
+  const [hasSeenInro, setHasSeenIntro] = useState<boolean | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  useEffect(()=>{
+  useEffect(() => {
     async function loadIntro() {
-      const value  = await AsyncStorage.getItem("hasSeenInto")
-      setHasSeenIntro(value==="true")
+      const value = await AsyncStorage.getItem('hasSeenInto');
+      setHasSeenIntro(value === 'true');
     }
-    loadIntro()
-  },[])
-  
-  if(hasSeenInro===null){
-    return null
+    loadIntro();
+  }, []);
+
+  if (hasSeenInro === null) {
+    return null;
   }
-  if(!hasSeenInro){
-    return(
-      <Stack screenOptions={{headerShown:false}}>
+  if (!hasSeenInro) {
+    return (
+      <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="(auth)/intro" />
       </Stack>
-    )
+    );
   }
-   if (!isAuthenticated) {
+  if (!isAuthenticated) {
     return (
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="(auth)" />
@@ -32,7 +32,7 @@ export default function RootLayout() {
     );
   }
 
-   return (
+  return (
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="(tabs)" />
     </Stack>

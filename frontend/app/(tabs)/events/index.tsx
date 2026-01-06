@@ -1,4 +1,4 @@
-import EventScreen from "@/screens/events/EventsScreen";
-export default function EventIndex(){
-    return <EventScreen/>
+import EventScreen from '@/screens/events/EventsScreen';
+export default function EventIndex() {
+  return <EventScreen />;
 }

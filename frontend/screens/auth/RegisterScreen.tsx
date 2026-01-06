@@ -1,21 +1,15 @@
-import {
-  View,
-  Text,
-  TextInput,
-  Button,
-  TouchableOpacity,
-} from "react-native";
-import { useState } from "react";
-import { useRouter, useLocalSearchParams } from "expo-router";
-import { registerUser } from "@/services/auth/otp.service";
+import { View, Text, TextInput, Button, TouchableOpacity } from 'react-native';
+import { useState } from 'react';
+import { useRouter, useLocalSearchParams } from 'expo-router';
+import { registerUser } from '@/services/auth/otp.service';
 
 const INTERESTS = [
-  "Technology",
-  "Music",
-  "Sports",
-  "Travel",
-  "Fitness",
-  "Photography",
+  'Technology',
+  'Music',
+  'Sports',
+  'Travel',
+  'Fitness',
+  'Photography',
 ];
 
 export default function RegisterScreen() {
@@ -26,34 +20,31 @@ export default function RegisterScreen() {
   const [step, setStep] = useState<1 | 2>(1);
 
   // profile data
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [age, setAge] = useState("");
-  const [gender, setGender] = useState<"male" | "female" | "other" | "">("");
-
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [age, setAge] = useState('');
+  const [gender, setGender] = useState<'male' | 'female' | 'other' | ''>('');
 
   const [interests, setInterests] = useState<string[]>([]);
 
-const toggleInterest = (interest: string) => {
-  setInterests((prev) => {
-    if (prev.includes(interest)) {
-      return prev.filter((i) => i !== interest);
-    } else {
-      return [...prev, interest];
-    }
-  });
-};
-
+  const toggleInterest = (interest: string) => {
+    setInterests((prev) => {
+      if (prev.includes(interest)) {
+        return prev.filter((i) => i !== interest);
+      } else {
+        return [...prev, interest];
+      }
+    });
+  };
 
   const handleNext = () => {
     if (!name || !gender) return;
     setStep(2);
   };
 
-  
   const handleFinish = async () => {
     if (!otpId) return;
-     if (!gender) return;
+    if (!gender) return;
 
     const res = await registerUser({
       otpId: otpId.toString(),
@@ -64,16 +55,14 @@ const toggleInterest = (interest: string) => {
       interests,
     });
     console.log(res);
-    
 
     if (!res?.success) return;
 
-    router.replace("/(tabs)/home");
+    router.replace('/(tabs)/home');
   };
 
   return (
     <View>
-     
       {step === 1 && (
         <>
           <Text>Complete your profile</Text>
@@ -100,13 +89,10 @@ const toggleInterest = (interest: string) => {
 
           <Text>Select gender</Text>
 
-          {["male", "female", "other"].map((g) => (
-            <TouchableOpacity
-              key={g}
-              onPress={() => setGender(g as any)}
-            >
+          {['male', 'female', 'other'].map((g) => (
+            <TouchableOpacity key={g} onPress={() => setGender(g as any)}>
               <Text>
-                {gender === g ? "🔘 " : "⚪ "}
+                {gender === g ? '🔘 ' : '⚪ '}
                 {g}
               </Text>
             </TouchableOpacity>
@@ -126,7 +112,7 @@ const toggleInterest = (interest: string) => {
               onPress={() => toggleInterest(interest)}
             >
               <Text>
-                {interests.includes(interest) ? "✅ " : "⬜ "}
+                {interests.includes(interest) ? '✅ ' : '⬜ '}
                 {interest}
               </Text>
             </TouchableOpacity>

@@ -3,7 +3,6 @@ export const phoneSchema = z.object({
   phoneNumber: z.string().min(10, 'Invalid phone number'),
 });
 
-
 export const registerSchema = z.object({
   otpId: z.string().uuid(),
   name: z.string().min(1, 'name is required'),

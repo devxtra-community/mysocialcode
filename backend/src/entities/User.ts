@@ -10,11 +10,11 @@ export class User {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
-  @Column({ unique: true,nullable:true })
+  @Column({ unique: true, nullable: true })
   email!: string;
 
-  @Column({unique:true,nullable:true})
-  phoneNumber!:string
+  @Column({ unique: true, nullable: true })
+  phoneNumber!: string;
 
   @Column()
   name!: string;
@@ -31,8 +31,8 @@ export class User {
   @Column({ nullable: true })
   profileImageUrl?: string;
 
-  @Column({nullable:true})
-  password?:string;
+  @Column({ nullable: true })
+  password?: string;
 
   @CreateDateColumn()
   createdAt!: Date;
