@@ -1,38 +1,135 @@
-import { View, Text, TextInput, Button } from 'react-native';
-import { sendOtp } from '@/services/auth/otp.service';
-import { useState } from 'react';
-import { useRouter } from 'expo-router';
+import {
+  View,
+  Text,
+  TextInput,
+  StyleSheet,
+  Pressable,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useState } from "react";
+import { router } from "expo-router";
+import { sendOtp } from "@/services/auth/otp.service";
 
 export default function PhoneScreen() {
-  const [phone, setPhone] = useState('');
-  const router = useRouter();
+  const [phone, setPhone] = useState("");
 
-  const handleContinue = async () => {
-    const res = await sendOtp(phone);
-    console.log(res);
+  const handleContinue = async() => {
+    if (!phone) return;
+    const res = await sendOtp(phone)
 
-    if (res.success) {
+    if(res.success){
       router.push({
-        pathname: '/(auth)/otp',
-        params: {
-          phoneNumber: phone,
-        },
+        pathname: "/(auth)/otp",
+        params: { phone },
       });
     }
+    
   };
 
   return (
-    <View>
-      <Text>Enter your phone number</Text>
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.container}>
+        
+        <View style={styles.content}>
+          <Text style={styles.title}>Enter your phone number</Text>
 
-      <TextInput
-        placeholder="Phone number"
-        keyboardType="phone-pad"
-        value={phone}
-        onChangeText={setPhone}
-      />
+          <Text style={styles.description}>
+            We’ll send you a one-time password to verify your number.
+          </Text>
 
-      <Button title="Continue" onPress={handleContinue} />
-    </View>
+          <View style={styles.inputWrapper}>
+            <Text style={styles.countryCode}>+91</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Phone number"
+              keyboardType="phone-pad"
+              value={phone}
+              onChangeText={setPhone}
+              maxLength={13}
+            />
+          </View>
+
+         
+          <Pressable
+            style={[
+              styles.button,
+              !phone && styles.buttonDisabled,
+            ]}
+            onPress={handleContinue}
+            disabled={!phone}
+          >
+            <Text style={styles.buttonText}>Continue</Text>
+          </Pressable>
+        </View>
+      </View>
+    </SafeAreaView>
   );
 }
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: "#EAF5EC",
+  },
+
+  container: {
+    flex: 1,
+    paddingHorizontal: 24,
+  },
+
+  content: {
+    flex: 1,
+    justifyContent: "center",
+  },
+
+  title: {
+    fontSize: 24,
+    fontWeight: "700",
+    color: "#111",
+    marginBottom: 8,
+  },
+
+  description: {
+    fontSize: 14,
+    color: "#555",
+    lineHeight: 20,
+    marginBottom: 24,
+  },
+
+  inputWrapper: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#FFF",
+    borderRadius: 14,
+    paddingHorizontal: 14,
+    height: 52,
+    marginBottom: 24,
+  },
+
+  countryCode: {
+    fontSize: 16,
+    fontWeight: "600",
+    marginRight: 8,
+  },
+
+  input: {
+    flex: 1,
+    fontSize: 16,
+  },
+
+  button: {
+    backgroundColor: "#000",
+    paddingVertical: 16,
+    borderRadius: 16,
+    alignItems: "center",
+  },
+
+  buttonDisabled: {
+    opacity: 0.5,
+  },
+
+  buttonText: {
+    color: "#FFF",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+});
