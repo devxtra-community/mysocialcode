@@ -9,13 +9,13 @@ export default function PhoneScreen() {
 
   const handleContinue = async () => {
     if (!phone) return;
-      const fullPhoneNumber = `+91${phone}`;
+    const fullPhoneNumber = `+91${phone}`;
     const res = await sendOtp(fullPhoneNumber);
 
     if (res.success) {
       router.push({
         pathname: '/(auth)/otp',
-        params: { phone:fullPhoneNumber },
+        params: { phone: fullPhoneNumber },
       });
     }
   };
