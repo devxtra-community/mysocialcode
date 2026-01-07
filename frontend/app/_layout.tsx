@@ -8,7 +8,7 @@ export default function RootLayout() {
 
   useEffect(() => {
     async function loadIntro() {
-      const value = await AsyncStorage.getItem('hasSeenInto');
+      const value = await AsyncStorage.getItem('hasSeenIntro');
       setHasSeenIntro(value === 'true');
     }
     loadIntro();

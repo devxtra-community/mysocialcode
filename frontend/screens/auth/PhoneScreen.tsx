@@ -1,35 +1,28 @@
-import {
-  View,
-  Text,
-  TextInput,
-  StyleSheet,
-  Pressable,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { useState } from "react";
-import { router } from "expo-router";
-import { sendOtp } from "@/services/auth/otp.service";
+import { View, Text, TextInput, StyleSheet, Pressable } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useState } from 'react';
+import { router } from 'expo-router';
+import { sendOtp } from '@/services/auth/otp.service';
 
 export default function PhoneScreen() {
-  const [phone, setPhone] = useState("");
+  const [phone, setPhone] = useState('');
 
-  const handleContinue = async() => {
+  const handleContinue = async () => {
     if (!phone) return;
-    const res = await sendOtp(phone)
+      const fullPhoneNumber = `+91${phone}`;
+    const res = await sendOtp(fullPhoneNumber);
 
-    if(res.success){
+    if (res.success) {
       router.push({
-        pathname: "/(auth)/otp",
-        params: { phone },
+        pathname: '/(auth)/otp',
+        params: { phone:fullPhoneNumber },
       });
     }
-    
   };
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
-        
         <View style={styles.content}>
           <Text style={styles.title}>Enter your phone number</Text>
 
@@ -45,16 +38,12 @@ export default function PhoneScreen() {
               keyboardType="phone-pad"
               value={phone}
               onChangeText={setPhone}
-              maxLength={13}
+              maxLength={10}
             />
           </View>
 
-         
           <Pressable
-            style={[
-              styles.button,
-              !phone && styles.buttonDisabled,
-            ]}
+            style={[styles.button, !phone && styles.buttonDisabled]}
             onPress={handleContinue}
             disabled={!phone}
           >
@@ -68,7 +57,7 @@ export default function PhoneScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: "#EAF5EC",
+    backgroundColor: '#EAF5EC',
   },
 
   container: {
@@ -78,27 +67,27 @@ const styles = StyleSheet.create({
 
   content: {
     flex: 1,
-    justifyContent: "center",
+    justifyContent: 'center',
   },
 
   title: {
     fontSize: 24,
-    fontWeight: "700",
-    color: "#111",
+    fontWeight: '700',
+    color: '#111',
     marginBottom: 8,
   },
 
   description: {
     fontSize: 14,
-    color: "#555",
+    color: '#555',
     lineHeight: 20,
     marginBottom: 24,
   },
 
   inputWrapper: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#FFF",
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFF',
     borderRadius: 14,
     paddingHorizontal: 14,
     height: 52,
@@ -107,7 +96,7 @@ const styles = StyleSheet.create({
 
   countryCode: {
     fontSize: 16,
-    fontWeight: "600",
+    fontWeight: '600',
     marginRight: 8,
   },
 
@@ -117,10 +106,10 @@ const styles = StyleSheet.create({
   },
 
   button: {
-    backgroundColor: "#000",
+    backgroundColor: '#000',
     paddingVertical: 16,
     borderRadius: 16,
-    alignItems: "center",
+    alignItems: 'center',
   },
 
   buttonDisabled: {
@@ -128,8 +117,8 @@ const styles = StyleSheet.create({
   },
 
   buttonText: {
-    color: "#FFF",
+    color: '#FFF',
     fontSize: 16,
-    fontWeight: "600",
+    fontWeight: '600',
   },
 });
