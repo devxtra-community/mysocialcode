@@ -3,7 +3,6 @@ import { View, Text, StyleSheet, Pressable } from 'react-native';
 export default function ProfileScreen() {
   return (
     <View style={styles.container}>
-
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.title}>Profile</Text>
@@ -32,7 +31,6 @@ export default function ProfileScreen() {
           <Text style={styles.rowText}>Help & Support</Text>
         </Pressable>
       </View>
-
     </View>
   );
 }
@@ -83,4 +81,3 @@ const styles = StyleSheet.create({
     fontSize: 15,
   },
 });
-

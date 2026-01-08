@@ -6,20 +6,19 @@ export default function EventsScreen() {
 
   return (
     <View style={styles.container}>
-
       <View style={styles.header}>
         <Text style={styles.title}>Events</Text>
 
-        <Pressable
-          onPress={() => router.push('/(tabs)/events/create')}
-        >
+        <Pressable onPress={() => router.push('/(tabs)/events/create')}>
           <Text style={styles.createText}>Create</Text>
         </Pressable>
       </View>
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>My Events</Text>
-        <Text style={styles.placeholder}>You haven’t created any events yet.</Text>
+        <Text style={styles.placeholder}>
+          You haven’t created any events yet.
+        </Text>
       </View>
 
       <View style={styles.section}>
@@ -65,4 +64,3 @@ const styles = StyleSheet.create({
     color: '#6b7280',
   },
 });
-

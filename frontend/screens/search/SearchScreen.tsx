@@ -3,7 +3,6 @@ import { View, Text, StyleSheet, TextInput } from 'react-native';
 export default function SearchScreen() {
   return (
     <View style={styles.container}>
-
       <View style={styles.header}>
         <Text style={styles.title}>Search</Text>
       </View>
@@ -23,11 +22,8 @@ export default function SearchScreen() {
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Results</Text>
-        <Text style={styles.placeholder}>
-          Start typing to see results.
-        </Text>
+        <Text style={styles.placeholder}>Start typing to see results.</Text>
       </View>
-
     </View>
   );
 }

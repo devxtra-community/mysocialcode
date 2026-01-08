@@ -53,8 +53,7 @@ export default function TabLayout() {
           ),
         }}
       />
-      <Tabs.Screen name='events/create' options={{href:null}}/>
+      <Tabs.Screen name="events/create" options={{ href: null }} />
     </Tabs>
-    
   );
 }

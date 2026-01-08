@@ -3,7 +3,6 @@ import { View, Text, StyleSheet, Pressable } from 'react-native';
 export default function HomeScreen() {
   return (
     <View style={styles.container}>
-
       <View style={styles.header}>
         <Text style={styles.title}>Home</Text>
       </View>
@@ -16,7 +15,6 @@ export default function HomeScreen() {
         <Text style={styles.sectionTitle}>Popular Events</Text>
         <Text style={styles.placeholder}>Popular events will appear here.</Text>
       </View>
-
     </View>
   );
 }
