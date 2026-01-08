@@ -3,12 +3,11 @@ import { View, Text, StyleSheet, Pressable } from 'react-native';
 export default function ProfileScreen() {
   return (
     <View style={styles.container}>
-      {/* Header */}
+   
       <View style={styles.header}>
         <Text style={styles.title}>Profile</Text>
       </View>
 
-      {/* User info */}
       <View style={styles.userCard}>
         <View style={styles.avatar} />
         <View>
@@ -17,7 +16,6 @@ export default function ProfileScreen() {
         </View>
       </View>
 
-      {/* Actions */}
       <View style={styles.section}>
         <Pressable style={styles.row}>
           <Text style={styles.rowText}>Edit Profile</Text>

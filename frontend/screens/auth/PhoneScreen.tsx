@@ -66,6 +66,15 @@ export default function PhoneScreen() {
               {loading ? 'Sending OTP...' : 'Continue'}
             </Text>
           </Pressable>
+          <Pressable
+  onPress={() => router.push('/(auth)/login')}
+  style={styles.loginInstead}
+>
+  <Text style={styles.loginText}>
+    Already have an account? <Text style={styles.loginHighlight}>Login instead</Text>
+  </Text>
+</Pressable>
+
         </View>
       </View>
     </SafeAreaView>
@@ -138,4 +147,19 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
+  loginInstead: {
+  marginTop: 20,
+  alignItems: 'center',
+},
+
+loginText: {
+  fontSize: 14,
+  color: '#555',
+},
+
+loginHighlight: {
+  color: '#000',
+  fontWeight: '600',
+},
+
 });
