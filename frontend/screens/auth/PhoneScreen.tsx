@@ -6,17 +6,25 @@ import { sendOtp } from '@/services/auth/otp.service';
 
 export default function PhoneScreen() {
   const [phone, setPhone] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleContinue = async () => {
-    if (!phone) return;
-    const fullPhoneNumber = `+91${phone}`;
-    const res = await sendOtp(fullPhoneNumber);
+    if (!phone || loading) return;
 
-    if (res.success) {
-      router.push({
-        pathname: '/(auth)/otp',
-        params: { phone: fullPhoneNumber },
-      });
+    try {
+      setLoading(true);
+
+      const fullPhoneNumber = `+91${phone}`;
+      const res = await sendOtp(fullPhoneNumber);
+
+      if (res.success) {
+        router.push({
+          pathname: '/(auth)/otp',
+          params: { phone: fullPhoneNumber },
+        });
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -41,13 +49,17 @@ export default function PhoneScreen() {
               maxLength={10}
             />
           </View>
-
           <Pressable
-            style={[styles.button, !phone && styles.buttonDisabled]}
+            style={[
+              styles.button,
+              (!phone || loading) && styles.buttonDisabled,
+            ]}
             onPress={handleContinue}
-            disabled={!phone}
+            disabled={!phone || loading}
           >
-            <Text style={styles.buttonText}>Continue</Text>
+            <Text style={styles.buttonText}>
+              {loading ? 'Sending OTP...' : 'Continue'}
+            </Text>
           </Pressable>
         </View>
       </View>

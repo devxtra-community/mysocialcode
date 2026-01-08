@@ -32,7 +32,10 @@ export class User {
   profileImageUrl?: string;
 
   @Column({ nullable: true })
-  password?: string;
+  passwordHash?: string;
+
+  @Column({ default: false })
+  isPhoneVerified!: boolean;
 
   @CreateDateColumn()
   createdAt!: Date;

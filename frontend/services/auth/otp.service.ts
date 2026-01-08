@@ -8,14 +8,27 @@ export const verifyOtp = async (phone: string, otp: string) => {
   return res.data;
 };
 
-export const registerUser = async (data: {
+export type RegisterUserPayload = {
   otpId: string;
   name: string;
   email?: string;
   age?: number;
   gender: 'male' | 'female' | 'other';
   interests?: string[];
-}) => {
+  password: string;
+  confirmPassword: string;
+};
+export type LoginPayload = {
+  phoneNumber: string;
+  password: string;
+};
+
+export const registerUser = async (data: RegisterUserPayload) => {
   const res = await api.post('/auth/register', data);
+  return res.data;
+};
+
+export const loginUser = async (data: LoginPayload) => {
+  const res = await api.post('/auth/login', data);
   return res.data;
 };
