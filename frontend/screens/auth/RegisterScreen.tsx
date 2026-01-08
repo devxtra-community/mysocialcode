@@ -87,7 +87,7 @@ export default function RegisterScreen() {
 
       if (res?.success) {
         router.replace('/(tabs)/home');
-        storeTokens(res.accesstoken,res.refreshtoken)
+        storeTokens(res.accesstoken, res.refreshtoken);
       } else {
         Alert.alert('Registration failed', res?.message || 'Try again');
       }

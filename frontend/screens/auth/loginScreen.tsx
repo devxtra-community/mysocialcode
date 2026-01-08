@@ -20,12 +20,10 @@ export default function LoginScreen() {
   async function handleLogin() {
     const res = await loginUser({ phoneNumber, password });
     console.log(res);
-    
 
     if (res?.success) {
       router.replace('/(tabs)/home');
-      storeTokens(res.accesstoken,res.refreshtoken)
-    
+      storeTokens(res.accesstoken, res.refreshtoken);
     }
   }
 
