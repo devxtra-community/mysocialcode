@@ -23,7 +23,13 @@ export default function PhoneScreen() {
           params: { phone: fullPhoneNumber },
         });
       }
-    } finally {
+    }catch(err:any){
+      const data  = err?.response?.data
+      if(data.next=="login"){
+        router.push("/(auth)/login")
+      }
+    }
+     finally {
       setLoading(false);
     }
   };
