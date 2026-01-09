@@ -3,6 +3,10 @@ export const emailSchema = z.object({
   email: z.string().email('Invalid email'),
 });
 
+export const numberSchema = z.object({
+  phoneNumber: z.number(),
+});
+
 export const registerSchema = z.object({
   otpId: z.string().uuid(),
   name: z.string().min(1, 'name is required'),

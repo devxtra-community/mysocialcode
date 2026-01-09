@@ -5,7 +5,7 @@ import { Otp } from './entities/opt';
 if (!process.env.DATABASE_URL) {
   throw new Error('DATABASE_URL is not defined');
 }
-export const appDataSouce = new DataSource({
+export const appDataSource = new DataSource({
   type: 'postgres',
   url: process.env.DATABASE_URL,
   ssl: {

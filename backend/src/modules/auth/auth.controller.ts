@@ -3,7 +3,7 @@ import { logger } from '../../utils/logger';
 import { emailSchema, registerSchema } from './auth.schema';
 import { sendOtpEmail } from '../../Services/email.service';
 import { generateotp } from '../../utils/otp';
-import { appDataSouce } from '../../data-source';
+import { appDataSource } from '../../data-source';
 import { Otp } from '../../entities/opt';
 import { User } from '../../entities/User';
 
@@ -20,7 +20,7 @@ export const sendOtp = async (
         .status(400)
         .json({ message: 'validation vailed', error: result.error?.format() });
     }
-    const otpRep = appDataSouce.getRepository(Otp);
+    const otpRep = appDataSource.getRepository(Otp);
     const otpcode = generateotp();
     logger.debug({ otpcode }, 'otp is');
     const email = result.data?.email;
@@ -49,7 +49,7 @@ export const verifyotp = async (
       return res.status(400).json({ message: ' otp and email are required' });
     }
 
-    const otpRepo = appDataSouce.getRepository(Otp);
+    const otpRepo = appDataSource.getRepository(Otp);
     const otpRecord = await otpRepo.findOne({
       where: {
         email,
@@ -101,8 +101,8 @@ export const register = async (
     if (!otpId) {
       return res.status(400).json({ message: 'otpid requuired' });
     }
-    const otpRepo = appDataSouce.getRepository(Otp);
-    const userRepo = appDataSouce.getRepository(User);
+    const otpRepo = appDataSource.getRepository(Otp);
+    const userRepo = appDataSource.getRepository(User);
 
     const otpRecord = await otpRepo.findOne({
       where: { id: otpId },
