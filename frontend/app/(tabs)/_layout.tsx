@@ -1,40 +1,59 @@
 import { Tabs } from 'expo-router';
-import React from 'react';
-
-import { HapticTab } from '@/components/haptic-tab';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { Home, Search, Ticket, User } from 'lucide-react-native';
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
-
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
         headerShown: false,
-        tabBarButton: HapticTab,
+        tabBarShowLabel: false,
+        tabBarStyle: {
+          height: 60,
+          paddingTop: 6,
+          paddingBottom: 6,
+        },
+        tabBarActiveTintColor: '#22c55e',
+        tabBarInactiveTintColor: '#9ca3af',
       }}
     >
       <Tabs.Screen
-        name="index"
+        name="home/index"
         options={{
           title: 'Home',
-          tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="house.fill" color={color} />
+          tabBarIcon: ({ color, size }) => (
+            <Home color={color} size={size} strokeWidth={1} />
           ),
         }}
       />
       <Tabs.Screen
-        name="explore"
+        name="search/index"
         options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="paperplane.fill" color={color} />
+          title: 'Search',
+          tabBarIcon: ({ color, size }) => (
+            <Search color={color} size={size} strokeWidth={1} />
           ),
         }}
       />
+      <Tabs.Screen
+        name="events/index"
+        options={{
+          title: 'Events',
+          tabBarIcon: ({ color, size }) => (
+            <Ticket color={color} size={size} strokeWidth={1} />
+          ),
+        }}
+      />
+      <Tabs.Screen name="events/[id]" options={{ href: null }} />
+      <Tabs.Screen
+        name="profile/index"
+        options={{
+          title: 'Profile',
+          tabBarIcon: ({ color, size }) => (
+            <User color={color} size={size} strokeWidth={1} />
+          ),
+        }}
+      />
+      <Tabs.Screen name="events/create" options={{ href: null }} />
     </Tabs>
   );
 }

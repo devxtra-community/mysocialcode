@@ -3,20 +3,26 @@ import {
   PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
+  ManyToOne,
 } from 'typeorm';
-
-@Entity('otps')
-export class Otp {
+import { User } from './User';
+@Entity()
+export class RefreshTokenEntity {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
+
   @Column()
-  phoneNumber!: string;
+  tokenHash!: string;
+
   @Column()
-  otp!: string;
-  @Column({ type: 'timestamp' })
   expiresAt!: Date;
+
   @Column({ default: false })
-  verified!: boolean;
+  revoked!: boolean;
+
+  @ManyToOne(() => User, { onDelete: 'CASCADE' })
+  user!: User;
+
   @CreateDateColumn()
   createdAt!: Date;
 }

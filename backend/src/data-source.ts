@@ -2,6 +2,7 @@ import 'dotenv/config';
 import { DataSource } from 'typeorm';
 import { User } from './entities/User';
 import { Otp } from './entities/opt';
+import { RefreshTokenEntity } from './entities/refreshToken';
 if (!process.env.DATABASE_URL) {
   throw new Error('DATABASE_URL is not defined');
 }
@@ -11,6 +12,6 @@ export const appDataSource = new DataSource({
   ssl: {
     rejectUnauthorized: false,
   },
-  entities: [User, Otp],
+  entities: [User, Otp, RefreshTokenEntity],
   synchronize: true,
 });
