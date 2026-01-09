@@ -23,6 +23,11 @@ export default function PhoneScreen() {
           params: { phone: fullPhoneNumber },
         });
       }
+    } catch (err: any) {
+      const data = err?.response?.data;
+      if (data.next == 'login') {
+        router.push('/(auth)/login');
+      }
     } finally {
       setLoading(false);
     }
@@ -59,6 +64,15 @@ export default function PhoneScreen() {
           >
             <Text style={styles.buttonText}>
               {loading ? 'Sending OTP...' : 'Continue'}
+            </Text>
+          </Pressable>
+          <Pressable
+            onPress={() => router.push('/(auth)/login')}
+            style={styles.loginInstead}
+          >
+            <Text style={styles.loginText}>
+              Already have an account?{' '}
+              <Text style={styles.loginHighlight}>Login instead</Text>
             </Text>
           </Pressable>
         </View>
@@ -131,6 +145,20 @@ const styles = StyleSheet.create({
   buttonText: {
     color: '#FFF',
     fontSize: 16,
+    fontWeight: '600',
+  },
+  loginInstead: {
+    marginTop: 20,
+    alignItems: 'center',
+  },
+
+  loginText: {
+    fontSize: 14,
+    color: '#555',
+  },
+
+  loginHighlight: {
+    color: '#000',
     fontWeight: '600',
   },
 });

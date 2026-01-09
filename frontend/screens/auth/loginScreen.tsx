@@ -9,6 +9,7 @@ import {
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
 import { loginUser } from '@/services/auth/otp.service';
+import { storeTokens } from '@/services/token/token.storage';
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -18,9 +19,11 @@ export default function LoginScreen() {
 
   async function handleLogin() {
     const res = await loginUser({ phoneNumber, password });
+    console.log(res);
 
     if (res?.success) {
       router.replace('/(tabs)/home');
+      storeTokens(res.accesstoken, res.refreshtoken);
     }
   }
 

@@ -10,6 +10,7 @@ import {
 import { useState } from 'react';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { registerUser } from '@/services/auth/otp.service';
+import { storeTokens } from '@/services/token/token.storage';
 
 const INTERESTS = [
   'Technology',
@@ -86,6 +87,7 @@ export default function RegisterScreen() {
 
       if (res?.success) {
         router.replace('/(tabs)/home');
+        storeTokens(res.accesstoken, res.refreshtoken);
       } else {
         Alert.alert('Registration failed', res?.message || 'Try again');
       }
