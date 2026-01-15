@@ -3,7 +3,9 @@ import {
   PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
+  OneToMany,
 } from 'typeorm';
+import { Events } from './Event';
 
 @Entity('users')
 export class User {
@@ -36,6 +38,9 @@ export class User {
 
   @Column({ default: false })
   isPhoneVerified!: boolean;
+
+  @OneToMany(() => Events, (event) => event.user)
+  events!: Events[];
 
   @CreateDateColumn()
   createdAt!: Date;
