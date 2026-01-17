@@ -1,4 +1,4 @@
-import { appDataSouce } from '../data-source';
+import { appDataSource } from '../data-source';
 import { RefreshTokenEntity } from '../entities/refreshToken';
 import { User } from '../entities/User';
 import { generateRefreshToken, hashRefreshToken } from './refreshToken';
@@ -15,7 +15,7 @@ export const createRefreshTokenSession = async (user: User) => {
 
   expiresAt.setDate(expiresAt.getDate() + REFRESH_TOKEN_DAYS);
 
-  const repo = appDataSouce.getRepository(RefreshTokenEntity);
+  const repo = appDataSource.getRepository(RefreshTokenEntity);
   console.log('Got refresh token repository');
 
   await repo.save({

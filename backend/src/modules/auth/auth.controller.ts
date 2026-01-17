@@ -4,11 +4,12 @@ import { registerSchema, phoneSchema, loginSchema } from './auth.schema';
 import { sendOtpSms } from '../../Services/sms.service';
 import { generateotp } from '../../utils/otp';
 import { appDataSource } from '../../data-source';
-import { Otp } from '../../entities/opt';
+import { Otp } from '../../entities/otp';
 import { User } from '../../entities/User';
 import { signAccessToken } from '../../Services/jwt.service';
 import { createRefreshTokenSession } from '../../Services/authToken';
 import bcrypt from 'bcrypt';
+// import { publish } from '../../messaging/rabbitmq/publish';
 
 export const sendOtp = async (
   req: Request,
@@ -51,6 +52,11 @@ export const sendOtp = async (
     logger.debug({ otpCode }, 'otp is');
 
     await sendOtpSms(phoneNumber, otpCode.toString());
+
+    // await publish('SEND_OTP', {
+    //   phone: phoneNumber,
+    //   otp: otpCode.toString(),
+    // });
 
     await otpRepo.delete({ phoneNumber });
     await otpRepo.save({
