@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import { PutObjectCommand } from '@aws-sdk/client-s3';
 import { r2 } from '../../utils/r2';
-import { appDataSource } from '../../data-source';
+import { appDataSouce } from '../../data-source';
 import { User } from '../../entities/User';
 import { logger } from '../../utils/logger';
 export const uploadAvatar = async (
@@ -25,7 +25,7 @@ export const uploadAvatar = async (
       }),
     );
     const imageUrl = `${process.env.R2_ENDPOINT}/${process.env.R2_BUCKET_NAME}/${key}`;
-    const userRepo = appDataSource.getRepository(User);
+    const userRepo = appDataSouce.getRepository(User);
     await userRepo.update(userId, { profileImageUrl: imageUrl });
     res
       .status(200)

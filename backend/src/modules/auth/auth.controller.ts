@@ -3,13 +3,12 @@ import { logger } from '../../utils/logger';
 import { registerSchema, phoneSchema, loginSchema } from './auth.schema';
 import { sendOtpSms } from '../../Services/sms.service';
 import { generateotp } from '../../utils/otp';
-import { appDataSource } from '../../data-source';
-import { Otp } from '../../entities/otp';
+import { appDataSouce } from '../../data-source';
+import { Otp } from '../../entities/opt';
 import { User } from '../../entities/User';
 import { signAccessToken } from '../../Services/jwt.service';
 import { createRefreshTokenSession } from '../../Services/authToken';
 import bcrypt from 'bcrypt';
-// import { publish } from '../../messaging/rabbitmq/publish';
 
 export const sendOtp = async (
   req: Request,
@@ -29,8 +28,8 @@ export const sendOtp = async (
 
     const phoneNumber = result.data.phoneNumber;
 
-    const userRepo = appDataSource.getRepository(User);
-    const otpRepo = appDataSource.getRepository(Otp);
+    const userRepo = appDataSouce.getRepository(User);
+    const otpRepo = appDataSouce.getRepository(Otp);
 
     const existingUser = await userRepo.findOne({
       where: { phoneNumber },
@@ -52,11 +51,6 @@ export const sendOtp = async (
     logger.debug({ otpCode }, 'otp is');
 
     await sendOtpSms(phoneNumber, otpCode.toString());
-
-    // await publish('SEND_OTP', {
-    //   phone: phoneNumber,
-    //   otp: otpCode.toString(),
-    // });
 
     await otpRepo.delete({ phoneNumber });
     await otpRepo.save({
@@ -89,7 +83,7 @@ export const verifyotp = async (
         .status(400)
         .json({ message: ' otp and phoneNumber are required' });
     }
-    const otpRepo = appDataSource.getRepository(Otp);
+    const otpRepo = appDataSouce.getRepository(Otp);
     const otpRecord = await otpRepo.findOne({
       where: {
         phoneNumber,
@@ -161,8 +155,8 @@ export const register = async (
       });
     }
 
-    const otpRepo = appDataSource.getRepository(Otp);
-    const userRepo = appDataSource.getRepository(User);
+    const otpRepo = appDataSouce.getRepository(Otp);
+    const userRepo = appDataSouce.getRepository(User);
 
     const otpRecord = await otpRepo.findOne({
       where: { id: otpId },
@@ -237,7 +231,7 @@ export const login = async (
 
     const { phoneNumber, password } = result.data;
 
-    const userRepo = appDataSource.getRepository(User);
+    const userRepo = appDataSouce.getRepository(User);
 
     // 2️⃣ find user
     const user = await userRepo.findOne({

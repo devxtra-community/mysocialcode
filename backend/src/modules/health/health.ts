@@ -1,16 +1,16 @@
 import express from 'express';
-import { appDataSource } from '../../data-source';
+import { appDataSouce } from '../../data-source';
 const Healthrouter = express.Router();
 Healthrouter.get('/', async (req, res) => {
   try {
-    if (!appDataSource.isInitialized) {
+    if (!appDataSouce.isInitialized) {
       return res.status(503).json({
         status: 'eroor',
         service: 'mysocial-code-backend',
         db: 'not initialized',
       });
     }
-    await appDataSource.query('SELECT 1');
+    await appDataSouce.query('SELECT 1');
     return res.status(200).json({
       status: 'ok',
       service: 'mysocial-code-backend',
