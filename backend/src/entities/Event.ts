@@ -18,6 +18,12 @@ export class Events {
   @Column()
   description!: string;
 
+  @Column({ type: 'timestamptz' })
+  startDate!: Date;
+
+  @Column({ type: 'timestamptz' })
+  endDate!: Date;
+
   @ManyToOne(() => User, (user) => user.events, { onDelete: 'CASCADE' })
   user!: User;
 

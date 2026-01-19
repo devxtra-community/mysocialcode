@@ -10,11 +10,15 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
+import { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 import { showError } from '@/utils/toast';
 export default function CreateEventScreen() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [images, setImages] = useState<string[]>([]);
+  const [startDate, setStartDate] = useState<Date | null>(null);
+  const [endDate, setEndDate] = useState<Date | null>(null);
+
   async function pickImages() {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permission.granted) {
@@ -47,6 +51,8 @@ export default function CreateEventScreen() {
           type: 'image/jpeg',
         } as any);
       });
+      form.append('startDate', startDate?.toISOString() || '');
+      form.append('endDate', endDate?.toISOString() || '');
 
       const res = await api.post('event/create-event', form, {
         headers: {
@@ -63,6 +69,38 @@ export default function CreateEventScreen() {
   function removeImage(index: number) {
     setImages((prev) => prev.filter((_, i) => i !== index));
   }
+  const openPicker = (type: 'start' | 'end') => {
+    const current =
+      type === 'start' ? startDate || new Date() : endDate || new Date();
+
+    DateTimePickerAndroid.open({
+      value: current,
+      mode: 'date',
+      is24Hour: true,
+      onChange: (event, selectedDate) => {
+        if (event.type === 'dismissed' || !selectedDate) return;
+
+        DateTimePickerAndroid.open({
+          value: selectedDate,
+          mode: 'time',
+          is24Hour: true,
+          onChange: (event2, selectedTime) => {
+            if (event2.type === 'dismissed' || !selectedTime) return;
+
+            const finalDate = new Date(selectedDate);
+            finalDate.setHours(selectedTime.getHours());
+            finalDate.setMinutes(selectedTime.getMinutes());
+
+            if (type === 'start') {
+              setStartDate(finalDate);
+            } else {
+              setEndDate(finalDate);
+            }
+          },
+        });
+      },
+    });
+  };
 
   return (
     <SafeAreaView>
@@ -87,7 +125,6 @@ export default function CreateEventScreen() {
               marginRight: 10,
             }}
           >
-            {/* X Button */}
             <Pressable
               onPress={() => removeImage(ind)}
               style={{
@@ -108,7 +145,6 @@ export default function CreateEventScreen() {
               </Text>
             </Pressable>
 
-            {/* Image */}
             <Image
               source={{ uri }}
               style={{
@@ -120,6 +156,17 @@ export default function CreateEventScreen() {
           </View>
         ))}
       </ScrollView>
+      <Pressable onPress={() => openPicker('start')}>
+        <Text>
+          {startDate ? startDate.toLocaleString() : 'Select start date & time'}
+        </Text>
+      </Pressable>
+
+      <Pressable onPress={() => openPicker('end')}>
+        <Text>
+          {endDate ? endDate.toLocaleString() : 'Select end date & time'}
+        </Text>
+      </Pressable>
     </SafeAreaView>
   );
 }
