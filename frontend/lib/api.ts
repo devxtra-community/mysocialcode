@@ -6,11 +6,7 @@ import {
   storeTokens,
 } from '@/services/token/token.storage';
 const api = axios.create({
-<<<<<<< HEAD
   baseURL: 'http://172.28.32.1:4000',
-=======
-  baseURL: 'http://10.222.145.137:4000',
->>>>>>> ed88ab50d4f546b7ea5de8f1fb46fb235057de4c
   timeout: 20000,
   headers: {
     'Content-Type': 'application/json',

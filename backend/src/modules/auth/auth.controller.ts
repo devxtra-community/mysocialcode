@@ -9,11 +9,10 @@ import { User } from '../../entities/User';
 import { signAccessToken } from '../../Services/jwt.service';
 import { createRefreshTokenSession } from '../../Services/authToken';
 import bcrypt from 'bcrypt';
-<<<<<<< HEAD
+
 // import { publish } from '../../messaging/rabbitmq/publish';
-=======
+
 import { refreshAccessTokenService } from './auth.service';
->>>>>>> ed88ab50d4f546b7ea5de8f1fb46fb235057de4c
 
 export const sendOtp = async (
   req: Request,
