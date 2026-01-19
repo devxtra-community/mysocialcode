@@ -1,14 +1,14 @@
-import { connectRabbitMQ, getChannel } from "../connect";
-import { QUEUES } from "../queues";
-import { SendOtpJob } from "../../jobTypes";
+import { connectRabbitMQ, getChannel } from '../connect';
+import { QUEUES } from '../queues';
+import { SendOtpJob } from '../../jobTypes';
 
 const startOtpWorker = async () => {
   await connectRabbitMQ();
   const channel = getChannel();
 
-  channel.prefetch(1); // process one OTP at a time
+  channel.prefetch(1);
 
-  console.log("OTP Worker running");
+  console.log('OTP Worker running');
 
   channel.consume(QUEUES.SEND_OTP, async (msg) => {
     if (!msg) return;
@@ -22,9 +22,9 @@ const startOtpWorker = async () => {
       await new Promise((r) => setTimeout(r, 1500));
 
       channel.ack(msg);
-      console.log("OTP sent");
+      console.log('OTP sent');
     } catch (err) {
-      console.error("OTP failed", err);
+      console.error('OTP failed', err);
       channel.nack(msg, false, false);
     }
   });

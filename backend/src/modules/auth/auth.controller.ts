@@ -9,7 +9,11 @@ import { User } from '../../entities/User';
 import { signAccessToken } from '../../Services/jwt.service';
 import { createRefreshTokenSession } from '../../Services/authToken';
 import bcrypt from 'bcrypt';
+<<<<<<< HEAD
 // import { publish } from '../../messaging/rabbitmq/publish';
+=======
+import { refreshAccessTokenService } from './auth.service';
+>>>>>>> ed88ab50d4f546b7ea5de8f1fb46fb235057de4c
 
 export const sendOtp = async (
   req: Request,
@@ -239,7 +243,6 @@ export const login = async (
 
     const userRepo = appDataSource.getRepository(User);
 
-    // 2️⃣ find user
     const user = await userRepo.findOne({
       where: { phoneNumber },
     });
@@ -250,14 +253,12 @@ export const login = async (
       });
     }
 
-    // 3️⃣ block incomplete registration
     if (!user.passwordHash || !user.isPhoneVerified) {
       return res.status(403).json({
         message: 'Account not fully registered',
       });
     }
 
-    // 4️⃣ compare password
     const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
 
     if (!isPasswordValid) {
@@ -266,7 +267,6 @@ export const login = async (
       });
     }
 
-    // 5️⃣ issue tokens
     const accessToken = signAccessToken({
       userId: user.id,
     });
@@ -281,5 +281,23 @@ export const login = async (
   } catch (err) {
     logger.error({ err }, 'error in login');
     next(err);
+  }
+};
+
+export const refreshAccessToken = async (req: Request, res: Response) => {
+  try {
+    const { refreshToken } = req.body;
+
+    if (!refreshToken) {
+      return res.status(401).json({ message: 'refresh token missing' });
+    }
+
+    const newAccessToken = await refreshAccessTokenService(refreshToken);
+
+    return res.json({ accessToken: newAccessToken });
+  } catch (err) {
+    return res
+      .status(403)
+      .json({ message: 'Invalid refresh token', error: err });
   }
 };
