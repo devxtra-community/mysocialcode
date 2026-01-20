@@ -4,6 +4,8 @@ import {
   Entity,
   ManyToOne,
   OneToMany,
+  CreateDateColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { User } from './User';
 import { EventImage } from './EventImage';
@@ -29,4 +31,34 @@ export class Events {
 
   @OneToMany(() => EventImage, (image) => image.event, { onDelete: 'CASCADE' })
   image!: EventImage[];
+
+  @Column({ type: 'int' })
+  capacity!: number;
+
+  @Column({ type: 'int', default: 0 })
+  bookedSeats!: number;
+
+  @Column()
+  location!: string;
+
+  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
+  price!: number;
+
+  @Column({ default: true })
+  isFree!: boolean;
+
+  @Column()
+  category!: string;
+
+  @Column({ type: 'text', nullable: true })
+  rules?: string;
+
+  @Column({ default: 'draft' })
+  status!: 'draft' | 'published' | 'cancelled';
+
+  @CreateDateColumn({ type: 'timestamptz' })
+  createdAt!: Date;
+
+  @UpdateDateColumn({ type: 'timestamptz' })
+  updatedAt!: Date;
 }
