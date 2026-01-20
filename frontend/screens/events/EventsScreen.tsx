@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { View, Text, Image, ScrollView, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
+import { router, useRouter } from 'expo-router';
 
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -49,5 +49,9 @@ export default function EventsScreen() {
     }
   }
 
-  return <></>;
+  return (
+    <Pressable onPress={()=>router.push('/(tabs)/events/create')}>
+      create
+    </Pressable>
+  );
 }
