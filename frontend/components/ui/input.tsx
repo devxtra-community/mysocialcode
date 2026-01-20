@@ -416,7 +416,7 @@ export const GroupedInputItem = forwardRef<TextInput, GroupedInputItemProps>(
     const [isFocused, setIsFocused] = useState(false);
 
     const text = useColor('text');
-  const muted = useColor('mutedForeground');
+    const muted = useColor('mutedForeground');
     const primary = useColor('primary');
     const danger = useColor('red');
 
