@@ -1,4 +1,5 @@
 import { useColor } from '@/hooks/useColor';
+const mutedForeground = useColor('mutedForeground');
 import { FONT_SIZE } from '@/theme/globals';
 import React, { forwardRef } from 'react';
 import {
@@ -28,7 +29,7 @@ export const Text = forwardRef<RNText, TextProps>(
     ref,
   ) => {
     const textColor = useColor('text', { light: lightColor, dark: darkColor });
-    const mutedColor = useColor('textMuted');
+    const muted = useColor('mutedForeground');
 
     const getTextStyle = (): TextStyle => {
       const baseStyle: TextStyle = {
@@ -59,7 +60,7 @@ export const Text = forwardRef<RNText, TextProps>(
             ...baseStyle,
             fontSize: FONT_SIZE,
             fontWeight: '400',
-            color: mutedColor,
+            color: mutedForeground,
           };
         case 'link':
           return {

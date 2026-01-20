@@ -70,7 +70,7 @@ export function Onboarding({
 
   const backgroundColor = useColor('background');
   const primaryColor = useColor('primary');
-  const mutedColor = useColor('mutedForeground');
+  const mutedForeground = useColor('mutedForeground');
 
   const isLastStep = currentStep === steps.length - 1;
   const isFirstStep = currentStep === 0;
@@ -147,7 +147,7 @@ export function Onboarding({
               styles.progressDot,
               {
                 backgroundColor:
-                  index === currentStep ? primaryColor : mutedColor,
+                  index === currentStep ? primaryColor : mutedForeground,
                 opacity: index === currentStep ? 1 : 0.3,
               },
             ]}
