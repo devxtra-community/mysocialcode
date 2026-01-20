@@ -5,6 +5,8 @@ export const createEventService = async (
   title: string,
   description: string,
   userId: string,
+  startDate: string,
+  endDate: string,
   files: Express.Multer.File[],
 ) => {
   const user = await getUserRepository.findOne({
@@ -17,6 +19,8 @@ export const createEventService = async (
     title,
     description,
     user,
+    startDate,
+    endDate,
   });
 
   await getEventRepository.save(event);

@@ -7,9 +7,11 @@ export const publish = async <T>(
 ): Promise<void> => {
   const channel = getChannel();
 
-  channel.sendToQueue(QUEUES[queue], Buffer.from(JSON.stringify(payload)), {
-    persistent: true,
-  });
+  channel.sendToQueue(
+    QUEUES[queue],
+    Buffer.from(JSON.stringify(payload)),
+    { persistent: true },
+  );
 
-  console.log('📤 OTP job queued');
+  console.log(`📨 Job published to ${queue}`);
 };

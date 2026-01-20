@@ -1,3 +1,3 @@
-import { appDataSouce } from '../../data-source';
+import { appDataSource } from '../../data-source';
 import { User } from '../../entities/User';
-export const getUserRepository = appDataSouce.getRepository(User);
+export const getUserRepository = appDataSource.getRepository(User);

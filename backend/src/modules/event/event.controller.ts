@@ -12,7 +12,7 @@ export const createEvent = async (req: AuthReq, res: Response) => {
   console.log('files', req.files);
 
   try {
-    const { title, description } = req.body;
+    const { title, description, startDate, endDate } = req.body;
     if (!req.user || !req.user.id) {
       return res.status(401).json({
         message: 'in side create event  controller no req,user if  case worked',
@@ -20,7 +20,14 @@ export const createEvent = async (req: AuthReq, res: Response) => {
     }
     const userId = req.user?.id;
     const files = req.files as Express.Multer.File[];
-    const event = await createEventService(title, description, userId, files);
+    const event = await createEventService(
+      title,
+      description,
+      userId,
+      startDate,
+      endDate,
+      files,
+    );
     res.status(201).json({ message: 'event created', event: event });
   } catch (err) {
     logger.error({ err }, 'catch in create event worked');

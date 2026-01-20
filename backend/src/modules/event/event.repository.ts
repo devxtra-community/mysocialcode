@@ -1,6 +1,6 @@
-import { appDataSouce } from '../../data-source';
+import { appDataSource } from '../../data-source';
 import { Events } from '../../entities/Event';
 import { EventImage } from '../../entities/EventImage';
-export const getEventRepository = appDataSouce.getRepository(Events);
+export const getEventRepository = appDataSource.getRepository(Events);
 
-export const getImageRepository = appDataSouce.getRepository(EventImage);
+export const getImageRepository = appDataSource.getRepository(EventImage);
