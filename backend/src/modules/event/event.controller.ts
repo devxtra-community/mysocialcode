@@ -65,13 +65,11 @@ export const getAllEvents = async (req: AuthReq, res: Response) => {
       relations: ['image'],
       order: { startDate: 'ASC' },
     });
-    return res
-      .status(200)
-      .json({
-        message: 'fetched data successfully',
-        success: true,
-        events: events,
-      });
+    return res.status(200).json({
+      message: 'fetched data successfully',
+      success: true,
+      events: events,
+    });
   } catch (err) {
     logger.error({ err }, 'catch in get all events workded');
     res.status(400).json({ message: 'failed to fetch events', error: err });

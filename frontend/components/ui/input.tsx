@@ -56,7 +56,7 @@ export const Input = forwardRef<TextInput, InputProps>(
     // Theme colors
     const cardColor = useColor('card');
     const textColor = useColor('text');
-    const muted = useColor('textMuted');
+    const muted = useColor('mutedForeground');
     const borderColor = useColor('border');
     const primary = useColor('primary');
     const danger = useColor('red');
@@ -416,7 +416,7 @@ export const GroupedInputItem = forwardRef<TextInput, GroupedInputItemProps>(
     const [isFocused, setIsFocused] = useState(false);
 
     const text = useColor('text');
-    const muted = useColor('textMuted');
+    const muted = useColor('mutedForeground');
     const primary = useColor('primary');
     const danger = useColor('red');
 

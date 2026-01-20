@@ -23,7 +23,7 @@ export function Skeleton({
   style,
   variant = 'default',
 }: SkeletonProps) {
-  const mutedColor = useColor('muted');
+  const mutedForeground = useColor('muted');
   // Start the opacity at its lowest point
   const opacity = useSharedValue(0.5);
 
@@ -53,7 +53,7 @@ export function Skeleton({
         {
           width: width as any,
           height,
-          backgroundColor: mutedColor,
+          backgroundColor: mutedForeground,
           borderRadius: variant === 'default' ? CORNERS : BORDER_RADIUS,
         },
         animatedStyle,
