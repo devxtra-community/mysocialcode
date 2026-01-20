@@ -11,7 +11,7 @@ interface CardProps {
 
 export function Card({ children, style }: CardProps) {
   const cardColor = useColor('card');
-  const foregroundColor = useColor('foreground');
+ const foregroundColor = useColor('text');
 
   return (
     <View

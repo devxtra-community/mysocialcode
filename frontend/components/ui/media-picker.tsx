@@ -104,7 +104,7 @@ export const MediaPicker = forwardRef<RNView, MediaPickerProps>(
     const cardColor = useColor('card');
     const borderColor = useColor('border');
     const textColor = useColor('text');
-    const mutedColor = useColor('mutedForeground');
+    const mutedForeground = useColor('mutedForeground');
     const primaryColor = useColor('primary');
     const secondary = useColor('secondary');
 
@@ -404,7 +404,10 @@ export const MediaPicker = forwardRef<RNView, MediaPickerProps>(
                 <View style={styles.modalActions}>
                   {multiple && (
                     <Text
-                      style={[styles.selectionCount, { color: mutedColor }]}
+                      style={[
+                        styles.selectionCount,
+                        { color: mutedForeground },
+                      ]}
                     >
                       {assets.length}/{maxSelection}
                     </Text>

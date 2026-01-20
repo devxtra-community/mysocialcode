@@ -1,10 +1,10 @@
 export const Colors = {
   light: {
     primary: '#0f172a',
-    primaryForeground: '#ffffff', // ✅ ADD
+    primaryForeground: '#ffffff',
 
     secondary: '#f1f5f9',
-    secondaryForeground: '#0f172a', // ✅ ADD
+    secondaryForeground: '#0f172a',
 
     background: '#ffffff',
     text: '#0f172a',
@@ -15,17 +15,20 @@ export const Colors = {
     border: '#e5e7eb',
 
     red: '#ef4444',
-    destructiveForeground: '#ffffff', // ✅ ADD
+    destructiveForeground: '#ffffff',
 
     green: '#22c55e',
+
+    // ✅ added
+    card: '#ffffff',
   },
 
   dark: {
     primary: '#e5e7eb',
-    primaryForeground: '#020617', // ✅ ADD
+    primaryForeground: '#020617',
 
     secondary: '#1e293b',
-    secondaryForeground: '#ffffff', // ✅ ADD
+    secondaryForeground: '#ffffff',
 
     background: '#020617',
     text: '#e5e7eb',
@@ -36,8 +39,11 @@ export const Colors = {
     border: '#1e293b',
 
     red: '#ef4444',
-    destructiveForeground: '#ffffff', // ✅ ADD
+    destructiveForeground: '#ffffff',
 
     green: '#22c55e',
+
+    // ✅ added
+    card: '#0f172a',
   },
-};
+} as const;
