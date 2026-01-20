@@ -1,5 +1,4 @@
 import { useColor } from '@/hooks/useColor';
-const mutedForeground = useColor('mutedForeground');
 import { FONT_SIZE } from '@/theme/globals';
 import React, { forwardRef } from 'react';
 import {
@@ -9,12 +8,12 @@ import {
 } from 'react-native';
 
 type TextVariant =
-  | 'body'
-  | 'title'
-  | 'subtitle'
-  | 'caption'
-  | 'heading'
-  | 'link';
+| 'body'
+| 'title'
+| 'subtitle'
+| 'caption'
+| 'heading'
+| 'link';
 
 interface TextProps extends RNTextProps {
   variant?: TextVariant;
@@ -28,6 +27,7 @@ export const Text = forwardRef<RNText, TextProps>(
     { variant = 'body', lightColor, darkColor, style, children, ...props },
     ref,
   ) => {
+    const mutedForeground = useColor('mutedForeground');
     const textColor = useColor('text', { light: lightColor, dark: darkColor });
     const muted = useColor('mutedForeground');
 
@@ -85,3 +85,4 @@ export const Text = forwardRef<RNText, TextProps>(
     );
   },
 );
+Text.displayName = 'Text';

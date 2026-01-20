@@ -1,11 +1,11 @@
 import { hashRefreshToken } from '../../Services/refreshToken';
-import { appDataSouce } from '../../data-source';
+import { appDataSource } from '../../data-source';
 import { RefreshTokenEntity } from '../../entities/refreshToken';
 import { signAccessToken } from '../../Services/jwt.service';
 
 export const refreshAccessTokenService = async (token: string) => {
   const tokenHash = hashRefreshToken(token);
-  const refreshrepo = appDataSouce.getRepository(RefreshTokenEntity);
+  const refreshrepo = appDataSource.getRepository(RefreshTokenEntity);
   const tokenRecord = await refreshrepo.findOne({
     where: { tokenHash },
     relations: ['user'],

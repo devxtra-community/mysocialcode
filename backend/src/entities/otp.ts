@@ -19,4 +19,8 @@ export class Otp {
   verified!: boolean;
   @CreateDateColumn()
   createdAt!: Date;
+  @Column({ default: false })
+  sent!: boolean;
+  @Column({ unique: true })
+  requestId!: string;
 }
