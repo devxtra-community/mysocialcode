@@ -21,23 +21,23 @@ export const createEventService = async (
 
   if (!user) throw new Error('user not found');
   const parsedIsFree = isFree === 'true';
-const parsedPrice = parsedIsFree ? 0 : Number(price);
-const parsedCapacity = Number(capacity);
+  const parsedPrice = parsedIsFree ? 0 : Number(price);
+  const parsedCapacity = Number(capacity);
 
- const event = getEventRepository.create({
-  title,
-  description,
-  user,
-  startDate,
-  endDate,
-  isFree: parsedIsFree,
-  price: parsedPrice,
-  location,
-  capacity: parsedCapacity,
-  category,
-  rules,
-  status: 'published'
-});
+  const event = getEventRepository.create({
+    title,
+    description,
+    user,
+    startDate,
+    endDate,
+    isFree: parsedIsFree,
+    price: parsedPrice,
+    location,
+    capacity: parsedCapacity,
+    category,
+    rules,
+    status: 'published',
+  });
 
   await getEventRepository.save(event);
 

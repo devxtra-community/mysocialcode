@@ -9,5 +9,5 @@ eventRouter.post(
   upload.array('images', 4),
   createEvent,
 );
-eventRouter.get('/all-events',getAllEvents)
+eventRouter.get('/all-events', getAllEvents);
 export default eventRouter;

@@ -44,7 +44,7 @@ export const Image = forwardRef<ExpoImage, ImageProps>(
       transition = 200,
       ...props
     },
-    ref
+    ref,
   ) => {
     const [isLoading, setIsLoading] = useState(true);
     const [hasError, setHasError] = useState(false);
@@ -135,7 +135,7 @@ export const Image = forwardRef<ExpoImage, ImageProps>(
         {hasError && showErrorFallback && (
           <View style={[styles.overlay, styles.errorContainer]}>
             <Text
-              variant='caption'
+              variant="caption"
               style={[styles.errorText, { color: textColor }]}
               numberOfLines={2}
             >
@@ -145,7 +145,7 @@ export const Image = forwardRef<ExpoImage, ImageProps>(
         )}
       </View>
     );
-  }
+  },
 );
 
 const styles = StyleSheet.create({

@@ -5,7 +5,7 @@ import {
   ManyToOne,
   OneToMany,
   CreateDateColumn,
-  UpdateDateColumn
+  UpdateDateColumn,
 } from 'typeorm';
 import { User } from './User';
 import { EventImage } from './EventImage';
@@ -61,5 +61,4 @@ export class Events {
 
   @UpdateDateColumn({ type: 'timestamptz' })
   updatedAt!: Date;
-
 }

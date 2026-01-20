@@ -32,9 +32,9 @@ export function Switch({ label, error, labelStyle, ...props }: SwitchProps) {
       >
         {label && (
           <Text
-            variant='caption'
+            variant="caption"
             numberOfLines={2} // Allow wrapping for longer labels
-            ellipsizeMode='tail'
+            ellipsizeMode="tail"
             style={[
               {
                 color: error ? danger : primary,
@@ -43,7 +43,7 @@ export function Switch({ label, error, labelStyle, ...props }: SwitchProps) {
               },
               labelStyle,
             ]}
-            pointerEvents='none'
+            pointerEvents="none"
           >
             {label}
           </Text>
@@ -58,9 +58,9 @@ export function Switch({ label, error, labelStyle, ...props }: SwitchProps) {
 
       {error && (
         <Text
-          variant='caption'
+          variant="caption"
           numberOfLines={2}
-          ellipsizeMode='tail'
+          ellipsizeMode="tail"
           style={[
             {
               fontSize: 12, // Slightly smaller for error text
@@ -68,7 +68,7 @@ export function Switch({ label, error, labelStyle, ...props }: SwitchProps) {
               marginTop: 4, // Add spacing above error text
             },
           ]}
-          pointerEvents='none'
+          pointerEvents="none"
         >
           {error}
         </Text>

@@ -8,9 +8,9 @@ import {
   ScrollView,
   Image,
   StyleSheet,
-  KeyboardAvoidingView ,
+  KeyboardAvoidingView,
   Platform,
-  ActivityIndicator
+  ActivityIndicator,
 } from 'react-native';
 import { Switch } from '@/components/ui/switch';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -22,8 +22,8 @@ export default function CreateEventScreen() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [images, setImages] = useState<string[]>([]);
-  const [startDate,setStartDate] = useState<Date | null>(null);
-  const [endDate,setEndDate] = useState<Date | null>(null);
+  const [startDate, setStartDate] = useState<Date | null>(null);
+  const [endDate, setEndDate] = useState<Date | null>(null);
   const [isFree, setIsFree] = useState(true);
   const [price, setPrice] = useState('');
   const [location, setLocation] = useState('');
@@ -31,7 +31,6 @@ export default function CreateEventScreen() {
   const [category, setCategory] = useState('');
   const [rules, setRules] = useState('');
   const [loading, setLoading] = useState(false);
-
 
   async function pickImages() {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -66,8 +65,8 @@ export default function CreateEventScreen() {
           type: 'image/jpeg',
         } as any);
       });
-      form.append("startDate", startDate?.toISOString() || "");
-      form.append("endDate", endDate?.toISOString() || "");
+      form.append('startDate', startDate?.toISOString() || '');
+      form.append('endDate', endDate?.toISOString() || '');
       form.append('isFree', String(isFree));
       form.append('price', isFree ? '0' : price);
       form.append('location', location);
@@ -83,227 +82,229 @@ export default function CreateEventScreen() {
 
       console.log(res.data);
       if (res.data.success) {
-  setTitle('');
-  setDescription('');
-  setImages([]);
-  setStartDate(null);
-  setEndDate(null);
-  setLocation('')
-  setCategory('')
-  setRules('')
-  setPrice('')
+        setTitle('');
+        setDescription('');
+        setImages([]);
+        setStartDate(null);
+        setEndDate(null);
+        setLocation('');
+        setCategory('');
+        setRules('');
+        setPrice('');
 
-
-  router.replace('/(tabs)/events');
-}
+        router.replace('/(tabs)/events');
+      }
     } catch (err) {
       console.log('upload failed:', err);
-    }finally{
-      setLoading(false)
+    } finally {
+      setLoading(false);
     }
   }
 
   function removeImage(index: number) {
     setImages((prev) => prev.filter((_, i) => i !== index));
   }
-  const openPicker = (type: "start" | "end") => {
-  const current =
-    type === "start"
-      ? startDate || new Date()
-      : endDate || new Date();
+  const openPicker = (type: 'start' | 'end') => {
+    const current =
+      type === 'start' ? startDate || new Date() : endDate || new Date();
 
+    DateTimePickerAndroid.open({
+      value: current,
+      mode: 'date',
+      is24Hour: true,
+      onChange: (event, selectedDate) => {
+        if (event.type === 'dismissed' || !selectedDate) return;
 
-  DateTimePickerAndroid.open({
-    value: current,
-    mode: "date",
-    is24Hour: true,
-    onChange: (event, selectedDate) => {
-      if (event.type === "dismissed" || !selectedDate) return;
+        DateTimePickerAndroid.open({
+          value: selectedDate,
+          mode: 'time',
+          is24Hour: true,
+          onChange: (event2, selectedTime) => {
+            if (event2.type === 'dismissed' || !selectedTime) return;
 
-      DateTimePickerAndroid.open({
-        value: selectedDate,
-        mode: "time",
-        is24Hour: true,
-        onChange: (event2, selectedTime) => {
-          if (event2.type === "dismissed" || !selectedTime) return;
+            const finalDate = new Date(selectedDate);
+            finalDate.setHours(selectedTime.getHours());
+            finalDate.setMinutes(selectedTime.getMinutes());
 
-          const finalDate = new Date(selectedDate);
-          finalDate.setHours(selectedTime.getHours());
-          finalDate.setMinutes(selectedTime.getMinutes());
+            if (type === 'start') {
+              setStartDate(finalDate);
+            } else {
+              setEndDate(finalDate);
+            }
+          },
+        });
+      },
+    });
+  };
 
-          if (type === "start") {
-            setStartDate(finalDate);
-          } else {
-            setEndDate(finalDate);
-          }
-        },
-      });
-    },
-  });
-};
+  return (
+    <SafeAreaView style={styles.container}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.inner}
+      >
+        <ScrollView showsVerticalScrollIndicator={false}>
+          <Text style={styles.header}>Create New Event</Text>
 
+          {/* Text Inputs */}
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Event Title</Text>
+            <TextInput
+              placeholder="Give your event a name"
+              value={title}
+              onChangeText={setTitle}
+              style={styles.input}
+            />
+          </View>
 
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Description</Text>
+            <TextInput
+              placeholder="What's happening?"
+              value={description}
+              onChangeText={setDescription}
+              multiline
+              numberOfLines={4}
+              style={[styles.input, styles.textArea]}
+            />
+          </View>
 
- return (
-  <SafeAreaView style={styles.container}>
-    <KeyboardAvoidingView 
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={styles.inner}
-    >
-      <ScrollView showsVerticalScrollIndicator={false}>
-        <Text style={styles.header}>Create New Event</Text>
+          {/* Date Pickers */}
+          <View style={styles.row}>
+            <Pressable
+              style={styles.dateBox}
+              onPress={() => openPicker('start')}
+            >
+              <Text style={styles.dateLabel}>Starts</Text>
+              <Text style={styles.dateText}>
+                {startDate
+                  ? startDate.toLocaleString([], {
+                      dateStyle: 'short',
+                      timeStyle: 'short',
+                    })
+                  : 'Select start'}
+              </Text>
+            </Pressable>
 
-        {/* Text Inputs */}
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Event Title</Text>
-          <TextInput 
-            placeholder="Give your event a name" 
-            value={title} 
-            onChangeText={setTitle} 
-            style={styles.input}
-          />
-        </View>
-
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Description</Text>
-          <TextInput
-            placeholder="What's happening?"
-            value={description}
-            onChangeText={setDescription}
-            multiline
-            numberOfLines={4}
-            style={[styles.input, styles.textArea]}
-          />
-        </View>
-
-        {/* Date Pickers */}
-        <View style={styles.row}>
-          <Pressable style={styles.dateBox} onPress={() => openPicker("start")}>
-            <Text style={styles.dateLabel}>Starts</Text>
-            <Text style={styles.dateText}>
-              {startDate ? startDate.toLocaleString([], {dateStyle: 'short', timeStyle: 'short'}) : "Select start"}
-            </Text>
-          </Pressable>
-
-          <Pressable style={styles.dateBox} onPress={() => openPicker("end")}>
-            <Text style={styles.dateLabel}>Ends</Text>
-            <Text style={styles.dateText}>
-              {endDate ? endDate.toLocaleString([], {dateStyle: 'short', timeStyle: 'short'}) : "Select end"}
-            </Text>
-          </Pressable>
-        </View>
-        <View style={styles.inputGroup}>
-  <Text style={styles.label}>Is this a free event?</Text>
-
-  <View style={styles.switchRow}>
-    <Text style={{ color: '#374151' }}>
-      {isFree ? 'Free Event' : 'Paid Event'}
-    </Text>
-
-    <Switch
-      value={isFree}
-      onValueChange={setIsFree}
-    />
-  </View>
-</View>
-{!isFree && (
-  <View style={styles.inputGroup}>
-    <Text style={styles.label}>Ticket Price</Text>
-    <TextInput
-      placeholder="Enter ticket price"
-      keyboardType="numeric"
-      value={price}
-      onChangeText={setPrice}
-      style={styles.input}
-    />
-  </View>
-)}
-
-<View style={styles.inputGroup}>
-  <Text style={styles.label}>Location</Text>
-  <TextInput
-    placeholder="Venue or full address"
-    value={location}
-    onChangeText={setLocation}
-    style={styles.input}
-  />
-</View>
-<View style={styles.inputGroup}>
-  <Text style={styles.label}>Capacity</Text>
-  <TextInput
-    placeholder="Number of seats"
-    keyboardType="numeric"
-    value={capacity}
-    onChangeText={setCapacity}
-    style={styles.input}
-  />
-</View>
-<View style={styles.inputGroup}>
-  <Text style={styles.label}>Category</Text>
-  <TextInput
-    placeholder="Tech, Music, Business..."
-    value={category}
-    onChangeText={setCategory}
-    style={styles.input}
-  />
-</View>
-<View style={styles.inputGroup}>
-  <Text style={styles.label}>Rules (optional)</Text>
-  <TextInput
-    placeholder="Event rules or guidelines"
-    value={rules}
-    onChangeText={setRules}
-    multiline
-    style={[styles.input, styles.textArea]}
-  />
-</View>
-
-
-
-
-
-
-        {/* Image Selection */}
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.label}>Photos</Text>
-            <Pressable onPress={pickImages}>
-              <Text style={styles.linkText}>+ Add Photos</Text>
+            <Pressable style={styles.dateBox} onPress={() => openPicker('end')}>
+              <Text style={styles.dateLabel}>Ends</Text>
+              <Text style={styles.dateText}>
+                {endDate
+                  ? endDate.toLocaleString([], {
+                      dateStyle: 'short',
+                      timeStyle: 'short',
+                    })
+                  : 'Select end'}
+              </Text>
             </Pressable>
           </View>
-          
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.imageScroll}>
-            {images.map((uri, ind) => (
-              <View key={ind} style={styles.imageWrapper}>
-                <Pressable onPress={() => removeImage(ind)} style={styles.removeBadge}>
-                  <Text style={styles.removeText}>×</Text>
-                </Pressable>
-                <Image source={{ uri }} style={styles.thumbnail} />
-              </View>
-            ))}
-          </ScrollView>
-        </View>
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Is this a free event?</Text>
 
-        {/* Submit Button */}
-        <Pressable
-  style={[
-    styles.submitButton,
-    loading && { opacity: 0.7 }
-  ]}
-  onPress={handleEvent}
-  disabled={loading}
->
-  {loading ? (
-    <ActivityIndicator color="#fff" />
-  ) : (
-    <Text style={styles.submitButtonText}>Create Event</Text>
-  )}
-</Pressable>
+            <View style={styles.switchRow}>
+              <Text style={{ color: '#374151' }}>
+                {isFree ? 'Free Event' : 'Paid Event'}
+              </Text>
 
-      </ScrollView>
-    </KeyboardAvoidingView>
-  </SafeAreaView>
-);
+              <Switch value={isFree} onValueChange={setIsFree} />
+            </View>
+          </View>
+          {!isFree && (
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Ticket Price</Text>
+              <TextInput
+                placeholder="Enter ticket price"
+                keyboardType="numeric"
+                value={price}
+                onChangeText={setPrice}
+                style={styles.input}
+              />
+            </View>
+          )}
+
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Location</Text>
+            <TextInput
+              placeholder="Venue or full address"
+              value={location}
+              onChangeText={setLocation}
+              style={styles.input}
+            />
+          </View>
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Capacity</Text>
+            <TextInput
+              placeholder="Number of seats"
+              keyboardType="numeric"
+              value={capacity}
+              onChangeText={setCapacity}
+              style={styles.input}
+            />
+          </View>
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Category</Text>
+            <TextInput
+              placeholder="Tech, Music, Business..."
+              value={category}
+              onChangeText={setCategory}
+              style={styles.input}
+            />
+          </View>
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Rules (optional)</Text>
+            <TextInput
+              placeholder="Event rules or guidelines"
+              value={rules}
+              onChangeText={setRules}
+              multiline
+              style={[styles.input, styles.textArea]}
+            />
+          </View>
+
+          {/* Image Selection */}
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.label}>Photos</Text>
+              <Pressable onPress={pickImages}>
+                <Text style={styles.linkText}>+ Add Photos</Text>
+              </Pressable>
+            </View>
+
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              style={styles.imageScroll}
+            >
+              {images.map((uri, ind) => (
+                <View key={ind} style={styles.imageWrapper}>
+                  <Pressable
+                    onPress={() => removeImage(ind)}
+                    style={styles.removeBadge}
+                  >
+                    <Text style={styles.removeText}>×</Text>
+                  </Pressable>
+                  <Image source={{ uri }} style={styles.thumbnail} />
+                </View>
+              ))}
+            </ScrollView>
+          </View>
+
+          {/* Submit Button */}
+          <Pressable
+            style={[styles.submitButton, loading && { opacity: 0.7 }]}
+            onPress={handleEvent}
+            disabled={loading}
+          >
+            {loading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.submitButtonText}>Create Event</Text>
+            )}
+          </Pressable>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
+  );
 }
 
 const styles = StyleSheet.create({
@@ -429,9 +430,8 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   switchRow: {
-  flexDirection: 'row',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-}
-
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
 });
