@@ -96,7 +96,6 @@ export const sendOtp = async (
   }
 };
 
-
 export const verifyotp = async (
   req: Request,
   res: Response,

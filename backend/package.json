@@ -2,10 +2,10 @@
   "name": "backend",
   "private": true,
   "scripts": {
-  "dev:api": "ts-node-dev --respawn --transpile-only src/server.ts",
-  "dev:worker": "ts-node src/messaging/rabbitmq/consume/otp.worker.ts",
-  "build": "tsc",
-  "start": "node dist/server.js"
+    "dev:api": "ts-node-dev --respawn --transpile-only src/server.ts",
+    "dev:worker": "ts-node src/messaging/rabbitmq/consume/otp.worker.ts",
+    "build": "tsc",
+    "start": "node dist/server.js"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.962.0",
