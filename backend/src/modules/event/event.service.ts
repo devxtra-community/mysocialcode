@@ -7,6 +7,12 @@ export const createEventService = async (
   userId: string,
   startDate: string,
   endDate: string,
+  isFree: string,
+  price: string,
+  location: string,
+  capacity: string,
+  category: string,
+  rules: string,
   files: Express.Multer.File[],
 ) => {
   const user = await getUserRepository.findOne({
@@ -14,14 +20,24 @@ export const createEventService = async (
   });
 
   if (!user) throw new Error('user not found');
+  const parsedIsFree = isFree === 'true';
+const parsedPrice = parsedIsFree ? 0 : Number(price);
+const parsedCapacity = Number(capacity);
 
-  const event = getEventRepository.create({
-    title,
-    description,
-    user,
-    startDate,
-    endDate,
-  });
+ const event = getEventRepository.create({
+  title,
+  description,
+  user,
+  startDate,
+  endDate,
+  isFree: parsedIsFree,
+  price: parsedPrice,
+  location,
+  capacity: parsedCapacity,
+  category,
+  rules,
+  status: 'published'
+});
 
   await getEventRepository.save(event);
 
