@@ -14,15 +14,12 @@ if (!PORT) {
 
 const startServer = async () => {
   try {
-
     await appDataSource.initialize();
     logger.info('database connected successfully');
-
 
     await connectRabbitMQ();
     logger.info('rabbitmq connected successfully');
 
-   
     app.listen(PORT, () => {
       logger.info(`server started dont need worry on port ${PORT}`);
     });

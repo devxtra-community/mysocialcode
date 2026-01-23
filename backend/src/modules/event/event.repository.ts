@@ -5,5 +5,3 @@ import { EventTicket } from '../../entities/Tickets';
 export const getEventRepository = appDataSource.getRepository(Events);
 
 export const getImageRepository = appDataSource.getRepository(EventImage);
-
-

@@ -105,10 +105,10 @@ export function PopoverTrigger({
           width: number,
           height: number,
           pageX: number,
-          pageY: number
+          pageY: number,
         ) => {
           setTriggerLayout({ x: pageX, y: pageY, width, height });
-        }
+        },
       );
     }
   };
@@ -174,7 +174,7 @@ export function PopoverContent({
     const contentWidth = contentSize.width || maxWidth;
     const contentHeight = Math.min(
       contentSize.height || maxHeight,
-      screenDimensions.height * 0.8
+      screenDimensions.height * 0.8,
     );
 
     let top = 0;
@@ -311,7 +311,7 @@ export function PopoverContent({
     <Modal
       visible={isOpen}
       transparent
-      animationType='fade'
+      animationType="fade"
       onRequestClose={handleClose}
     >
       <Pressable style={styles.overlay} onPress={handleClose}>

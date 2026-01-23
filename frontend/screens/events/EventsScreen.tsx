@@ -38,8 +38,8 @@ export default function EventsScreen() {
 
   async function fetchEvents() {
     try {
-      console.log("insidethe fext events");
-      
+      console.log('insidethe fext events');
+
       const res = await api.get('/event/all-events');
       console.log(res.data);
 
@@ -52,40 +52,28 @@ export default function EventsScreen() {
       setLoading(false);
     }
   }
- const renderItem=({item}:{item:any})=>{
-  return(
-    <View style={{margin:20}}>
-      <Text>
-        {item.title}
-      </Text>
-      <Text>
-        {item.startDate}
-      </Text>
-      <View style={{display:'flex',flexDirection:'row', gap:10}}>
-      <Pressable onPress={()=>router.push(`/(tabs)/events/${item.id}`)}><Text>view</Text></Pressable>
+  const renderItem = ({ item }: { item: any }) => {
+    return (
+      <View style={{ margin: 20 }}>
+        <Text>{item.title}</Text>
+        <Text>{item.startDate}</Text>
+        <View style={{ display: 'flex', flexDirection: 'row', gap: 10 }}>
+          <Pressable onPress={() => router.push(`/(tabs)/events/${item.id}`)}>
+            <Text>view</Text>
+          </Pressable>
+        </View>
       </View>
-    </View>
-
-   
-  )
- }
-
-  
+    );
+  };
 
   return (
     <SafeAreaView>
-
-    <Pressable onPress={()=>router.push('/(tabs)/events/create')}>
-      <Text>cratehgjjjjjjkkkkkkk</Text>
-    </Pressable>
-    <View>
-      <FlatList
-      data={events}
-      renderItem={renderItem}
-      />
-        
-     
-    </View>
+      <Pressable onPress={() => router.push('/(tabs)/events/create')}>
+        <Text>cratehgjjjjjjkkkkkkk</Text>
+      </Pressable>
+      <View>
+        <FlatList data={events} renderItem={renderItem} />
+      </View>
     </SafeAreaView>
   );
 }

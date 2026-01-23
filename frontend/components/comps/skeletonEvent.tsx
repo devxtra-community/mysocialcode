@@ -11,7 +11,7 @@ export default function EventDetailSkeleton() {
       <Skeleton width="100%" height={14} style={{ marginBottom: 8 }} />
       <Skeleton width="95%" height={14} style={{ marginBottom: 8 }} />
       <Skeleton width="90%" height={14} style={{ marginBottom: 16 }} />
-        <Spinner variant='bars' color='red' size='lg'/>
+      <Spinner variant="bars" color="red" size="lg" />
       <View style={styles.infoRow}>
         <Skeleton width={100} height={14} />
         <Skeleton width={80} height={14} />

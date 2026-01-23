@@ -1,4 +1,4 @@
-import { appDataSource } from "../../data-source";
-import { EventTicket } from "../../entities/Tickets";
+import { appDataSource } from '../../data-source';
+import { EventTicket } from '../../entities/Tickets';
 
-export const getTicketRepository = appDataSource.getRepository(EventTicket)
+export const getTicketRepository = appDataSource.getRepository(EventTicket);

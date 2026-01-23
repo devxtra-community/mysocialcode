@@ -3,7 +3,7 @@ import { createEventService } from './event.service';
 import { logger } from '../../utils/logger';
 import { getEventRepository } from './event.repository';
 import { getTicketRepository } from '../tickets/ticket.repository';
-import { v4 as uuid } from "uuid";
+import { v4 as uuid } from 'uuid';
 import { json } from 'zod';
 import { log } from 'node:console';
 import { EventImage } from '../../entities/EventImage';
@@ -82,24 +82,24 @@ export const getAllEvents = async (req: AuthReq, res: Response) => {
   }
 };
 
-export const getSingleEvent = async(req:AuthReq,res:Response)=>{
-  try{
-    const id = req.params.id
-  logger.info({id},"id from params")
-  const event = await  getEventRepository.findOne({
-    where:{
-      id:id
-    },
-    relations:['image']
-  })
-  console.log(event);
-  res.status(200).json({message:"found",event})
-  
-
-  }catch(err){
-    res.status(500).json({error:err,message:"catch in get single event workec"})
+export const getSingleEvent = async (req: AuthReq, res: Response) => {
+  try {
+    const id = req.params.id;
+    logger.info({ id }, 'id from params');
+    const event = await getEventRepository.findOne({
+      where: {
+        id: id,
+      },
+      relations: ['image'],
+    });
+    console.log(event);
+    res.status(200).json({ message: 'found', event });
+  } catch (err) {
+    res
+      .status(500)
+      .json({ error: err, message: 'catch in get single event workec' });
   }
-}
+};
 
 export const joinEvent = async (req: AuthReq, res: Response) => {
   try {
@@ -107,7 +107,7 @@ export const joinEvent = async (req: AuthReq, res: Response) => {
     const userId = req.user?.id;
 
     if (!userId) {
-      return res.status(401).json({ message: "Unauthorized" });
+      return res.status(401).json({ message: 'Unauthorized' });
     }
 
     const event = await getEventRepository.findOne({
@@ -115,11 +115,11 @@ export const joinEvent = async (req: AuthReq, res: Response) => {
     });
 
     if (!event) {
-      return res.status(404).json({ message: "Event not found" });
+      return res.status(404).json({ message: 'Event not found' });
     }
 
     if (event.capacity <= 0) {
-      return res.status(400).json({ message: "Event is full" });
+      return res.status(400).json({ message: 'Event is full' });
     }
 
     const user = await getUserRepository.findOne({
@@ -127,7 +127,7 @@ export const joinEvent = async (req: AuthReq, res: Response) => {
     });
 
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      return res.status(404).json({ message: 'User not found' });
     }
 
     const existingTicket = await getTicketRepository.findOne({
@@ -138,7 +138,7 @@ export const joinEvent = async (req: AuthReq, res: Response) => {
     });
 
     if (existingTicket) {
-      return res.status(409).json({ message: "You already joined this event" });
+      return res.status(409).json({ message: 'You already joined this event' });
     }
 
     const qrCode = `SC${uuid()}`;
@@ -156,17 +156,17 @@ export const joinEvent = async (req: AuthReq, res: Response) => {
 
     return res.status(200).json({
       success: true,
-      message: "Joined event",
+      message: 'Joined event',
       ticket: {
         id: ticket.id,
         qrCode: ticket.qrCode,
         status: ticket.status,
       },
     });
-
   } catch (err) {
-    console.error("Join Event Error:", err);
-    return res.status(500).json({ message: "Something went wrong",error:err });
+    console.error('Join Event Error:', err);
+    return res
+      .status(500)
+      .json({ message: 'Something went wrong', error: err });
   }
 };
-
