@@ -6,7 +6,7 @@ import {
   Unique,
   Index,
   Entity,
-  JoinColumn,
+
 } from 'typeorm';
 import { Events } from './Event';
 import { User } from './User';
@@ -24,10 +24,10 @@ export class EventTicket {
   id!: string;
 
   @ManyToOne(() => Events, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'event_id' })
+ 
   event!: Events;
   @ManyToOne(() => User, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'user_id' })
+
   user!: User;
 
   @Index()
