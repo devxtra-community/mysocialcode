@@ -75,3 +75,53 @@ export const getAllEvents = async (req: AuthReq, res: Response) => {
     res.status(400).json({ message: 'failed to fetch events', error: err });
   }
 };
+
+export const getEventById = async (req: AuthReq, res: Response) => {
+  try {
+    const eventId = req.params.id;
+    const event = await getEventRepository.findOne({
+      where: { id: eventId },
+      relations: ['image'],
+    });
+
+    if (!event) {
+      return res
+        .status(404)
+        .json({ message: 'Event not found', success: false });
+    }
+
+    return res
+      .status(200)
+      .json({ message: 'Event fetched', success: true, event });
+  } catch (err) {
+    logger.error({ err }, 'catch in get event by id worked');
+    res.status(400).json({ message: 'failed to fetch event', error: err });
+  }
+}
+
+export const getMyEvents = async (req: AuthReq, res: Response) => {
+  try {
+    if (!req.user?.id) {
+      return res
+        .status(401)
+        .json({ success: false, message: 'Unauthorized' });
+    }
+
+    const events = await getEventRepository.find({
+      where: { user: { id: req.user.id } },
+      relations: ['image', 'user'],
+      order: { createdAt: 'DESC' },
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: 'My events fetched',
+      events,
+    });
+  } catch (err) {
+    logger.error({ err }, 'getMyEvents failed');
+    return res
+      .status(500)
+      .json({ success: false, message: 'Failed to fetch events' });
+  }
+};
