@@ -25,7 +25,7 @@ export default function EventDetailScreen() {
 
   useEffect(() => {
     fetchEvent();
-  }, []);
+  }, [id]);
 
   async function fetchEvent() {
     const res = await api.get(`/event/getEvent/${id}`);
