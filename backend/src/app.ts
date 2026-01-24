@@ -8,6 +8,7 @@ import Healthrouter from './modules/health/health';
 import authRouter from './modules/auth/auth.routes';
 import userRouter from './modules/user/user.routes';
 import eventRouter from './modules/event/event.routes';
+import path from 'path';
 
 const app = express();
 app.use(cors());
@@ -25,6 +26,8 @@ app.use(
       `${req.method} ${req.url} ${res.statusCode}`,
   }),
 );
+
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 app.use('/health', Healthrouter);
 app.use('/auth', authRouter);

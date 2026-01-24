@@ -2,6 +2,7 @@ import { Router } from 'express';
 import {
   createEvent,
   getAllEvents,
+  getMyEvents,
   getSingleEvent,
   joinEvent,
 } from './event.controller';
@@ -17,4 +18,6 @@ eventRouter.post(
 eventRouter.get('/all-events', requireAuth, getAllEvents);
 eventRouter.get('/getEvent/:id', requireAuth, getSingleEvent);
 eventRouter.post('/join-event/:id', requireAuth, joinEvent);
+
+eventRouter.get('/my-events', requireAuth, getMyEvents);
 export default eventRouter;

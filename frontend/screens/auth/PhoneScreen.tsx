@@ -25,7 +25,7 @@ export default function PhoneScreen() {
       }
     } catch (err: any) {
       const data = err?.response?.data;
-      if (data.next == 'login') {
+      if (data.next === 'login') {
         router.push('/(auth)/login');
       }
     } finally {
