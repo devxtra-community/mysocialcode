@@ -4,9 +4,6 @@ import { logger } from '../../utils/logger';
 import { getEventRepository } from './event.repository';
 import { getTicketRepository } from '../tickets/ticket.repository';
 import { v4 as uuid } from 'uuid';
-import { json } from 'zod';
-import { log } from 'node:console';
-import { EventImage } from '../../entities/EventImage';
 import { getUserRepository } from '../user/user.repository';
 
 export interface AuthReq extends Request {
@@ -98,6 +95,31 @@ export const getSingleEvent = async (req: AuthReq, res: Response) => {
     res
       .status(500)
       .json({ error: err, message: 'catch in get single event workec' });
+  }
+};
+
+export const getMyEvents = async (req: AuthReq, res: Response) => {
+  try {
+    if (!req.user?.id) {
+      return res.status(401).json({ success: false, message: 'Unauthorized' });
+    }
+
+    const events = await getEventRepository.find({
+      where: { user: { id: req.user.id } },
+      relations: ['image', 'user'],
+      order: { createdAt: 'DESC' },
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: 'My events fetched',
+      events,
+    });
+  } catch (err) {
+    logger.error({ err }, 'getMyEvents failed');
+    return res
+      .status(500)
+      .json({ success: false, message: 'Failed to fetch events' });
   }
 };
 

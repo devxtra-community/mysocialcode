@@ -158,7 +158,7 @@ export function PopoverContent({
 }: PopoverContentProps) {
   const { isOpen, setIsOpen, triggerLayout } = usePopover();
   const [contentSize, setContentSize] = useState({ width: 0, height: 0 });
-  const popoverColor = useColor('popover');
+  const popoverColor = useColor('card');
   const borderColor = useColor('border');
 
   const handleClose = () => {

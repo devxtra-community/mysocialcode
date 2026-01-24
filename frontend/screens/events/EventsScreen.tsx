@@ -1,8 +1,14 @@
 import { useEffect, useState } from 'react';
-import { View, Text, Image, Pressable } from 'react-native';
+import {
+  View,
+  Text,
+  Image,
+  ScrollView,
+  Pressable,
+  TextInput,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
-import { FlatList } from 'react-native-gesture-handler';
 
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -18,14 +24,10 @@ function EventSkeleton() {
         <Skeleton height={14} width="90%" style={{ marginTop: 6 }} />
         <Skeleton height={12} width="60%" style={{ marginTop: 6 }} />
       </View>
-
-      <View style={{ flexDirection: 'row', marginTop: 12, gap: 10 }}>
-        <Skeleton height={32} width={80} />
-      </View>
     </Card>
   );
 }
-//comment
+
 export default function EventsScreen() {
   const [events, setEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -37,8 +39,6 @@ export default function EventsScreen() {
   async function fetchEvents() {
     try {
       const res = await api.get('/event/all-events');
-      console.log(res.data);
-
       if (res.data.success) {
         setEvents(res.data.events);
       }
@@ -102,53 +102,105 @@ export default function EventsScreen() {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
-      {/* Create Event */}
-      <Pressable
-        onPress={() => router.push('/(tabs)/events/create')}
-        style={{
-          margin: 12,
-          padding: 12,
-          backgroundColor: '#444',
-          borderRadius: 8,
-          alignItems: 'center',
-        }}
-      >
-        <Text style={{ color: '#fff', fontWeight: '600' }}>
-          ➕ Create Event
-        </Text>
-      </Pressable>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
+      <View style={{ padding: 16 }}>
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: 12,
+          }}
+        >
+          <Text style={{ fontSize: 24, fontWeight: '700' }}>Events</Text>
 
-      {/* My Tickets */}
-      <Pressable
-        onPress={() => router.push('/(tabs)/tickets/ticket')}
-        style={{
-          marginHorizontal: 12,
-          marginBottom: 8,
-          padding: 12,
-          backgroundColor: '#000',
-          borderRadius: 8,
-          alignItems: 'center',
-        }}
-      >
-        <Text style={{ color: '#fff', fontWeight: '600' }}>🎫 My Tickets</Text>
-      </Pressable>
-
-      {/* Events List */}
-      {loading ? (
-        <View>
-          {[1, 2, 3].map((i) => (
-            <EventSkeleton key={i} />
-          ))}
+          <Pressable onPress={() => router.push('/(tabs)/events/create')}>
+            <Text style={{ fontSize: 16, fontWeight: '600' }}>Create</Text>
+          </Pressable>
         </View>
-      ) : (
-        <FlatList
-          data={events}
-          renderItem={renderItem}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={{ paddingBottom: 20 }}
-        />
-      )}
+
+        <View
+          style={{
+            backgroundColor: '#f3f4f6',
+            borderRadius: 12,
+            paddingHorizontal: 12,
+            height: 44,
+            justifyContent: 'center',
+          }}
+        >
+          <TextInput
+            placeholder="Search events..."
+            placeholderTextColor="#6b7280"
+          />
+        </View>
+      </View>
+
+      <ScrollView contentContainerStyle={{ paddingHorizontal: 16 }}>
+        <Text
+          style={{
+            fontSize: 18,
+            fontWeight: '600',
+            marginBottom: 12,
+          }}
+        >
+          My Events
+        </Text>
+
+        {loading &&
+          Array.from({ length: 3 }).map((_, i) => <EventSkeleton key={i} />)}
+
+        {!loading && events.length === 0 && (
+          <Text style={{ color: '#6b7280' }}>No events found</Text>
+        )}
+
+        {!loading &&
+          events.map((event) => (
+            <Pressable
+              key={event.id}
+              onPress={() => router.push(`/(tabs)/events/${event.id}`)}
+            >
+              <Card style={{ marginBottom: 14, padding: 12 }}>
+                <Image
+                  source={{ uri: event.image?.[0]?.imageUrl }}
+                  style={{
+                    height: 160,
+                    borderRadius: 12,
+                    backgroundColor: '#e5e7eb',
+                  }}
+                />
+
+                <Text
+                  style={{
+                    fontSize: 16,
+                    fontWeight: '600',
+                    marginTop: 8,
+                  }}
+                >
+                  {event.title}
+                </Text>
+
+                <Text
+                  style={{
+                    color: '#6b7280',
+                    marginTop: 4,
+                  }}
+                >
+                  {event.location}
+                </Text>
+
+                <Text
+                  style={{
+                    color: '#9ca3af',
+                    marginTop: 2,
+                    fontSize: 12,
+                  }}
+                >
+                  {event.startDate}
+                </Text>
+              </Card>
+            </Pressable>
+          ))}
+      </ScrollView>
     </SafeAreaView>
   );
 }
