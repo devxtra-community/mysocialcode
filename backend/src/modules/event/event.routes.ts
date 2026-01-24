@@ -26,8 +26,7 @@ eventRouter.put(
   '/update-event/:id',
   requireAuth,
   upload.array('files', 5),
-  updateEvent
+  updateEvent,
 );
-
 
 export default eventRouter;
