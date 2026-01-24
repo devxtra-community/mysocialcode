@@ -6,7 +6,6 @@ import {
   Unique,
   Index,
   Entity,
-
 } from 'typeorm';
 import { Events } from './Event';
 import { User } from './User';
@@ -24,10 +23,8 @@ export class EventTicket {
   id!: string;
 
   @ManyToOne(() => Events, { onDelete: 'CASCADE' })
- 
   event!: Events;
   @ManyToOne(() => User, { onDelete: 'CASCADE' })
-
   user!: User;
 
   @Index()
