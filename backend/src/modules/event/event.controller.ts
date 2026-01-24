@@ -192,3 +192,63 @@ export const joinEvent = async (req: AuthReq, res: Response) => {
       .json({ message: 'Something went wrong', error: err });
   }
 };
+
+export const updateEvent = async (req: AuthReq, res: Response) => {
+  try {
+    const eventId = req.params.id;
+    const userId = req.user?.id;
+
+    if (!userId) {
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
+
+    const body = req.body || {};
+
+    const {
+      title,
+      description,
+      startDate,
+      endDate,
+      location,
+      capacity,
+      category,
+      rules,
+    } = body;
+
+    const event = await getEventRepository.findOne({
+      where: { id: eventId },
+      relations: ['user'],
+    });
+
+    if (!event) {
+      return res.status(404).json({ message: 'Event not found' });
+    }
+
+    if (event.user.id !== userId) {
+      return res.status(403).json({ message: 'Forbidden' });
+    }
+
+    if (title !== undefined) event.title = title;
+    if (description !== undefined) event.description = description;
+    if (startDate !== undefined) event.startDate = startDate;
+    if (endDate !== undefined) event.endDate = endDate;
+    if (location !== undefined) event.location = location;
+    if (capacity !== undefined) event.capacity = capacity;
+    if (category !== undefined) event.category = category;
+    if (rules !== undefined) event.rules = rules;
+
+    await getEventRepository.save(event);
+
+    return res.status(200).json({
+      success: true,
+      message: 'Event updated',
+      event,
+    });
+  } catch (err) {
+    logger.error({ err }, 'Error in updateEvent');
+    return res.status(500).json({
+      success: false,
+      message: 'Something went wrong',
+    });
+  }
+};
