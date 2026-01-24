@@ -12,8 +12,10 @@ import { router } from 'expo-router';
 
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+
 import { Skeleton } from '@/components/ui/skeleton';
 import api from '@/lib/api';
+import { FlatList } from 'react-native-gesture-handler';
 
 function EventSkeleton() {
   return (
@@ -39,6 +41,8 @@ export default function EventsScreen() {
 
   async function fetchEvents() {
     try {
+      console.log('insidethe fext events');
+
       const res = await api.get('/event/all-events');
       if (res.data.success) {
         setEvents(res.data.events);
@@ -49,6 +53,19 @@ export default function EventsScreen() {
       setLoading(false);
     }
   }
+  const renderItem = ({ item }: { item: any }) => {
+    return (
+      <View style={{ margin: 20 }}>
+        <Text>{item.title}</Text>
+        <Text>{item.startDate}</Text>
+        <View style={{ display: 'flex', flexDirection: 'row', gap: 10 }}>
+          <Pressable onPress={() => router.push(`/(tabs)/events/${item.id}`)}>
+            <Text>view</Text>
+          </Pressable>
+        </View>
+      </View>
+    );
+  };
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
