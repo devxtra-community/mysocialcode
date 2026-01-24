@@ -5,6 +5,7 @@ import { getEventRepository } from './event.repository';
 import { getTicketRepository } from '../tickets/ticket.repository';
 import { v4 as uuid } from 'uuid';
 import { getUserRepository } from '../user/user.repository';
+import { EventImage } from '../../entities/EventImage';
 
 export interface AuthReq extends Request {
   user?: {
@@ -202,22 +203,9 @@ export const updateEvent = async (req: AuthReq, res: Response) => {
       return res.status(401).json({ message: 'Unauthorized' });
     }
 
-    const body = req.body || {};
-
-    const {
-      title,
-      description,
-      startDate,
-      endDate,
-      location,
-      capacity,
-      category,
-      rules,
-    } = body;
-
     const event = await getEventRepository.findOne({
       where: { id: eventId },
-      relations: ['user'],
+      relations: ['user', 'image'],
     });
 
     if (!event) {
@@ -228,14 +216,59 @@ export const updateEvent = async (req: AuthReq, res: Response) => {
       return res.status(403).json({ message: 'Forbidden' });
     }
 
+    const {
+      title,
+      description,
+      startDate,
+      endDate,
+      location,
+      capacity,
+      category,
+      rules,
+      existingImages,
+    } = req.body;
+
     if (title !== undefined) event.title = title;
     if (description !== undefined) event.description = description;
-    if (startDate !== undefined) event.startDate = startDate;
-    if (endDate !== undefined) event.endDate = endDate;
+    if (startDate !== undefined) event.startDate = new Date(startDate);
+    if (endDate !== undefined) event.endDate = new Date(endDate);
     if (location !== undefined) event.location = location;
-    if (capacity !== undefined) event.capacity = capacity;
+    if (capacity !== undefined) event.capacity = Number(capacity);
     if (category !== undefined) event.category = category;
     if (rules !== undefined) event.rules = rules;
+
+    let keepImages: string[] = [];
+
+    if (existingImages) {
+      try {
+        keepImages = Array.isArray(existingImages)
+          ? existingImages
+          : JSON.parse(existingImages);
+      } catch {
+        keepImages = [];
+      }
+    }
+
+    const imagesToDelete = event.image.filter(
+      (img) => !keepImages.includes(img.imageUrl),
+    );
+
+    if (imagesToDelete.length > 0) {
+      await getEventRepository.manager.remove(imagesToDelete);
+    }
+
+    const files = req.files as Express.Multer.File[] | undefined;
+
+    if (files && files.length > 0) {
+      const newImages = files.map((file) =>
+        getEventRepository.manager.create(EventImage, {
+          imageUrl: file.path,
+          event,
+        }),
+      );
+
+      await getEventRepository.manager.save(newImages);
+    }
 
     await getEventRepository.save(event);
 

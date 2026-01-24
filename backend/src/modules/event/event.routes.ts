@@ -23,9 +23,9 @@ eventRouter.post('/join-event/:id', requireAuth, joinEvent);
 
 eventRouter.get('/my-events', requireAuth, getMyEvents);
 eventRouter.put(
-  '/update-event/:id',
+  '/update/:id',
   requireAuth,
-  upload.array('files', 5),
+  upload.array('images', 4),
   updateEvent,
 );
 

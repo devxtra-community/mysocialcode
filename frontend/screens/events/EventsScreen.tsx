@@ -2,30 +2,29 @@ import { useEffect, useState } from 'react';
 import {
   View,
   Text,
-  Image,
   ScrollView,
   Pressable,
   TextInput,
+  StyleSheet,
+  ImageBackground,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 
 import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-
 import { Skeleton } from '@/components/ui/skeleton';
 import api from '@/lib/api';
-import { FlatList } from 'react-native-gesture-handler';
 
 function EventSkeleton() {
   return (
-    <Card style={{ marginBottom: 14, padding: 12 }}>
-      <Skeleton height={160} style={{ borderRadius: 12 }} />
+    <Card style={styles.skeletonCard}>
+      <Skeleton height={160} style={styles.skeletonImage} />
 
-      <View style={{ marginTop: 10 }}>
+      <View style={styles.skeletonTextWrapper}>
         <Skeleton height={18} width="70%" />
-        <Skeleton height={14} width="90%" style={{ marginTop: 6 }} />
-        <Skeleton height={12} width="60%" style={{ marginTop: 6 }} />
+        <Skeleton height={14} width="90%" style={styles.skeletonSpacing} />
+        <Skeleton height={12} width="60%" style={styles.skeletonSpacing} />
+        <Skeleton height={12} width="60%" style={styles.skeletonSpacing} />
       </View>
     </Card>
   );
@@ -41,9 +40,7 @@ export default function EventsScreen() {
 
   async function fetchEvents() {
     try {
-      console.log('insidethe fext events');
-
-      const res = await api.get('/event/all-events');
+      const res = await api.get('/event/my-events');
       if (res.data.success) {
         setEvents(res.data.events);
       }
@@ -53,47 +50,19 @@ export default function EventsScreen() {
       setLoading(false);
     }
   }
-  const renderItem = ({ item }: { item: any }) => {
-    return (
-      <View style={{ margin: 20 }}>
-        <Text>{item.title}</Text>
-        <Text>{item.startDate}</Text>
-        <View style={{ display: 'flex', flexDirection: 'row', gap: 10 }}>
-          <Pressable onPress={() => router.push(`/(tabs)/events/${item.id}`)}>
-            <Text>view</Text>
-          </Pressable>
-        </View>
-      </View>
-    );
-  };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
-      <View style={{ padding: 16 }}>
-        <View
-          style={{
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            marginBottom: 12,
-          }}
-        >
-          <Text style={{ fontSize: 24, fontWeight: '700' }}>Events</Text>
+    <SafeAreaView style={styles.container}>
+      <View style={styles.header}>
+        <View style={styles.headerRow}>
+          <Text style={styles.title}>Events</Text>
 
           <Pressable onPress={() => router.push('/(tabs)/events/create')}>
-            <Text style={{ fontSize: 16, fontWeight: '600' }}>Create</Text>
+            <Text style={styles.createText}>Create</Text>
           </Pressable>
         </View>
 
-        <View
-          style={{
-            backgroundColor: '#f3f4f6',
-            borderRadius: 12,
-            paddingHorizontal: 12,
-            height: 44,
-            justifyContent: 'center',
-          }}
-        >
+        <View style={styles.searchBox}>
           <TextInput
             placeholder="Search events..."
             placeholderTextColor="#6b7280"
@@ -101,22 +70,14 @@ export default function EventsScreen() {
         </View>
       </View>
 
-      <ScrollView contentContainerStyle={{ paddingHorizontal: 16 }}>
-        <Text
-          style={{
-            fontSize: 18,
-            fontWeight: '600',
-            marginBottom: 12,
-          }}
-        >
-          My Events
-        </Text>
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        <Text style={styles.sectionTitle}>My Events</Text>
 
         {loading &&
           Array.from({ length: 3 }).map((_, i) => <EventSkeleton key={i} />)}
 
         {!loading && events.length === 0 && (
-          <Text style={{ color: '#6b7280' }}>No events found</Text>
+          <Text style={styles.emptyText}>No events found</Text>
         )}
 
         {!loading &&
@@ -125,44 +86,27 @@ export default function EventsScreen() {
               key={event.id}
               onPress={() => router.push(`/(tabs)/events/${event.id}`)}
             >
-              <Card style={{ marginBottom: 14, padding: 12 }}>
-                <Image
+              <Card style={styles.eventCard}>
+                <ImageBackground
                   source={{ uri: event.image?.[0]?.imageUrl }}
-                  style={{
-                    height: 160,
-                    borderRadius: 12,
-                    backgroundColor: '#e5e7eb',
-                  }}
-                />
-
-                <Text
-                  style={{
-                    fontSize: 16,
-                    fontWeight: '600',
-                    marginTop: 8,
-                  }}
+                  style={styles.eventImage}
+                  imageStyle={styles.eventImageRadius}
                 >
-                  {event.title}
-                </Text>
+                  <View style={styles.overlay}>
+                    <Text style={styles.eventTitle}>{event.title}</Text>
+                    <Text style={styles.eventLocation}>{event.location}</Text>
+                    <Text style={styles.eventDate}>{event.startDate}</Text>
 
-                <Text
-                  style={{
-                    color: '#6b7280',
-                    marginTop: 4,
-                  }}
-                >
-                  {event.location}
-                </Text>
-
-                <Text
-                  style={{
-                    color: '#9ca3af',
-                    marginTop: 2,
-                    fontSize: 12,
-                  }}
-                >
-                  {event.startDate}
-                </Text>
+                    <Pressable
+                      onPress={(e) => {
+                        e.stopPropagation();
+                        router.push(`/(tabs)/events/update/${event.id}`);
+                      }}
+                    >
+                      <Text style={styles.eventUpdate}>Update</Text>
+                    </Pressable>
+                  </View>
+                </ImageBackground>
               </Card>
             </Pressable>
           ))}
@@ -170,3 +114,119 @@ export default function EventsScreen() {
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+
+  header: {
+    padding: 16,
+  },
+
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+
+  title: {
+    fontSize: 24,
+    fontWeight: '700',
+  },
+
+  createText: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+
+  searchBox: {
+    backgroundColor: '#f3f4f6',
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    height: 44,
+    justifyContent: 'center',
+  },
+
+  scrollContent: {
+    paddingHorizontal: 16,
+  },
+
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    marginBottom: 12,
+  },
+
+  emptyText: {
+    color: '#6b7280',
+  },
+
+  eventCard: {
+    marginBottom: 14,
+    padding: 0,
+    overflow: 'hidden',
+  },
+
+  eventImage: {
+    height: 180,
+    justifyContent: 'flex-end',
+  },
+
+  eventImageRadius: {
+    borderRadius: 12,
+  },
+
+  overlay: {
+    backgroundColor: 'rgba(0,0,0,0.45)',
+    padding: 12,
+  },
+
+  eventTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#fff',
+  },
+
+  eventLocation: {
+    color: '#e5e7eb',
+    marginTop: 4,
+  },
+
+  eventDate: {
+    color: '#d1d5db',
+    marginTop: 2,
+    fontSize: 12,
+  },
+
+  eventUpdate: {
+    marginTop: 8,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    backgroundColor: '#3b82f6',
+    borderRadius: 6,
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600',
+    alignSelf: 'flex-start',
+  },
+
+  skeletonCard: {
+    marginBottom: 14,
+    padding: 12,
+  },
+
+  skeletonImage: {
+    borderRadius: 12,
+  },
+
+  skeletonTextWrapper: {
+    marginTop: 10,
+  },
+
+  skeletonSpacing: {
+    marginTop: 6,
+  },
+});
