@@ -97,14 +97,12 @@ export const getEventById = async (req: AuthReq, res: Response) => {
     logger.error({ err }, 'catch in get event by id worked');
     res.status(400).json({ message: 'failed to fetch event', error: err });
   }
-}
+};
 
 export const getMyEvents = async (req: AuthReq, res: Response) => {
   try {
     if (!req.user?.id) {
-      return res
-        .status(401)
-        .json({ success: false, message: 'Unauthorized' });
+      return res.status(401).json({ success: false, message: 'Unauthorized' });
     }
 
     const events = await getEventRepository.find({

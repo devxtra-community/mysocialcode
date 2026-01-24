@@ -1,5 +1,10 @@
 import { Router } from 'express';
-import { createEvent, getAllEvents, getEventById, getMyEvents } from './event.controller';
+import {
+  createEvent,
+  getAllEvents,
+  getEventById,
+  getMyEvents,
+} from './event.controller';
 import { requireAuth } from '../../middleware/auth.middleware';
 import { upload } from '../../middleware/upload';
 const eventRouter = Router();
