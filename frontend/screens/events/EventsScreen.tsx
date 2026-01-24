@@ -38,7 +38,6 @@ export default function EventsScreen() {
     try {
       const res = await api.get('/event/all-events');
       console.log(res.data);
-      
 
       if (res.data.success) {
         setEvents(res.data.events);
@@ -56,7 +55,7 @@ export default function EventsScreen() {
         {/* Event Image */}
         <Image
           source={{
-            uri:item.image?.[0]?.imageUrl
+            uri: item.image?.[0]?.imageUrl,
           }}
           style={{
             width: '100%',
@@ -115,12 +114,14 @@ export default function EventsScreen() {
           alignItems: 'center',
         }}
       >
-        <Text style={{ color: '#fff', fontWeight: '600' }}>➕ Create Event</Text>
+        <Text style={{ color: '#fff', fontWeight: '600' }}>
+          ➕ Create Event
+        </Text>
       </Pressable>
 
       {/* My Tickets */}
       <Pressable
-        onPress={() =>router.push('/(tabs)/tickets/ticket')}
+        onPress={() => router.push('/(tabs)/tickets/ticket')}
         style={{
           marginHorizontal: 12,
           marginBottom: 8,

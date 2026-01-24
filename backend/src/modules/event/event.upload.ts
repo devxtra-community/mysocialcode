@@ -12,5 +12,5 @@ export async function uploadEventImage(file: Express.Multer.File) {
     }),
   );
 
-  return `${process.env.R2_PUBLIC_URL}/${key}`
+  return `${process.env.R2_PUBLIC_URL}/${key}`;
 }
