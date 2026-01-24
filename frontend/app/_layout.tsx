@@ -1,40 +1,43 @@
 import { Stack } from 'expo-router';
-import { useState, useEffect } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useEffect, useState } from 'react';
+import Toast from 'react-native-toast-message';
+import { getAccessToken } from '@/services/token/token.storage';
+import { toastConfig } from '@/utils/toastConfig';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { View, ActivityIndicator } from 'react-native';
 
 export default function RootLayout() {
-  const [hasSeenInro, setHasSeenIntro] = useState<boolean | null>(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
 
   useEffect(() => {
-    async function loadIntro() {
-      const value = await AsyncStorage.getItem('hasSeenIntro');
-      setHasSeenIntro(value === 'true');
+    async function loadState() {
+      const token = await getAccessToken();
+      setIsAuthenticated(!!token);
     }
-    loadIntro();
+
+    loadState();
   }, []);
 
-  if (hasSeenInro === null) {
-    return null;
-  }
-  if (!hasSeenInro) {
+  // Loading screen while checking token
+  if (isAuthenticated === null) {
     return (
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="(auth)/intro" />
-      </Stack>
-    );
-  }
-  if (!isAuthenticated) {
-    return (
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="(auth)" />
-      </Stack>
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" />
+      </View>
     );
   }
 
   return (
-    <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="(tabs)" />
-    </Stack>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <Stack screenOptions={{ headerShown: false }}>
+        {isAuthenticated ? (
+          <Stack.Screen name="(tabs)" />
+        ) : (
+          <Stack.Screen name="(auth)" />
+        )}
+      </Stack>
+
+      <Toast config={toastConfig} />
+    </GestureHandlerRootView>
   );
 }

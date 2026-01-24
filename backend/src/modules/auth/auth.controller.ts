@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { logger } from '../../utils/logger';
 import { registerSchema, phoneSchema, loginSchema } from './auth.schema';
-import { sendOtpSms } from '../../Services/sms.service';
+// import { sendOtpSms } from '../../Services/sms.service';
 import { generateotp } from '../../utils/otp';
 import { appDataSource } from '../../data-source';
 import { Otp } from '../../entities/otp';
@@ -9,7 +9,11 @@ import { User } from '../../entities/User';
 import { signAccessToken } from '../../Services/jwt.service';
 import { createRefreshTokenSession } from '../../Services/authToken';
 import bcrypt from 'bcrypt';
-// import { publish } from '../../messaging/rabbitmq/publish';
+
+import { publish } from '../../messaging/rabbitmq/publish';
+import { v4 as uuid } from 'uuid';
+
+import { refreshAccessTokenService } from './auth.service';
 
 export const sendOtp = async (
   req: Request,
@@ -48,21 +52,38 @@ export const sendOtp = async (
       });
     }
 
+    const lastOtp = await otpRepo.findOne({
+      where: { phoneNumber },
+      order: { createdAt: 'DESC' },
+    });
+
+    if (lastOtp && Date.now() - lastOtp.createdAt.getTime() < 60_000) {
+      return res.status(429).json({
+        message: 'Please wait before requesting another OTP',
+      });
+    }
+
     const otpCode = generateotp();
-    logger.debug({ otpCode }, 'otp is');
+    logger.debug('OTP generated');
 
-    await sendOtpSms(phoneNumber, otpCode.toString());
-
-    // await publish('SEND_OTP', {
-    //   phone: phoneNumber,
-    //   otp: otpCode.toString(),
-    // });
+    const requestId = uuid();
 
     await otpRepo.delete({ phoneNumber });
+
     await otpRepo.save({
       phoneNumber,
       otp: otpCode.toString(),
+      requestId,
+      sent: false,
       expiresAt: new Date(Date.now() + 5 * 60 * 1000),
+    });
+
+    await publish('SEND_OTP', {
+      phone: phoneNumber,
+      otp: otpCode.toString(),
+      purpose: 'login',
+      retryCount: 0,
+      requestId,
     });
 
     return res.status(200).json({
@@ -239,7 +260,6 @@ export const login = async (
 
     const userRepo = appDataSource.getRepository(User);
 
-    // 2️⃣ find user
     const user = await userRepo.findOne({
       where: { phoneNumber },
     });
@@ -250,14 +270,12 @@ export const login = async (
       });
     }
 
-    // 3️⃣ block incomplete registration
     if (!user.passwordHash || !user.isPhoneVerified) {
       return res.status(403).json({
         message: 'Account not fully registered',
       });
     }
 
-    // 4️⃣ compare password
     const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
 
     if (!isPasswordValid) {
@@ -266,7 +284,6 @@ export const login = async (
       });
     }
 
-    // 5️⃣ issue tokens
     const accessToken = signAccessToken({
       userId: user.id,
     });
@@ -281,5 +298,23 @@ export const login = async (
   } catch (err) {
     logger.error({ err }, 'error in login');
     next(err);
+  }
+};
+
+export const refreshAccessToken = async (req: Request, res: Response) => {
+  try {
+    const { refreshToken } = req.body;
+
+    if (!refreshToken) {
+      return res.status(401).json({ message: 'refresh token missing' });
+    }
+
+    const newAccessToken = await refreshAccessTokenService(refreshToken);
+
+    return res.json({ accessToken: newAccessToken });
+  } catch (err) {
+    return res
+      .status(403)
+      .json({ message: 'Invalid refresh token', error: err });
   }
 };

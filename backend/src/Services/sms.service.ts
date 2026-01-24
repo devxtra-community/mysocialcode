@@ -1,18 +1,22 @@
-import Twilio from 'twilio';
 import { logger } from '../utils/logger';
-const accountSid = process.env.TWILIO_ACCOUNT_SID!;
-const authToken = process.env.TWILIO_AUTH_TOKEN!;
-const fromNumber = process.env.TWILIO_FROM_NUMBER!;
-const client = Twilio(accountSid, authToken);
-export const sendOtpSms = async (phoneNumber: string, otp: string) => {
-  try {
-    await client.messages.create({
-      body: `otp is ${otp}`,
-      from: fromNumber,
-      to: phoneNumber,
-    });
-  } catch (err) {
-    logger.error({ err }, 'failed to send otp');
-    throw new Error('failed to send');
+import twilio from 'twilio';
+
+export const sendOtpSms = async (phone: string, otp: string) => {
+  const accountSid = process.env.TWILIO_ACCOUNT_SID;
+  const authToken = process.env.TWILIO_AUTH_TOKEN;
+  const fromNumber = process.env.TWILIO_FROM_NUMBER;
+
+  if (!accountSid || !authToken || !fromNumber) {
+    throw new Error('Twilio env vars missing');
   }
+
+  const client = twilio(accountSid, authToken);
+
+  await client.messages.create({
+    body: `Your OTP is ${otp}`,
+    from: fromNumber,
+    to: phone,
+  });
+
+  logger.info('OTP SMS sent');
 };
