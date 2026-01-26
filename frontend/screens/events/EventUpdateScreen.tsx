@@ -37,10 +37,11 @@ export default function CreateEventScreen() {
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
 
+  const { refresh } = useLocalSearchParams<{ refresh: string }>();
   useEffect(() => {
     if (!id) return;
     fetchEvent();
-  }, [id]);
+  }, [refresh]);
 
   const fetchEvent = async () => {
     try {
@@ -85,8 +86,8 @@ export default function CreateEventScreen() {
   }
 
   async function handleEvent() {
+    setLoading(true);
     try {
-      setLoading(true);
       const form = new FormData();
 
       form.append('title', title);
@@ -104,7 +105,7 @@ export default function CreateEventScreen() {
 
       newImages.forEach((uri, index) => {
         form.append('images', {
-          uri,
+          uri: uri.startsWith('file://') ? uri : `file://${uri}`,
           name: `image_${index}.jpg`,
           type: 'image/jpeg',
         } as any);
@@ -119,25 +120,27 @@ export default function CreateEventScreen() {
       //   } as any);
       // });
 
-      const res = await api.put(`/event/update/${id}`, form, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+      const res = await api.put(`/event/update/${id}`, form);
 
-      if (res.data.success) {
-        setTitle('');
-        setDescription('');
-        setImages([]);
-        setStartDate(null);
-        setEndDate(null);
-        setLocation('');
-        setCategory('');
-        setRules('');
-        setPrice('');
+      // if (res.data.success) {
+      //   setTitle('');
+      //   setDescription('');
+      //   setImages([]);
+      //   setStartDate(null);
+      //   setEndDate(null);
+      //   setLocation('');
+      //   setCategory('');
+      //   setRules('');
+      //   setPrice('');
 
-        router.replace('/(tabs)/events');
+      //   router.replace({
+      //     pathname: '/(tabs)/events',
+      //     params: { refresh: Date.now().toString() },
+      //   });
+      if (res.data?.success) {
+      router.push('/(tabs)/events');
       }
+      console.log('UPDATE RESPONSE:', res.data);
     } catch (err) {
       console.log('upload failed:', err);
     } finally {

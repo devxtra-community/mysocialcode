@@ -1,11 +1,12 @@
 import { Request, Response } from 'express';
 import { createEventService } from './event.service';
 import { logger } from '../../utils/logger';
-import { getEventRepository } from './event.repository';
+import { getEventRepository, getImageRepository } from './event.repository';
 import { getTicketRepository } from '../tickets/ticket.repository';
 import { v4 as uuid } from 'uuid';
 import { getUserRepository } from '../user/user.repository';
-import { EventImage } from '../../entities/EventImage';
+// import { EventImage } from '../../entities/EventImage';
+import { uploadEventImage } from './event.upload';
 
 export interface AuthReq extends Request {
   user?: {
@@ -260,14 +261,16 @@ export const updateEvent = async (req: AuthReq, res: Response) => {
     const files = req.files as Express.Multer.File[] | undefined;
 
     if (files && files.length > 0) {
-      const newImages = files.map((file) =>
-        getEventRepository.manager.create(EventImage, {
-          imageUrl: file.path,
-          event,
-        }),
-      );
+      for (const file of files) {
+        const imageUrl = await uploadEventImage(file);
 
-      await getEventRepository.manager.save(newImages);
+        const image = getImageRepository.create({
+          imageUrl,
+          event,
+        });
+
+        await getImageRepository.save(image);
+      }
     }
 
     await getEventRepository.save(event);
