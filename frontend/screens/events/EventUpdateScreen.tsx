@@ -138,7 +138,7 @@ export default function CreateEventScreen() {
       //     params: { refresh: Date.now().toString() },
       //   });
       if (res.data?.success) {
-      router.push('/(tabs)/events');
+        router.push('/(tabs)/events');
       }
       console.log('UPDATE RESPONSE:', res.data);
     } catch (err) {
