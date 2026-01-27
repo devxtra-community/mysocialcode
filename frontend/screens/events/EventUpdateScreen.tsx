@@ -129,7 +129,9 @@ export default function CreateEventScreen() {
         } as any);
       });
 
-      const res = await api.put(`/event/update/${id}`, form);
+      const res = await api.put(`/event/update/${id}`, form, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
 
       if (res.data?.success) {
         router.replace({

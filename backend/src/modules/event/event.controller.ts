@@ -7,8 +7,6 @@ import { v4 as uuid } from 'uuid';
 import { getUserRepository } from '../user/user.repository';
 // import { EventImage } from '../../entities/EventImage';
 import { uploadEventImage } from './event.upload';
-import { DeleteObjectCommand } from '@aws-sdk/client-s3';
-import { r2 } from '../../utils/r2';
 import { appDataSource } from '../../data-source';
 
 export interface AuthReq extends Request {
@@ -209,13 +207,7 @@ export const updateEvent = async (req: AuthReq, res: Response) => {
 
     const event = await getEventRepository.findOne({
       where: { id: eventId },
-      relations: ['image'],
-      order: {
-        startDate: 'ASC',
-        image: {
-          createdAt: 'ASC',
-        },
-      },
+      relations: ['image', 'user'], // ✅ FIXED
     });
 
     if (!event) {
@@ -240,13 +232,7 @@ export const updateEvent = async (req: AuthReq, res: Response) => {
       price,
     } = req.body;
 
-    if (event.capacity <= 0) {
-      return res.status(400).json({ message: 'Event is full' });
-    }
-
-    event.capacity -= 1;
-    await getEventRepository.save(event);
-
+    // ✅ Field updates
     if (title !== undefined) event.title = title;
     if (description !== undefined) event.description = description;
     if (location !== undefined) event.location = location;
@@ -255,7 +241,7 @@ export const updateEvent = async (req: AuthReq, res: Response) => {
 
     if (capacity !== undefined) {
       const parsed = Number(capacity);
-      if (isNaN(parsed)) {
+      if (isNaN(parsed) || parsed < 0) {
         return res.status(400).json({ message: 'Invalid capacity' });
       }
       event.capacity = parsed;
@@ -282,6 +268,13 @@ export const updateEvent = async (req: AuthReq, res: Response) => {
       event.endDate = d;
     }
 
+    if (event.startDate && event.endDate && event.endDate < event.startDate) {
+      return res
+        .status(400)
+        .json({ message: 'End date cannot be before start date' });
+    }
+
+    // ✅ Image handling
     let keepImages: string[] = [];
     if (existingImages) {
       keepImages = Array.isArray(existingImages)
@@ -296,40 +289,20 @@ export const updateEvent = async (req: AuthReq, res: Response) => {
     const files = req.files as Express.Multer.File[] | undefined;
 
     await appDataSource.transaction(async (manager) => {
-      if (imagesToDelete.length > 0) {
+      if (imagesToDelete.length) {
         await manager.remove(imagesToDelete);
       }
 
       await manager.save(event);
 
-      if (files && files.length > 0) {
+      if (files?.length) {
         for (const file of files) {
           const imageUrl = await uploadEventImage(file);
-
-          const image = getImageRepository.create({
-            imageUrl,
-            event,
-          });
-
+          const image = getImageRepository.create({ imageUrl, event });
           await manager.save(image);
         }
       }
     });
-
-    for (const img of imagesToDelete) {
-      try {
-        const key = img.imageUrl.replace(`${process.env.R2_PUBLIC_URL}/`, '');
-
-        await r2.send(
-          new DeleteObjectCommand({
-            Bucket: process.env.R2_BUCKET_NAME!,
-            Key: key,
-          }),
-        );
-      } catch (err) {
-        logger.error({ err, img }, 'Failed to delete image from R2');
-      }
-    }
 
     return res.status(200).json({
       success: true,

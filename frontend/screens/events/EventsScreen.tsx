@@ -29,7 +29,7 @@ function EventSkeleton() {
     </Card>
   );
 }
-
+//comment
 export default function EventsScreen() {
   const [events, setEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
