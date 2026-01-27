@@ -23,7 +23,6 @@ export default function CreateEventScreen() {
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [images, setImages] = useState<string[]>([]);
   const [existingImages, setExistingImages] = useState<string[]>([]);
   const [newImages, setNewImages] = useState<string[]>([]);
   const [startDate, setStartDate] = useState<Date | null>(null);
@@ -41,7 +40,7 @@ export default function CreateEventScreen() {
   useEffect(() => {
     if (!id) return;
     fetchEvent();
-  }, [refresh]);
+  }, [id, refresh]);
 
   const fetchEvent = async () => {
     try {
@@ -65,9 +64,16 @@ export default function CreateEventScreen() {
   };
 
   async function pickImages() {
+    const remaining = 4 - existingImages.length;
+
+    if (remaining <= 0) {
+      showError('You can upload only 4 images');
+      return;
+    }
+
     const result = await ImagePicker.launchImageLibraryAsync({
       allowsMultipleSelection: true,
-      selectionLimit: 4,
+      selectionLimit: remaining,
       mediaTypes: ['images'],
       quality: 0.8,
     });
@@ -88,18 +94,30 @@ export default function CreateEventScreen() {
   async function handleEvent() {
     setLoading(true);
     try {
+      if (existingImages.length + newImages.length > 4) {
+        showError('Maximum 4 images allowed');
+        setLoading(false);
+        return;
+      }
       const form = new FormData();
 
       form.append('title', title);
       form.append('description', description);
-      form.append('startDate', startDate?.toISOString() || '');
-      form.append('endDate', endDate?.toISOString() || '');
+      // form.append('startDate', startDate?.toISOString() || '');
+      // form.append('endDate', endDate?.toISOString() || '');
       form.append('isFree', String(isFree));
       form.append('price', isFree ? '0' : price);
       form.append('location', location);
       form.append('capacity', capacity);
       form.append('category', category);
       form.append('rules', rules);
+      if (startDate) {
+        form.append('startDate', startDate.toISOString());
+      }
+
+      if (endDate) {
+        form.append('endDate', endDate.toISOString());
+      }
 
       form.append('existingImages', JSON.stringify(existingImages));
 
@@ -111,35 +129,15 @@ export default function CreateEventScreen() {
         } as any);
       });
 
-      // images.forEach((uri, index) => {
-      //   if (uri.startsWith('http')) return;
-      //   form.append('images', {
-      //     uri,
-      //     name: `image_${index}.jpg`,
-      //     type: 'image/jpeg',
-      //   } as any);
-      // });
-
       const res = await api.put(`/event/update/${id}`, form);
 
-      // if (res.data.success) {
-      //   setTitle('');
-      //   setDescription('');
-      //   setImages([]);
-      //   setStartDate(null);
-      //   setEndDate(null);
-      //   setLocation('');
-      //   setCategory('');
-      //   setRules('');
-      //   setPrice('');
-
-      //   router.replace({
-      //     pathname: '/(tabs)/events',
-      //     params: { refresh: Date.now().toString() },
-      //   });
       if (res.data?.success) {
-        router.push('/(tabs)/events');
+        router.replace({
+          pathname: '/(tabs)/events',
+          params: { refresh: Date.now().toString() },
+        });
       }
+
       console.log('UPDATE RESPONSE:', res.data);
     } catch (err) {
       console.log('upload failed:', err);
@@ -148,9 +146,6 @@ export default function CreateEventScreen() {
     }
   }
 
-  function removeImage(index: number) {
-    setImages((prev) => prev.filter((_, i) => i !== index));
-  }
   const openPicker = (type: 'start' | 'end') => {
     const current =
       type === 'start' ? startDate || new Date() : endDate || new Date();
@@ -178,16 +173,14 @@ export default function CreateEventScreen() {
             } else {
               setEndDate(finalDate);
             }
+            if (type === 'end' && startDate && finalDate < startDate) {
+              showError('End date cannot be before start date');
+              return;
+            }
           },
         });
       },
     });
-    // if (fetching) {
-    // return (
-    //   <SafeAreaView style={styles.center}>
-    //     <ActivityIndicator />
-    //   </SafeAreaView>
-    // );
   };
 
   return (
@@ -265,7 +258,15 @@ export default function CreateEventScreen() {
                     {isFree ? 'Free Event' : 'Paid Event'}
                   </Text>
 
-                  <Switch value={isFree} onValueChange={setIsFree} />
+                  <Switch
+                    value={isFree}
+                    onValueChange={(value) => {
+                      setIsFree(value);
+                      if (value) {
+                        setPrice('');
+                      }
+                    }}
+                  />
                 </View>
               </View>
               {!isFree && (

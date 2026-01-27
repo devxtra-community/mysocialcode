@@ -7,6 +7,9 @@ import { v4 as uuid } from 'uuid';
 import { getUserRepository } from '../user/user.repository';
 // import { EventImage } from '../../entities/EventImage';
 import { uploadEventImage } from './event.upload';
+import { DeleteObjectCommand } from '@aws-sdk/client-s3';
+import { r2 } from '../../utils/r2';
+import { appDataSource } from '../../data-source';
 
 export interface AuthReq extends Request {
   user?: {
@@ -206,7 +209,13 @@ export const updateEvent = async (req: AuthReq, res: Response) => {
 
     const event = await getEventRepository.findOne({
       where: { id: eventId },
-      relations: ['user', 'image'],
+      relations: ['image'],
+      order: {
+        startDate: 'ASC',
+        image: {
+          createdAt: 'ASC',
+        },
+      },
     });
 
     if (!event) {
@@ -227,53 +236,100 @@ export const updateEvent = async (req: AuthReq, res: Response) => {
       category,
       rules,
       existingImages,
+      isFree,
+      price,
     } = req.body;
+
+    if (event.capacity <= 0) {
+      return res.status(400).json({ message: 'Event is full' });
+    }
+
+    event.capacity -= 1;
+    await getEventRepository.save(event);
 
     if (title !== undefined) event.title = title;
     if (description !== undefined) event.description = description;
-    if (startDate !== undefined) event.startDate = new Date(startDate);
-    if (endDate !== undefined) event.endDate = new Date(endDate);
     if (location !== undefined) event.location = location;
-    if (capacity !== undefined) event.capacity = Number(capacity);
     if (category !== undefined) event.category = category;
     if (rules !== undefined) event.rules = rules;
 
-    let keepImages: string[] = [];
-
-    if (existingImages) {
-      try {
-        keepImages = Array.isArray(existingImages)
-          ? existingImages
-          : JSON.parse(existingImages);
-      } catch {
-        keepImages = [];
+    if (capacity !== undefined) {
+      const parsed = Number(capacity);
+      if (isNaN(parsed)) {
+        return res.status(400).json({ message: 'Invalid capacity' });
       }
+      event.capacity = parsed;
+    }
+
+    if (isFree !== undefined) {
+      event.isFree = isFree === 'true' || isFree === true;
+      event.price = event.isFree ? 0 : Number(price || 0);
+    }
+
+    if (startDate !== undefined) {
+      const d = new Date(startDate);
+      if (isNaN(d.getTime())) {
+        return res.status(400).json({ message: 'Invalid startDate' });
+      }
+      event.startDate = d;
+    }
+
+    if (endDate !== undefined) {
+      const d = new Date(endDate);
+      if (isNaN(d.getTime())) {
+        return res.status(400).json({ message: 'Invalid endDate' });
+      }
+      event.endDate = d;
+    }
+
+    let keepImages: string[] = [];
+    if (existingImages) {
+      keepImages = Array.isArray(existingImages)
+        ? existingImages
+        : JSON.parse(existingImages);
     }
 
     const imagesToDelete = event.image.filter(
       (img) => !keepImages.includes(img.imageUrl),
     );
 
-    if (imagesToDelete.length > 0) {
-      await getEventRepository.manager.remove(imagesToDelete);
-    }
-
     const files = req.files as Express.Multer.File[] | undefined;
 
-    if (files && files.length > 0) {
-      for (const file of files) {
-        const imageUrl = await uploadEventImage(file);
+    await appDataSource.transaction(async (manager) => {
+      if (imagesToDelete.length > 0) {
+        await manager.remove(imagesToDelete);
+      }
 
-        const image = getImageRepository.create({
-          imageUrl,
-          event,
-        });
+      await manager.save(event);
 
-        await getImageRepository.save(image);
+      if (files && files.length > 0) {
+        for (const file of files) {
+          const imageUrl = await uploadEventImage(file);
+
+          const image = getImageRepository.create({
+            imageUrl,
+            event,
+          });
+
+          await manager.save(image);
+        }
+      }
+    });
+
+    for (const img of imagesToDelete) {
+      try {
+        const key = img.imageUrl.replace(`${process.env.R2_PUBLIC_URL}/`, '');
+
+        await r2.send(
+          new DeleteObjectCommand({
+            Bucket: process.env.R2_BUCKET_NAME!,
+            Key: key,
+          }),
+        );
+      } catch (err) {
+        logger.error({ err, img }, 'Failed to delete image from R2');
       }
     }
-
-    await getEventRepository.save(event);
 
     return res.status(200).json({
       success: true,

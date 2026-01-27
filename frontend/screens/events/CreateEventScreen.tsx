@@ -60,7 +60,7 @@ export default function CreateEventScreen() {
       form.append('description', description);
       images.forEach((uri, index) => {
         form.append('images', {
-          uri,
+          uri: uri.startsWith('file://') ? uri : `file://${uri}`,
           name: `image_${index}.jpg`,
           type: 'image/jpeg',
         } as any);
