@@ -317,3 +317,53 @@ export const updateEvent = async (req: AuthReq, res: Response) => {
     });
   }
 };
+export const cancelEvent = async (req: AuthReq, res: Response) => {
+  try {
+    const eventId = req.params.id;
+    const userId = req.user?.id;
+
+    if (!userId) {
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
+
+    const event = await getEventRepository.findOne({
+      where: { id: eventId },
+      relations: ['user'],
+    });
+
+    if (!event) {
+      return res.status(404).json({ message: 'Event not found' });
+    }
+
+    if (event.user.id !== userId) {
+      return res.status(403).json({ message: 'Forbidden' });
+    }
+
+    if (event.status === 'canceled') {
+      return res.status(400).json({ message: 'Event already canceled' });
+    }
+
+    if (event.endDate && new Date(event.endDate) < new Date()) {
+      return res.status(400).json({ message: 'Cannot cancel a past event' });
+    }
+
+    event.status = 'canceled';
+    await getEventRepository.save(event);
+    if (event.status === 'canceled') {
+      return res.status(400).json({ message: 'Event already canceled' });
+    }
+console.log('EVENT STATUS:', event.status);
+
+    return res.status(200).json({
+      success: true,
+      message: 'Event canceled',
+      event,
+    });
+  } catch (err) {
+    logger.error({ err }, 'Error in cancelEvent');
+    return res.status(500).json({
+      success: false,
+      message: 'Something went wrong',
+    });
+  }
+};

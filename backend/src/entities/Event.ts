@@ -54,7 +54,7 @@ export class Events {
   rules?: string;
 
   @Column({ default: 'draft' })
-  status!: 'draft' | 'published' | 'cancelled';
+  status!: 'draft' | 'published' | 'canceled';
 
   @CreateDateColumn({ type: 'timestamptz' })
   createdAt!: Date;

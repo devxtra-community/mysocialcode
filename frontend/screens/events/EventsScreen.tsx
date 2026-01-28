@@ -42,12 +42,21 @@ export default function EventsScreen() {
     try {
       const res = await api.get('/event/my-events');
       if (res.data.success) {
-        setEvents(res.data.events);
+        setEvents(res.data?.events);
       }
     } catch (err) {
       console.log('Failed to load events', err);
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function cancelEvent(eventId: string) {
+    try {
+      await api.post(`/event/cancel/${eventId}`);
+      fetchEvents();
+    } catch (err) {
+      console.log('Failed to cancel event', err);
     }
   }
 
@@ -97,14 +106,33 @@ export default function EventsScreen() {
                     <Text style={styles.eventLocation}>{event.location}</Text>
                     <Text style={styles.eventDate}>{event.startDate}</Text>
 
-                    <Pressable
-                      onPress={(e) => {
-                        e.stopPropagation();
-                        router.push(`/(tabs)/events/update/${event.id}`);
-                      }}
-                    >
-                      <Text style={styles.eventUpdate}>Update</Text>
-                    </Pressable>
+                    <View style={{ flexDirection: 'row', gap: 8 }}>
+                      <Pressable
+                        onPress={(e) => {
+                          e.stopPropagation();
+                          router.push(`/(tabs)/events/update/${event.id}`);
+                        }}
+                      >
+                        <Text style={styles.eventUpdate}>Update</Text>
+                      </Pressable>
+
+                      {event.status !== 'canceled' && (
+                        <Pressable
+                          onPress={(e) => {
+                            e.stopPropagation();
+                            cancelEvent(event.id);
+                          }}
+                        >
+                          <Text style={styles.eventCancel}>Cancel</Text>
+
+                          {event.status === 'canceled' && (
+                            <Text style={{ color: '#fca5a5', marginTop: 4 }}>
+                              Canceled
+                            </Text>
+                          )}
+                        </Pressable>
+                      )}
+                    </View>
                   </View>
                 </ImageBackground>
               </Card>
@@ -206,6 +234,17 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     paddingHorizontal: 12,
     backgroundColor: '#3b82f6',
+    borderRadius: 6,
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600',
+    alignSelf: 'flex-start',
+  },
+  eventCancel: {
+    marginTop: 8,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    backgroundColor: '#ef4444', // red
     borderRadius: 6,
     color: '#fff',
     fontSize: 14,
