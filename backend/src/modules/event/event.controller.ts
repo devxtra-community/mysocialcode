@@ -352,7 +352,7 @@ export const cancelEvent = async (req: AuthReq, res: Response) => {
     if (event.status === 'canceled') {
       return res.status(400).json({ message: 'Event already canceled' });
     }
-console.log('EVENT STATUS:', event.status);
+    console.log('EVENT STATUS:', event.status);
 
     return res.status(200).json({
       success: true,

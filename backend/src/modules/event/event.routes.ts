@@ -29,5 +29,5 @@ eventRouter.put(
   upload.array('images', 4),
   updateEvent,
 );
-eventRouter.post("/cancel/:id", requireAuth, cancelEvent);
+eventRouter.post('/cancel/:id', requireAuth, cancelEvent);
 export default eventRouter;
