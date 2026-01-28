@@ -6,7 +6,7 @@ import {
   storeTokens,
 } from '@/services/token/token.storage';
 const api = axios.create({
-  baseURL: 'http://10.10.3.108:4000',
+  baseURL: 'http://192.168.2.117:4000',
 
   timeout: 20000,
 });
@@ -29,7 +29,7 @@ api.interceptors.response.use(
         const refreshToken = await getRefreshToken();
 
         const res = await axios.post(
-          'http://10.10.3.108:4000/auth/refresh-token',
+          'http://192.168.2.117:4000/auth/refresh-token',
           { refreshToken },
         );
 
@@ -53,3 +53,4 @@ api.interceptors.response.use(
 );
 
 export default api;
+10

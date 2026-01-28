@@ -53,10 +53,12 @@ export default function EventsScreen() {
 
   async function cancelEvent(eventId: string) {
     try {
-      await api.post(`/event/cancel/${eventId}`);
-      fetchEvents();
-    } catch (err) {
-      console.log('Failed to cancel event', err);
+      const res = await api.post(`/event/cancel/${eventId}`);
+      if (res.data?.success) {
+        fetchEvents();
+      }
+    } catch (err: any) {
+      console.log('Failed to cancel event:', err.response?.data || err.message);
     }
   }
 
@@ -124,13 +126,12 @@ export default function EventsScreen() {
                           }}
                         >
                           <Text style={styles.eventCancel}>Cancel</Text>
-
-                          {event.status === 'canceled' && (
-                            <Text style={{ color: '#fca5a5', marginTop: 4 }}>
-                              Canceled
-                            </Text>
-                          )}
                         </Pressable>
+                      )}
+                      {event.status === 'canceled' && (
+                        <Text style={{ color: '#fca5a5', marginTop: 4 }}>
+                          Canceled
+                        </Text>
                       )}
                     </View>
                   </View>
@@ -240,11 +241,12 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     alignSelf: 'flex-start',
   },
+
   eventCancel: {
     marginTop: 8,
     paddingVertical: 6,
     paddingHorizontal: 12,
-    backgroundColor: '#ef4444', // red
+    backgroundColor: '#ef4444',
     borderRadius: 6,
     color: '#fff',
     fontSize: 14,
