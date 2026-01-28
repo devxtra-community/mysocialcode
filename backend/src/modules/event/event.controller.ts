@@ -341,15 +341,11 @@ export const cancelEvent = async (req: AuthReq, res: Response) => {
     }
 
     if (event.status === 'canceled') {
-      return res
-        .status(400)
-        .json({ message: 'Event already canceled' });
+      return res.status(400).json({ message: 'Event already canceled' });
     }
 
     if (event.endDate && new Date(event.endDate) < new Date()) {
-      return res
-        .status(400)
-        .json({ message: 'Cannot cancel a past event' });
+      return res.status(400).json({ message: 'Cannot cancel a past event' });
     }
 
     event.status = 'canceled';
