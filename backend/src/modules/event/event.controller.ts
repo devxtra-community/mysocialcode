@@ -147,14 +147,14 @@ export const joinEvent = async (req: AuthReq, res: Response) => {
       return res.status(400).json({ message: 'Event is not open for joining' });
     }
 
-    if(new Date(event.endDate) < new Date()) {
+    if (new Date(event.endDate) < new Date()) {
       return res.status(400).json({ message: 'Cannot join a past event' });
     }
 
     if (event.capacity <= 0) {
       return res.status(400).json({ message: 'Event is full' });
     }
-    
+
     const user = await getUserRepository.findOne({
       where: { id: userId },
     });

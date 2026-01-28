@@ -112,9 +112,7 @@ export default function EventsScreen() {
                 key={event.id}
                 disabled={past}
                 style={past && { opacity: 0.6 }}
-                onPress={() =>
-                  router.push(`/(tabs)/events/${event.id}`)
-                }
+                onPress={() => router.push(`/(tabs)/events/${event.id}`)}
               >
                 <Card style={styles.eventCard}>
                   <ImageBackground
@@ -131,21 +129,15 @@ export default function EventsScreen() {
                       )}
 
                       <Text style={styles.eventTitle}>{event.title}</Text>
-                      <Text style={styles.eventLocation}>
-                        {event.location}
-                      </Text>
-                      <Text style={styles.eventDate}>
-                        {event.startDate}
-                      </Text>
+                      <Text style={styles.eventLocation}>{event.location}</Text>
+                      <Text style={styles.eventDate}>{event.startDate}</Text>
 
                       <View style={{ flexDirection: 'row', gap: 8 }}>
                         {!past && (
                           <Pressable
                             onPress={(e) => {
                               e.stopPropagation();
-                              router.push(
-                                `/(tabs)/events/update/${event.id}`
-                              );
+                              router.push(`/(tabs)/events/update/${event.id}`);
                             }}
                           >
                             <Text style={styles.eventUpdate}>Update</Text>
