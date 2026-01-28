@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
+import { logger } from '../utils/logger';
 
 interface AuthRequest extends Request {
   user?: {
@@ -28,6 +29,7 @@ export const requireAuth = (
     req.user = { id: decoded.userId };
     next();
   } catch (err) {
+    logger.error('catch in requre auth worked');
     return res
       .status(401)
       .json({ message: 'Invalid or expired token', error: err });
