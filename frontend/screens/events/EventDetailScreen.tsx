@@ -1,4 +1,4 @@
-import { View, Text, Pressable, StyleSheet } from 'react-native';
+import { View, Text, Pressable, StyleSheet, ScrollView } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import EventDetailSkeleton from '@/components/comps/skeletonEvent';
@@ -15,6 +15,7 @@ interface EventType {
   price: string;
   status: string;
   rules: string;
+  capacity: number;
 }
 
 export default function EventDetailScreen() {
@@ -22,20 +23,39 @@ export default function EventDetailScreen() {
   const [showConfirm, setShowConfirm] = useState(false);
 
   const { id } = useLocalSearchParams();
+  const eventId = Array.isArray(id) ? id[0] : id;
 
   useEffect(() => {
+    if (!eventId) return;
     fetchEvent();
-  }, [id]);
+  }, [eventId]);
 
   async function fetchEvent() {
-    const res = await api.get(`/event/getEvent/${id}`);
+    const res = await api.get(`/event/getEvent/${eventId}`);
     setEvent(res.data.event);
   }
 
   async function handleJoin() {
-    console.log('Join event:', event?.id);
-    const joinRes = await api.post(`/event/join-event/${id}`);
-    console.log(joinRes);
+    try {
+      await api.post(`/event/join-event/${eventId}`);
+
+      setEvent((prev) =>
+        prev
+          ? {
+              ...prev,
+              capacity: prev.capacity - 1,
+              status: 'joined',
+            }
+          : prev,
+      );
+
+      setShowConfirm(false);
+
+      alert('Successfully joined event');
+    } catch (err: any) {
+      alert(err.response?.data?.message || 'Failed to join event');
+      console.log('Join error:', err.response?.data);
+    }
   }
 
   if (!event) {
@@ -54,8 +74,21 @@ export default function EventDetailScreen() {
         <Text>Category: {event.category}</Text>
         <Text>Status: {event.status}</Text>
       </View>
-      <Pressable style={styles.joinButton} onPress={() => setShowConfirm(true)}>
-        <Text style={styles.joinText}>Join Event</Text>
+      <Pressable
+        style={[
+          styles.joinButton,
+          event.status !== 'published' && { opacity: 0.5 },
+        ]}
+        disabled={event.status !== 'published'}
+        onPress={() => setShowConfirm(true)}
+      >
+        <Text style={styles.joinText}>
+          {event.status === 'published'
+            ? 'Join Event'
+            : event.status === 'joined'
+              ? 'Joined'
+              : 'Not Available'}
+        </Text>
       </Pressable>
       {showConfirm && (
         <View style={styles.overlay}>
@@ -64,8 +97,11 @@ export default function EventDetailScreen() {
             <Text style={styles.confirmText}>
               Are you sure you want to join this event?
             </Text>
-            <Text>thsese are the rules</Text>
-            <Text>{event.rules}</Text>
+            <Text style={styles.confirmText}>These are the rules</Text>
+
+            <ScrollView style={{ maxHeight: 200 }}>
+              <Text>{event.rules}</Text>
+            </ScrollView>
 
             <View style={styles.confirmActions}>
               <Pressable
