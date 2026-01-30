@@ -45,7 +45,7 @@ export function Skeleton({
       -1, // Loop infinitely
       true, // Set to true to automatically reverse the animation (yoyo effect)
     );
-  }, []); // Use an empty dependency array as the shared value object is stable
+  }, [opacity]); // Use an empty dependency array as the shared value object is stable
 
   return (
     <Animated.View

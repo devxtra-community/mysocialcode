@@ -29,7 +29,7 @@ export const Text = forwardRef<RNText, TextProps>(
   ) => {
     const mutedForeground = useColor('mutedForeground');
     const textColor = useColor('text', { light: lightColor, dark: darkColor });
-    const muted = useColor('mutedForeground');
+    // const muted = useColor('mutedForeground');
 
     const getTextStyle = (): TextStyle => {
       const baseStyle: TextStyle = {

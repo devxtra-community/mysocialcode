@@ -1,6 +1,13 @@
 import { PutObjectCommand } from '@aws-sdk/client-s3';
 import { r2 } from '../../utils/r2';
+import dotenv from 'dotenv';
+
+dotenv.config({ path: '.env' });
+
+console.log('R2_PUBLIC_URL =', process.env.R2_PUBLIC_URL);
+
 export async function uploadEventImage(file: Express.Multer.File) {
+  console.log('R2_PUBLIC_URL at startup:', process.env.R2_PUBLIC_URL);
   const key = `event/${Date.now()}-${file.originalname}`;
 
   await r2.send(
@@ -13,4 +20,8 @@ export async function uploadEventImage(file: Express.Multer.File) {
   );
 
   return `${process.env.R2_PUBLIC_URL}/${key}`;
+
+  if (!process.env.R2_PUBLIC_URL) {
+    throw new Error('R2_PUBLIC_URL is not defined');
+  }
 }

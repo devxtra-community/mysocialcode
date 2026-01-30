@@ -9,11 +9,15 @@ import authRouter from './modules/auth/auth.routes';
 import userRouter from './modules/user/user.routes';
 import eventRouter from './modules/event/event.routes';
 import path from 'path';
+import { connectRedis } from './utils/redis';
+import ticketRouter from './modules/tickets/ticket.route';
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.disable('etag');
+connectRedis()
 app.use(
   pinoHttp({
     logger,
@@ -33,6 +37,7 @@ app.use('/health', Healthrouter);
 app.use('/auth', authRouter);
 app.use('/event', eventRouter);
 app.use('/user', userRouter);
+app.use('/ticket',ticketRouter)
 app.use(notFound);
 app.use(errorHandler);
 export default app;

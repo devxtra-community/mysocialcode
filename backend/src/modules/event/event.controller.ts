@@ -1,10 +1,14 @@
 import { Request, Response } from 'express';
 import { createEventService } from './event.service';
 import { logger } from '../../utils/logger';
-import { getEventRepository } from './event.repository';
+import { getEventRepository, getImageRepository } from './event.repository';
 import { getTicketRepository } from '../tickets/ticket.repository';
 import { v4 as uuid } from 'uuid';
 import { getUserRepository } from '../user/user.repository';
+// import { EventImage } from '../../entities/EventImage';
+import { uploadEventImage } from './event.upload';
+import { appDataSource } from '../../data-source';
+import { redisClient } from '../../utils/redis';
 
 export interface AuthReq extends Request {
   user?: {
@@ -61,21 +65,57 @@ export const createEvent = async (req: AuthReq, res: Response) => {
 
 export const getAllEvents = async (req: AuthReq, res: Response) => {
   try {
-    const events = await getEventRepository.find({
-      where: {
-        status: 'published',
-      },
-      relations: ['image'],
-      order: { startDate: 'ASC' },
-    });
-    return res.status(200).json({
-      message: 'fetched data successfully',
+    const limit = Number(req.query.limit) || 10;
+    const cursor = req.query.cursor as string | undefined;
+    const cursorId = req.query.id as string | undefined;
+    const cacheKey = `events:limit=${limit}:cursor=${cursor || 'none'}:id=${cursorId || 'none'}`;
+
+    const cachedData = await redisClient.get(cacheKey);
+    if (cachedData) {
+      logger.info('Served from Redis');
+      return res.status(200).json(JSON.parse(cachedData));
+    }
+
+    const qb = getEventRepository
+      .createQueryBuilder('event')
+      .leftJoinAndSelect('event.image', 'image')
+      .where('event.status = :status', { status: 'published' });
+
+    if (cursor && cursorId) {
+      qb.andWhere(
+        `(event.startDate > :cursor OR (event.startDate = :cursor AND event.id > :id))`,
+        { cursor, id: cursorId }
+      );
+    }
+
+    qb.orderBy('event.startDate', 'ASC')
+      .addOrderBy('event.id', 'ASC')
+      .take(limit + 1);
+
+    const events = await qb.getMany();
+
+    let hasMore = false;
+    if (events.length > limit) {
+      hasMore = true;
+      events.pop();
+    }
+
+    const lastEvent = events[events.length - 1];
+
+        const responseData = {
       success: true,
-      events: events,
-    });
+      events,
+      hasMore,
+      nextCursor: lastEvent
+        ? { startDate: lastEvent.startDate, id: lastEvent.id }
+        : null,
+    };
+
+    await redisClient.setEx(cacheKey, 60, JSON.stringify(responseData));
+
+    return res.status(200).json(responseData);
   } catch (err) {
-    logger.error({ err }, 'catch in get all events workded');
-    res.status(400).json({ message: 'failed to fetch events', error: err });
+    res.status(400).json({ success: false, message: 'failed to fetch events' });
   }
 };
 
@@ -140,6 +180,14 @@ export const joinEvent = async (req: AuthReq, res: Response) => {
       return res.status(404).json({ message: 'Event not found' });
     }
 
+    if (event.status !== 'published') {
+      return res.status(400).json({ message: 'Event is not open for joining' });
+    }
+
+    if (new Date(event.endDate) < new Date()) {
+      return res.status(400).json({ message: 'Cannot join a past event' });
+    }
+
     if (event.capacity <= 0) {
       return res.status(400).json({ message: 'Event is full' });
     }
@@ -190,5 +238,173 @@ export const joinEvent = async (req: AuthReq, res: Response) => {
     return res
       .status(500)
       .json({ message: 'Something went wrong', error: err });
+  }
+};
+
+export const updateEvent = async (req: AuthReq, res: Response) => {
+  try {
+    const eventId = req.params.id;
+    const userId = req.user?.id;
+
+    if (!userId) {
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
+
+    const event = await getEventRepository.findOne({
+      where: { id: eventId },
+      relations: ['image', 'user'], // ✅ FIXED
+    });
+
+    if (!event) {
+      return res.status(404).json({ message: 'Event not found' });
+    }
+
+    if (event.user.id !== userId) {
+      return res.status(403).json({ message: 'Forbidden' });
+    }
+
+    const {
+      title,
+      description,
+      startDate,
+      endDate,
+      location,
+      capacity,
+      category,
+      rules,
+      existingImages,
+      isFree,
+      price,
+    } = req.body;
+
+    if (title !== undefined) event.title = title;
+    if (description !== undefined) event.description = description;
+    if (location !== undefined) event.location = location;
+    if (category !== undefined) event.category = category;
+    if (rules !== undefined) event.rules = rules;
+
+    if (capacity !== undefined) {
+      const parsed = Number(capacity);
+      if (isNaN(parsed) || parsed < 0) {
+        return res.status(400).json({ message: 'Invalid capacity' });
+      }
+      event.capacity = parsed;
+    }
+
+    if (isFree !== undefined) {
+      event.isFree = isFree === 'true' || isFree === true;
+      event.price = event.isFree ? 0 : Number(price || 0);
+    }
+
+    if (startDate !== undefined) {
+      const d = new Date(startDate);
+      if (isNaN(d.getTime())) {
+        return res.status(400).json({ message: 'Invalid startDate' });
+      }
+      event.startDate = d;
+    }
+
+    if (endDate !== undefined) {
+      const d = new Date(endDate);
+      if (isNaN(d.getTime())) {
+        return res.status(400).json({ message: 'Invalid endDate' });
+      }
+      event.endDate = d;
+    }
+
+    if (event.startDate && event.endDate && event.endDate < event.startDate) {
+      return res
+        .status(400)
+        .json({ message: 'End date cannot be before start date' });
+    }
+
+    // ✅ Image handling
+    let keepImages: string[] = [];
+    if (existingImages) {
+      keepImages = Array.isArray(existingImages)
+        ? existingImages
+        : JSON.parse(existingImages);
+    }
+
+    const imagesToDelete = event.image.filter(
+      (img) => !keepImages.includes(img.imageUrl),
+    );
+
+    const files = req.files as Express.Multer.File[] | undefined;
+
+    await appDataSource.transaction(async (manager) => {
+      if (imagesToDelete.length) {
+        await manager.remove(imagesToDelete);
+      }
+
+      await manager.save(event);
+
+      if (files?.length) {
+        for (const file of files) {
+          const imageUrl = await uploadEventImage(file);
+          const image = getImageRepository.create({ imageUrl, event });
+          await manager.save(image);
+        }
+      }
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: 'Event updated',
+      event,
+    });
+  } catch (err) {
+    logger.error({ err }, 'Error in updateEvent');
+    return res.status(500).json({
+      success: false,
+      message: 'Something went wrong',
+    });
+  }
+};
+
+export const cancelEvent = async (req: AuthReq, res: Response) => {
+  try {
+    const eventId = req.params.id;
+    const userId = req.user?.id;
+
+    if (!userId) {
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
+
+    const event = await getEventRepository.findOne({
+      where: { id: eventId },
+      relations: ['user'],
+    });
+
+    if (!event) {
+      return res.status(404).json({ message: 'Event not found' });
+    }
+
+    if (event.user.id !== userId) {
+      return res.status(403).json({ message: 'Forbidden' });
+    }
+
+    if (event.status === 'canceled') {
+      return res.status(400).json({ message: 'Event already canceled' });
+    }
+
+    if (event.endDate && new Date(event.endDate) < new Date()) {
+      return res.status(400).json({ message: 'Cannot cancel a past event' });
+    }
+
+    event.status = 'canceled';
+    await getEventRepository.save(event);
+
+    return res.status(200).json({
+      success: true,
+      message: 'Event canceled',
+      event,
+    });
+  } catch (err) {
+    logger.error({ err }, 'Error in cancelEvent');
+    return res.status(500).json({
+      success: false,
+      message: 'Something went wrong',
+    });
   }
 };

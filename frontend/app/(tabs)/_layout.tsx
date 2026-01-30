@@ -56,6 +56,8 @@ export default function TabLayout() {
 
       <Tabs.Screen name="events/create" options={{ href: null }} />
       <Tabs.Screen name="tickets/ticket" options={{ href: null }} />
+      <Tabs.Screen name="events/update/[id]" options={{href:null}}/>
+      <Tabs.Screen name='events/[id]/scan' options={{href:null}}/>
     </Tabs>
   );
 }
