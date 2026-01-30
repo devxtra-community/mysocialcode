@@ -1,5 +1,5 @@
 import { View, Text, Pressable, StyleSheet, ScrollView } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import EventDetailSkeleton from '@/components/comps/skeletonEvent';
 import api from '@/lib/api';
@@ -89,6 +89,9 @@ export default function EventDetailScreen() {
               ? 'Joined'
               : 'Not Available'}
         </Text>
+      </Pressable>
+      <Pressable onPress={() => router.push(`/(tabs)/events/${id}/scan`)}>
+        <Text>scan for joinees</Text>
       </Pressable>
       {showConfirm && (
         <View style={styles.overlay}>

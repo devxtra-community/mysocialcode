@@ -14,6 +14,7 @@ import { router } from 'expo-router';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import api from '@/lib/api';
+// import { FlatList } from 'react-native';
 
 /* ---------- Skeleton ---------- */
 
@@ -42,17 +43,37 @@ function isPastEvent(endDate: string) {
 
 export default function EventsScreen() {
   const [events, setEvents] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const [cursor, setCursor] = useState<{
+    startDate: string;
+    id: string;
+  } | null>(null);
 
   useEffect(() => {
     fetchEvents();
   }, []);
 
   async function fetchEvents() {
+    if (loading || !hasMore) return;
+
+    setLoading(true);
+
     try {
-      const res = await api.get('/event/my-events');
+      let url = '/event/my-events?limit=10';
+
+      if (cursor) {
+        url += `&cursor=${cursor.startDate}&id=${cursor.id}`;
+      }
+
+      const res = await api.get(url);
+      console.log(`this is the fetch event api`);
+      console.log(res.data);
+
       if (res.data?.success) {
-        setEvents(res.data.events);
+        setEvents((prev) => [...prev, ...res.data.events]);
+        setHasMore(res.data.hasMore);
+        setCursor(res.data.nextCursor);
       }
     } catch (err) {
       console.log('Failed to load events', err);
@@ -78,6 +99,11 @@ export default function EventsScreen() {
       <View style={styles.header}>
         <View style={styles.headerRow}>
           <Text style={styles.title}>Events</Text>
+          <View>
+            <Pressable onPress={() => router.push('/(tabs)/tickets/ticket')}>
+              <Text style={styles.createText}>My tickets</Text>
+            </Pressable>
+          </View>
 
           <Pressable onPress={() => router.push('/(tabs)/events/create')}>
             <Text style={styles.createText}>Create</Text>

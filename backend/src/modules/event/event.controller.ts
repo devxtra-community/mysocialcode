@@ -8,6 +8,7 @@ import { getUserRepository } from '../user/user.repository';
 // import { EventImage } from '../../entities/EventImage';
 import { uploadEventImage } from './event.upload';
 import { appDataSource } from '../../data-source';
+import { Not } from 'typeorm/find-options/operator/Not';
 
 export interface AuthReq extends Request {
   user?: {
@@ -64,21 +65,38 @@ export const createEvent = async (req: AuthReq, res: Response) => {
 
 export const getAllEvents = async (req: AuthReq, res: Response) => {
   try {
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: 'Unauthorized',
+      });
+    }
+
+    const userId: string = req.user.id;
+
     const events = await getEventRepository.find({
       where: {
         status: 'published',
+        user: {
+          id: Not(userId),
+        },
       },
-      relations: ['image'],
+      relations: ['image', 'user'],
       order: { startDate: 'ASC' },
     });
+
     return res.status(200).json({
-      message: 'fetched data successfully',
+      message: 'Fetched data successfully',
       success: true,
-      events: events,
+      events,
     });
   } catch (err) {
-    logger.error({ err }, 'catch in get all events workded');
-    res.status(400).json({ message: 'failed to fetch events', error: err });
+    logger.error({ err }, 'Error in getAllEvents');
+    return res.status(400).json({
+      message: 'Failed to fetch events',
+      success: false,
+      error: err,
+    });
   }
 };
 

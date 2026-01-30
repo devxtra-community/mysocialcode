@@ -1,62 +1,3 @@
-// import { View, Text, StyleSheet, Pressable } from 'react-native';
-
-// export default function HomeScreen() {
-//   return (
-//     <View style={styles.container}>
-//       <View style={styles.header}>
-//         <Text style={styles.title}>Home</Text>
-//       </View>
-//       <View style={styles.section}>
-//         <Text style={styles.sectionTitle}>New Events</Text>
-//         <Text style={styles.placeholder}>New events will appear here.</Text>
-//       </View>
-
-//       <View style={styles.section}>
-//         <Text style={styles.sectionTitle}>Popular Events</Text>
-//         <Text style={styles.placeholder}>Popular events will appear here.</Text>
-//       </View>
-//     </View>
-//   );
-// }
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     padding: 16,
-//     backgroundColor: '#fff',
-//   },
-//   header: {
-//     marginBottom: 16,
-//   },
-//   title: {
-//     fontSize: 22,
-//     fontWeight: '600',
-//   },
-//   searchBox: {
-//     height: 44,
-//     borderRadius: 8,
-//     backgroundColor: '#f3f4f6',
-//     justifyContent: 'center',
-//     paddingHorizontal: 12,
-//     marginBottom: 24,
-//   },
-//   searchText: {
-//     color: '#6b7280',
-//     fontSize: 14,
-//   },
-//   section: {
-//     marginBottom: 24,
-//   },
-//   sectionTitle: {
-//     fontSize: 16,
-//     fontWeight: '600',
-//     marginBottom: 8,
-//   },
-//   placeholder: {
-//     fontSize: 14,
-//     color: '#6b7280',
-//   },
-// });
-
 import { useEffect, useState } from 'react';
 import {
   View,
@@ -73,6 +14,7 @@ import { router } from 'expo-router';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import api from '@/lib/api';
+import { FlatList } from 'react-native';
 
 function HomeSkeleton() {
   return (
@@ -90,17 +32,37 @@ function HomeSkeleton() {
 
 export default function HomeScreen() {
   const [events, setEvents] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const [cursor, setCursor] = useState<{
+    startDate: string;
+    id: string;
+  } | null>(null);
 
   useEffect(() => {
     fetchEvents();
   }, []);
 
   async function fetchEvents() {
+    if (loading || !hasMore) return;
+
+    setLoading(true);
+
     try {
-      const res = await api.get('/event/all-events');
+      let url = '/event/all-events?limit=10';
+
+      if (cursor) {
+        url += `&cursor=${cursor.startDate}&id=${cursor.id}`;
+      }
+
+      const res = await api.get(url);
+      console.log(`this is the fetch event api`);
+      console.log(res.data);
+
       if (res.data.success) {
-        setEvents(res.data.events);
+        setEvents((prev) => [...prev, ...res.data.events]);
+        setHasMore(res.data.hasMore);
+        setCursor(res.data.nextCursor);
       }
     } catch (err) {
       console.log('Failed to load events', err);
@@ -124,38 +86,40 @@ export default function HomeScreen() {
         </View>
       </View>
 
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        <Text style={styles.sectionTitle}>All Events</Text>
-
-        {loading &&
-          Array.from({ length: 3 }).map((_, i) => <HomeSkeleton key={i} />)}
-
-        {!loading && events.length === 0 && (
-          <Text style={styles.emptyText}>No events found</Text>
+      <FlatList
+        data={events}
+        keyExtractor={(item) => item.id}
+        contentContainerStyle={styles.scrollContent}
+        onEndReached={fetchEvents}
+        onEndReachedThreshold={0.6}
+        ListHeaderComponent={
+          <Text style={styles.sectionTitle}>All Events</Text>
+        }
+        ListFooterComponent={
+          loading ? (
+            <HomeSkeleton />
+          ) : !hasMore ? (
+            <Text style={styles.emptyText}>No more events</Text>
+          ) : null
+        }
+        renderItem={({ item: event }) => (
+          <Pressable onPress={() => router.push(`/(tabs)/events/${event.id}`)}>
+            <Card style={styles.eventCard}>
+              <ImageBackground
+                source={{ uri: event.image?.[0]?.imageUrl }}
+                style={styles.eventImage}
+                imageStyle={styles.eventImageRadius}
+              >
+                <View style={styles.overlay}>
+                  <Text style={styles.eventTitle}>{event.title}</Text>
+                  <Text style={styles.eventLocation}>{event.location}</Text>
+                  <Text style={styles.eventDate}>{event.startDate}</Text>
+                </View>
+              </ImageBackground>
+            </Card>
+          </Pressable>
         )}
-
-        {!loading &&
-          events.map((event) => (
-            <Pressable
-              key={event.id}
-              onPress={() => router.push(`/(tabs)/events/${event.id}`)}
-            >
-              <Card style={styles.eventCard}>
-                <ImageBackground
-                  source={{ uri: event.image?.[0]?.imageUrl }}
-                  style={styles.eventImage}
-                  imageStyle={styles.eventImageRadius}
-                >
-                  <View style={styles.overlay}>
-                    <Text style={styles.eventTitle}>{event.title}</Text>
-                    <Text style={styles.eventLocation}>{event.location}</Text>
-                    <Text style={styles.eventDate}>{event.startDate}</Text>
-                  </View>
-                </ImageBackground>
-              </Card>
-            </Pressable>
-          ))}
-      </ScrollView>
+      />
     </SafeAreaView>
   );
 }
