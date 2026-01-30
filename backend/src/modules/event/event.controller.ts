@@ -84,7 +84,7 @@ export const getAllEvents = async (req: AuthReq, res: Response) => {
     if (cursor && cursorId) {
       qb.andWhere(
         `(event.startDate > :cursor OR (event.startDate = :cursor AND event.id > :id))`,
-        { cursor, id: cursorId }
+        { cursor, id: cursorId },
       );
     }
 
@@ -102,7 +102,7 @@ export const getAllEvents = async (req: AuthReq, res: Response) => {
 
     const lastEvent = events[events.length - 1];
 
-        const responseData = {
+    const responseData = {
       success: true,
       events,
       hasMore,

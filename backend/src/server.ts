@@ -22,7 +22,6 @@ const startServer = async () => {
 
     app.listen(PORT, () => {
       logger.info(`server started dont need worry on port ${PORT}`);
-      
     });
   } catch (err) {
     logger.error({ err }, 'failed to start server');

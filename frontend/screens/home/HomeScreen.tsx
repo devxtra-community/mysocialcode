@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import {
   View,
@@ -17,7 +16,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 import api from '@/lib/api';
 import { FlatList } from 'react-native';
 
-
 function HomeSkeleton() {
   return (
     <Card style={styles.skeletonCard}>
@@ -34,43 +32,44 @@ function HomeSkeleton() {
 
 export default function HomeScreen() {
   const [events, setEvents] = useState<any[]>([]);
-const [loading, setLoading] = useState(false);
-const [hasMore, setHasMore] = useState(true);
-const [cursor, setCursor] = useState<{ startDate: string; id: string } | null>(null);
-
+  const [loading, setLoading] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const [cursor, setCursor] = useState<{
+    startDate: string;
+    id: string;
+  } | null>(null);
 
   useEffect(() => {
     fetchEvents();
   }, []);
 
- async function fetchEvents() {
-  if (loading || !hasMore) return;
+  async function fetchEvents() {
+    if (loading || !hasMore) return;
 
-  setLoading(true);
+    setLoading(true);
 
-  try {
-    let url = '/event/all-events?limit=10';
+    try {
+      let url = '/event/all-events?limit=10';
 
-    if (cursor) {
-      url += `&cursor=${cursor.startDate}&id=${cursor.id}`;
-    }
+      if (cursor) {
+        url += `&cursor=${cursor.startDate}&id=${cursor.id}`;
+      }
 
-    const res = await api.get(url);
+      const res = await api.get(url);
       console.log(`this is the fetch event api`);
-    console.log(res.data);
+      console.log(res.data);
 
-    if (res.data.success) {
-      setEvents((prev) => [...prev, ...res.data.events]);
-      setHasMore(res.data.hasMore);
-      setCursor(res.data.nextCursor);
+      if (res.data.success) {
+        setEvents((prev) => [...prev, ...res.data.events]);
+        setHasMore(res.data.hasMore);
+        setCursor(res.data.nextCursor);
+      }
+    } catch (err) {
+      console.log('Failed to load events', err);
+    } finally {
+      setLoading(false);
     }
-  } catch (err) {
-    console.log('Failed to load events', err);
-  } finally {
-    setLoading(false);
   }
-}
-
 
   return (
     <SafeAreaView style={styles.container}>
@@ -88,36 +87,39 @@ const [cursor, setCursor] = useState<{ startDate: string; id: string } | null>(n
       </View>
 
       <FlatList
-  data={events}
-  keyExtractor={(item) => item.id}
-  contentContainerStyle={styles.scrollContent}
-  onEndReached={fetchEvents}
-  onEndReachedThreshold={0.6}
-  ListHeaderComponent={<Text style={styles.sectionTitle}>All Events</Text>}
-  ListFooterComponent={
-    loading ? <HomeSkeleton /> : !hasMore ? <Text style={styles.emptyText}>No more events</Text> : null
-  }
-  renderItem={({ item: event }) => (
-    <Pressable
-      onPress={() => router.push(`/(tabs)/events/${event.id}`)}
-    >
-      <Card style={styles.eventCard}>
-        <ImageBackground
-          source={{ uri: event.image?.[0]?.imageUrl }}
-          style={styles.eventImage}
-          imageStyle={styles.eventImageRadius}
-        >
-          <View style={styles.overlay}>
-            <Text style={styles.eventTitle}>{event.title}</Text>
-            <Text style={styles.eventLocation}>{event.location}</Text>
-            <Text style={styles.eventDate}>{event.startDate}</Text>
-          </View>
-        </ImageBackground>
-      </Card>
-    </Pressable>
-  )}
-/>
-
+        data={events}
+        keyExtractor={(item) => item.id}
+        contentContainerStyle={styles.scrollContent}
+        onEndReached={fetchEvents}
+        onEndReachedThreshold={0.6}
+        ListHeaderComponent={
+          <Text style={styles.sectionTitle}>All Events</Text>
+        }
+        ListFooterComponent={
+          loading ? (
+            <HomeSkeleton />
+          ) : !hasMore ? (
+            <Text style={styles.emptyText}>No more events</Text>
+          ) : null
+        }
+        renderItem={({ item: event }) => (
+          <Pressable onPress={() => router.push(`/(tabs)/events/${event.id}`)}>
+            <Card style={styles.eventCard}>
+              <ImageBackground
+                source={{ uri: event.image?.[0]?.imageUrl }}
+                style={styles.eventImage}
+                imageStyle={styles.eventImageRadius}
+              >
+                <View style={styles.overlay}>
+                  <Text style={styles.eventTitle}>{event.title}</Text>
+                  <Text style={styles.eventLocation}>{event.location}</Text>
+                  <Text style={styles.eventDate}>{event.startDate}</Text>
+                </View>
+              </ImageBackground>
+            </Card>
+          </Pressable>
+        )}
+      />
     </SafeAreaView>
   );
 }

@@ -11,25 +11,24 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-
 export default function MyTicketsScreen() {
   const [tickets, setTickets] = useState<any[]>([]);
 
   async function fetchTicket() {
-  try {
-    const res = await api.get('/ticket/getMyTickets');
+    try {
+      const res = await api.get('/ticket/getMyTickets');
 
-    if (res.data?.success) {
-      setTickets(res.data.tickets);   
+      if (res.data?.success) {
+        setTickets(res.data.tickets);
+      }
+    } catch (err) {
+      console.log('Failed to fetch tickets', err);
     }
-  } catch (err) {
-    console.log('Failed to fetch tickets', err);
   }
-}
 
-  useEffect(()=>{
-    fetchTicket()
-  },[])
+  useEffect(() => {
+    fetchTicket();
+  }, []);
   const [selectedTicket, setSelectedTicket] = useState<any | null>(null);
 
   const renderTicket = ({ item }: { item: any }) => {
@@ -87,9 +86,7 @@ export default function MyTicketsScreen() {
                   {selectedTicket.event.location}
                 </Text>
                 <Text style={styles.modalSubText}>
-                  {new Date(
-                    selectedTicket.event.startDate,
-                  ).toLocaleString()}
+                  {new Date(selectedTicket.event.startDate).toLocaleString()}
                 </Text>
 
                 <Image

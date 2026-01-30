@@ -90,7 +90,7 @@ export default function EventDetailScreen() {
               : 'Not Available'}
         </Text>
       </Pressable>
-      <Pressable onPress={()=>router.push(`/(tabs)/events/${id}/scan`)}>
+      <Pressable onPress={() => router.push(`/(tabs)/events/${id}/scan`)}>
         <Text>scan for joinees</Text>
       </Pressable>
       {showConfirm && (

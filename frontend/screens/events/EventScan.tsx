@@ -51,7 +51,7 @@ export default function ScanTicketsScreen() {
       <CameraView
         style={StyleSheet.absoluteFillObject}
         barcodeScannerSettings={{
-          barcodeTypes: ['qr'], 
+          barcodeTypes: ['qr'],
         }}
         onBarcodeScanned={handleScan}
       />

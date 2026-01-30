@@ -17,7 +17,7 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.disable('etag');
-connectRedis()
+connectRedis();
 app.use(
   pinoHttp({
     logger,
@@ -37,7 +37,7 @@ app.use('/health', Healthrouter);
 app.use('/auth', authRouter);
 app.use('/event', eventRouter);
 app.use('/user', userRouter);
-app.use('/ticket',ticketRouter)
+app.use('/ticket', ticketRouter);
 app.use(notFound);
 app.use(errorHandler);
 export default app;
