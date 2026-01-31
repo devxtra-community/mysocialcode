@@ -7,4 +7,5 @@ export const getEventRepository = appDataSource.getRepository(Events);
 
 export const getImageRepository = appDataSource.getRepository(EventImage);
 
-export const getEventAttendaceRepository = appDataSource.getRepository(EventAttendace)
+export const getEventAttendaceRepository =
+  appDataSource.getRepository(EventAttendace);

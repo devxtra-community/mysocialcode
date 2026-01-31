@@ -56,7 +56,7 @@ export function ActionSheet({
       if (visible) {
         const optionTitles = options.map((option) => option.title);
         const destructiveButtonIndex = options.findIndex(
-          (option) => option.destructive
+          (option) => option.destructive,
         );
         const disabledButtonIndices = options
           .map((option, index) => (option.disabled ? index : -1))
@@ -82,7 +82,7 @@ export function ActionSheet({
               options[buttonIndex].onPress();
             }
             onClose();
-          }
+          },
         );
       }
     }, [visible, title, message, options, cancelButtonTitle, onClose]);
@@ -143,7 +143,7 @@ function AndroidActionSheet({
           if (finished) {
             runOnJS(setIsSheetVisible)(false);
           }
-        }
+        },
       );
     }
   }, [visible, progress]);
@@ -181,7 +181,7 @@ function AndroidActionSheet({
     <Modal
       transparent
       visible={isSheetVisible}
-      animationType='none'
+      animationType="none"
       statusBarTranslucent
       onRequestClose={onClose}
     >
@@ -252,8 +252,8 @@ function AndroidActionSheet({
                         color: option.destructive
                           ? destructiveColor
                           : option.disabled
-                          ? mutedColor
-                          : textColor,
+                            ? mutedColor
+                            : textColor,
                       },
                     ]}
                     numberOfLines={1}
@@ -387,7 +387,7 @@ export function useActionSheet() {
       setConfig(actionSheetConfig);
       setIsVisible(true);
     },
-    []
+    [],
   );
 
   const hide = React.useCallback(() => {
@@ -396,7 +396,7 @@ export function useActionSheet() {
 
   const ActionSheetComponent = React.useMemo(
     () => <ActionSheet visible={isVisible} onClose={hide} {...config} />,
-    [isVisible, hide, config]
+    [isVisible, hide, config],
   );
 
   return {

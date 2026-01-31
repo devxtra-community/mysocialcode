@@ -31,5 +31,5 @@ eventRouter.put(
   updateEvent,
 );
 eventRouter.post('/cancel/:id', requireAuth, cancelEvent);
-eventRouter.post('/attendance',attendance)
+eventRouter.post('/attendance', attendance);
 export default eventRouter;

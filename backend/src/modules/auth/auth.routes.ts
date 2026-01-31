@@ -12,7 +12,7 @@ authRouter.post('/send-otp', sendOtp);
 authRouter.post('/verify-otp', verifyotp);
 authRouter.post('/register', register);
 authRouter.post('/login', login);
-authRouter.post('/logout',logout)
+authRouter.post('/logout', logout);
 authRouter.post('/refresh-token', refreshAccessToken);
 
 export default authRouter;

@@ -4,7 +4,6 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
- 
   Alert,
 } from 'react-native';
 import { useState } from 'react';

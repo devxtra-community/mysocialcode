@@ -305,9 +305,9 @@ export const login = async (
 export const logout = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
-  logger.error("reached thee logout api")
+  logger.error('reached thee logout api');
   try {
     const { refreshToken } = req.body;
 
@@ -317,9 +317,8 @@ export const logout = async (
       });
     }
 
-    const refreshTokenRepo =
-      appDataSource.getRepository(RefreshTokenEntity); 
-      const hashToken = hashRefreshToken(refreshToken)
+    const refreshTokenRepo = appDataSource.getRepository(RefreshTokenEntity);
+    const hashToken = hashRefreshToken(refreshToken);
 
     await refreshTokenRepo.delete({
       tokenHash: hashToken,
@@ -334,7 +333,6 @@ export const logout = async (
     next(err);
   }
 };
-
 
 export const refreshAccessToken = async (req: Request, res: Response) => {
   try {
