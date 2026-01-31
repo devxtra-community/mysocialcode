@@ -10,7 +10,7 @@ import {
 import { Events } from './Event';
 import { User } from './User';
 
-enum TicketStatus {
+export enum TicketStatus {
   ACTIVE = 'ACTIVE',
   USED = 'USED',
   CANCELLED = 'CANCELLED',

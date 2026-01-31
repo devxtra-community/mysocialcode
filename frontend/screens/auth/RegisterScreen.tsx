@@ -4,13 +4,14 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
-  SafeAreaView,
+ 
   Alert,
 } from 'react-native';
 import { useState } from 'react';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { registerUser } from '@/services/auth/otp.service';
 import { storeTokens } from '@/services/token/token.storage';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const INTERESTS = [
   'Technology',

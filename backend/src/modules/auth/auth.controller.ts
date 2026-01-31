@@ -9,11 +9,12 @@ import { User } from '../../entities/User';
 import { signAccessToken } from '../../Services/jwt.service';
 import { createRefreshTokenSession } from '../../Services/authToken';
 import bcrypt from 'bcrypt';
-
+import { hashRefreshToken } from '../../Services/refreshToken';
 import { publish } from '../../messaging/rabbitmq/publish';
 import { v4 as uuid } from 'uuid';
 
 import { refreshAccessTokenService } from './auth.service';
+import { RefreshTokenEntity } from '../../entities/refreshToken';
 
 export const sendOtp = async (
   req: Request,
@@ -300,6 +301,40 @@ export const login = async (
     next(err);
   }
 };
+
+export const logout = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  logger.error("reached thee logout api")
+  try {
+    const { refreshToken } = req.body;
+
+    if (!refreshToken) {
+      return res.status(400).json({
+        message: 'Refresh token required',
+      });
+    }
+
+    const refreshTokenRepo =
+      appDataSource.getRepository(RefreshTokenEntity); 
+      const hashToken = hashRefreshToken(refreshToken)
+
+    await refreshTokenRepo.delete({
+      tokenHash: hashToken,
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: 'Logged out successfully',
+    });
+  } catch (err) {
+    logger.error({ err }, 'error in logout');
+    next(err);
+  }
+};
+
 
 export const refreshAccessToken = async (req: Request, res: Response) => {
   try {
