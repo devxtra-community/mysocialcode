@@ -125,7 +125,6 @@ export const getSingleEvent = async (req: AuthReq, res: Response) => {
   try {
     const id = req.params.id;
     const userId = req.user?.id;
-    
 
     const event = await getEventRepository.findOne({
       where: { id },
@@ -135,7 +134,7 @@ export const getSingleEvent = async (req: AuthReq, res: Response) => {
     if (!event) {
       return res.status(404).json({ message: 'Event not found' });
     }
-    logger.info(event.user.id)
+    logger.info(event.user.id);
 
     const host = event.user?.id === userId;
 
@@ -144,15 +143,13 @@ export const getSingleEvent = async (req: AuthReq, res: Response) => {
       event,
       host,
     });
-
   } catch (err) {
-    console.log("REAL ERROR:", err);
+    console.log('REAL ERROR:', err);
     res.status(500).json({
       message: 'Error fetching event',
     });
   }
 };
-
 
 export const getMyEvents = async (req: AuthReq, res: Response) => {
   try {

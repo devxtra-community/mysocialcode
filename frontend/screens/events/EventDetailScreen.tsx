@@ -2,8 +2,8 @@ import { View, Text, Pressable, StyleSheet, ScrollView } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import EventDetailSkeleton from '@/components/comps/skeletonEvent';
-import Carousel from 'react-native-reanimated-carousel'
-import { Image,Dimensions } from 'react-native';
+import Carousel from 'react-native-reanimated-carousel';
+import { Image, Dimensions } from 'react-native';
 import api from '@/lib/api';
 
 interface EventType {
@@ -18,9 +18,9 @@ interface EventType {
   status: string;
   rules: string;
   capacity: number;
-  image:{
-    id:string;
-    imageUrl:string
+  image: {
+    id: string;
+    imageUrl: string;
   }[];
 }
 
@@ -29,11 +29,9 @@ export default function EventDetailScreen() {
   const [showConfirm, setShowConfirm] = useState(false);
   const [isHost, setIsHost] = useState(false);
 
-
   const { id } = useLocalSearchParams();
   const eventId = Array.isArray(id) ? id[0] : id;
-  const { width } = Dimensions.get("window");
-
+  const { width } = Dimensions.get('window');
 
   useEffect(() => {
     if (!eventId) return;
@@ -43,7 +41,7 @@ export default function EventDetailScreen() {
   async function fetchEvent() {
     const res = await api.get(`/event/getEvent/${eventId}`);
     console.log(res.data);
-    
+
     setEvent(res.data.event);
     setIsHost(res.data.host);
   }
@@ -78,23 +76,23 @@ export default function EventDetailScreen() {
   return (
     <View style={styles.container}>
       {event.image?.length > 0 && (
-  <Carousel
-    loop
-    autoPlay
-    autoPlayInterval={3000}
-    width={width}
-    height={220}
-    data={event.image}
-    scrollAnimationDuration={800}
-    renderItem={({ item }) => (
-      <Image
-        source={{ uri: item.imageUrl }}
-        style={{ width: "100%", height: "100%" }}
-        resizeMode="cover"
-      />
-    )}
-  />
-)}
+        <Carousel
+          loop
+          autoPlay
+          autoPlayInterval={3000}
+          width={width}
+          height={220}
+          data={event.image}
+          scrollAnimationDuration={800}
+          renderItem={({ item }) => (
+            <Image
+              source={{ uri: item.imageUrl }}
+              style={{ width: '100%', height: '100%' }}
+              resizeMode="cover"
+            />
+          )}
+        />
+      )}
 
       <Text style={styles.title}>{event.title}</Text>
 
@@ -123,10 +121,10 @@ export default function EventDetailScreen() {
         </Text>
       </Pressable>
       {isHost && (
-  <Pressable onPress={() => router.push(`/(tabs)/events/${id}/scan`)}>
-    <Text>scan for joinees</Text>
-  </Pressable>
-)}
+        <Pressable onPress={() => router.push(`/(tabs)/events/${id}/scan`)}>
+          <Text>scan for joinees</Text>
+        </Pressable>
+      )}
 
       {showConfirm && (
         <View style={styles.overlay}>
