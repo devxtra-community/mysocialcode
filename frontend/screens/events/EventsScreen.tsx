@@ -14,6 +14,9 @@ import { router } from 'expo-router';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import api from '@/lib/api';
+import { FlatList } from 'react-native';
+
+/* ---------- Skeleton ---------- */
 
 function EventSkeleton() {
   return (
@@ -29,20 +32,48 @@ function EventSkeleton() {
     </Card>
   );
 }
-//comment
+
+/* ---------- Helpers ---------- */
+
+function isPastEvent(endDate: string) {
+  return new Date(endDate).getTime() < Date.now();
+}
+
+/* ---------- Screen ---------- */
+
 export default function EventsScreen() {
   const [events, setEvents] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const [cursor, setCursor] = useState<{
+    startDate: string;
+    id: string;
+  } | null>(null);
 
   useEffect(() => {
     fetchEvents();
   }, []);
 
   async function fetchEvents() {
+    if (loading || !hasMore) return;
+
+    setLoading(true);
+
     try {
-      const res = await api.get('/event/my-events');
-      if (res.data.success) {
-        setEvents(res.data?.events);
+      let url = '/event/my-events?limit=10';
+
+      if (cursor) {
+        url += `&cursor=${cursor.startDate}&id=${cursor.id}`;
+      }
+
+      const res = await api.get(url);
+      console.log(`this is the fetch event api`);
+      console.log(res.data);
+
+      if (res.data?.success) {
+        setEvents((prev) => [...prev, ...res.data.events]);
+        setHasMore(res.data.hasMore);
+        setCursor(res.data.nextCursor);
       }
     } catch (err) {
       console.log('Failed to load events', err);
@@ -64,9 +95,15 @@ export default function EventsScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
+      {/* ---------- Header ---------- */}
       <View style={styles.header}>
         <View style={styles.headerRow}>
           <Text style={styles.title}>Events</Text>
+          <View>
+            <Pressable onPress={() => router.push('/(tabs)/tickets/ticket')}>
+              <Text style={styles.createText}>My tickets</Text>
+            </Pressable>
+          </View>
 
           <Pressable onPress={() => router.push('/(tabs)/events/create')}>
             <Text style={styles.createText}>Create</Text>
@@ -81,6 +118,7 @@ export default function EventsScreen() {
         </View>
       </View>
 
+      {/* ---------- Content ---------- */}
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <Text style={styles.sectionTitle}>My Events</Text>
 
@@ -92,57 +130,73 @@ export default function EventsScreen() {
         )}
 
         {!loading &&
-          events.map((event) => (
-            <Pressable
-              key={event.id}
-              onPress={() => router.push(`/(tabs)/events/${event.id}`)}
-            >
-              <Card style={styles.eventCard}>
-                <ImageBackground
-                  source={{ uri: event.image?.[0]?.imageUrl }}
-                  style={styles.eventImage}
-                  imageStyle={styles.eventImageRadius}
-                >
-                  <View style={styles.overlay}>
-                    <Text style={styles.eventTitle}>{event.title}</Text>
-                    <Text style={styles.eventLocation}>{event.location}</Text>
-                    <Text style={styles.eventDate}>{event.startDate}</Text>
+          events.map((event) => {
+            const past = isPastEvent(event.endDate);
 
-                    <View style={{ flexDirection: 'row', gap: 8 }}>
-                      <Pressable
-                        onPress={(e) => {
-                          e.stopPropagation();
-                          router.push(`/(tabs)/events/update/${event.id}`);
-                        }}
-                      >
-                        <Text style={styles.eventUpdate}>Update</Text>
-                      </Pressable>
+            return (
+              <Pressable
+                key={event.id}
+                disabled={past}
+                style={past && { opacity: 0.6 }}
+                onPress={() => router.push(`/(tabs)/events/${event.id}`)}
+              >
+                <Card style={styles.eventCard}>
+                  <ImageBackground
+                    source={{ uri: event.image?.[0]?.imageUrl }}
+                    style={styles.eventImage}
+                    imageStyle={styles.eventImageRadius}
+                  >
+                    <View style={styles.overlay}>
+                      {/* PAST BADGE */}
+                      {past && (
+                        <View style={styles.pastBadge}>
+                          <Text style={styles.pastBadgeText}>PAST</Text>
+                        </View>
+                      )}
 
-                      {event.status !== 'canceled' && (
-                        <Pressable
-                          onPress={(e) => {
-                            e.stopPropagation();
-                            cancelEvent(event.id);
-                          }}
-                        >
-                          <Text style={styles.eventCancel}>Cancel</Text>
-                        </Pressable>
-                      )}
-                      {event.status === 'canceled' && (
-                        <Text style={{ color: '#fca5a5', marginTop: 4 }}>
-                          Canceled
-                        </Text>
-                      )}
+                      <Text style={styles.eventTitle}>{event.title}</Text>
+                      <Text style={styles.eventLocation}>{event.location}</Text>
+                      <Text style={styles.eventDate}>{event.startDate}</Text>
+
+                      <View style={{ flexDirection: 'row', gap: 8 }}>
+                        {!past && (
+                          <Pressable
+                            onPress={(e) => {
+                              e.stopPropagation();
+                              router.push(`/(tabs)/events/update/${event.id}`);
+                            }}
+                          >
+                            <Text style={styles.eventUpdate}>Update</Text>
+                          </Pressable>
+                        )}
+
+                        {!past && event.status !== 'canceled' && (
+                          <Pressable
+                            onPress={(e) => {
+                              e.stopPropagation();
+                              cancelEvent(event.id);
+                            }}
+                          >
+                            <Text style={styles.eventCancel}>Cancel</Text>
+                          </Pressable>
+                        )}
+
+                        {event.status === 'canceled' && (
+                          <Text style={styles.canceledText}>Canceled</Text>
+                        )}
+                      </View>
                     </View>
-                  </View>
-                </ImageBackground>
-              </Card>
-            </Pressable>
-          ))}
+                  </ImageBackground>
+                </Card>
+              </Pressable>
+            );
+          })}
       </ScrollView>
     </SafeAreaView>
   );
 }
+
+/* ---------- Styles ---------- */
 
 const styles = StyleSheet.create({
   container: {
@@ -239,7 +293,6 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 14,
     fontWeight: '600',
-    alignSelf: 'flex-start',
   },
 
   eventCancel: {
@@ -251,7 +304,27 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 14,
     fontWeight: '600',
+  },
+
+  canceledText: {
+    color: '#fca5a5',
+    marginTop: 10,
+    fontWeight: '600',
+  },
+
+  pastBadge: {
     alignSelf: 'flex-start',
+    backgroundColor: '#dc2626',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+    marginBottom: 6,
+  },
+
+  pastBadgeText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: '700',
   },
 
   skeletonCard: {

@@ -8,6 +8,9 @@ import { getUserRepository } from '../user/user.repository';
 // import { EventImage } from '../../entities/EventImage';
 import { uploadEventImage } from './event.upload';
 import { appDataSource } from '../../data-source';
+import { redisClient } from '../../utils/redis';
+import { id } from 'zod/v4/locales';
+import { TicketStatus } from '../../entities/Tickets';
 
 export interface AuthReq extends Request {
   user?: {
@@ -64,21 +67,57 @@ export const createEvent = async (req: AuthReq, res: Response) => {
 
 export const getAllEvents = async (req: AuthReq, res: Response) => {
   try {
-    const events = await getEventRepository.find({
-      where: {
-        status: 'published',
-      },
-      relations: ['image'],
-      order: { startDate: 'ASC' },
-    });
-    return res.status(200).json({
-      message: 'fetched data successfully',
+    const limit = Number(req.query.limit) || 10;
+    const cursor = req.query.cursor as string | undefined;
+    const cursorId = req.query.id as string | undefined;
+    const cacheKey = `events:limit=${limit}:cursor=${cursor || 'none'}:id=${cursorId || 'none'}`;
+
+    const cachedData = await redisClient.get(cacheKey);
+    if (cachedData) {
+      logger.info('Served from Redis');
+      return res.status(200).json(JSON.parse(cachedData));
+    }
+
+    const qb = getEventRepository
+      .createQueryBuilder('event')
+      .leftJoinAndSelect('event.image', 'image')
+      .where('event.status = :status', { status: 'published' });
+
+    if (cursor && cursorId) {
+      qb.andWhere(
+        `(event.startDate > :cursor OR (event.startDate = :cursor AND event.id > :id))`,
+        { cursor, id: cursorId },
+      );
+    }
+
+    qb.orderBy('event.startDate', 'ASC')
+      .addOrderBy('event.id', 'ASC')
+      .take(limit + 1);
+
+    const events = await qb.getMany();
+
+    let hasMore = false;
+    if (events.length > limit) {
+      hasMore = true;
+      events.pop();
+    }
+
+    const lastEvent = events[events.length - 1];
+
+    const responseData = {
       success: true,
-      events: events,
-    });
+      events,
+      hasMore,
+      nextCursor: lastEvent
+        ? { startDate: lastEvent.startDate, id: lastEvent.id }
+        : null,
+    };
+
+    await redisClient.setEx(cacheKey, 60, JSON.stringify(responseData));
+
+    return res.status(200).json(responseData);
   } catch (err) {
-    logger.error({ err }, 'catch in get all events workded');
-    res.status(400).json({ message: 'failed to fetch events', error: err });
+    res.status(400).json({ success: false, message: 'failed to fetch events' });
   }
 };
 
@@ -141,6 +180,14 @@ export const joinEvent = async (req: AuthReq, res: Response) => {
 
     if (!event) {
       return res.status(404).json({ message: 'Event not found' });
+    }
+
+    if (event.status !== 'published') {
+      return res.status(400).json({ message: 'Event is not open for joining' });
+    }
+
+    if (new Date(event.endDate) < new Date()) {
+      return res.status(400).json({ message: 'Cannot join a past event' });
     }
 
     if (event.capacity <= 0) {
@@ -232,7 +279,6 @@ export const updateEvent = async (req: AuthReq, res: Response) => {
       price,
     } = req.body;
 
-    // ✅ Field updates
     if (title !== undefined) event.title = title;
     if (description !== undefined) event.description = description;
     if (location !== undefined) event.location = location;
@@ -362,5 +408,60 @@ export const cancelEvent = async (req: AuthReq, res: Response) => {
       success: false,
       message: 'Something went wrong',
     });
+  }
+};
+
+export const attendance = async (req: AuthReq, res: Response) => {
+  try {
+    const { qrCode, eventId } = req.body;
+    const userId = req.user?.id;
+
+    if (!qrCode || !eventId) {
+      return res.status(400).json({
+        success: false,
+        message: 'qrCode and eventId are required',
+      });
+    }
+
+    const scan = await getTicketRepository.findOne({
+      where: {
+        qrCode: qrCode,
+      },
+      relations: ['events', 'user'],
+    });
+
+    if (!scan) {
+      return res.status(404).json({
+        success: false,
+        message: 'Invalid ticket',
+      });
+    }
+
+    if (scan.event.id !== eventId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Ticket not valid for this event',
+      });
+    }
+
+    if (scan.status == TicketStatus.USED) {
+      return res.status(400).json({
+        success: false,
+        message: 'ticket already used',
+      });
+    }
+
+    scan.status = TicketStatus.USED;
+    await getTicketRepository.save(scan);
+
+    return res.status(200).json({ success: true, message: 'entry is allowed' });
+  } catch (err) {
+    logger.error({ err }, 'catch in scan api worked');
+    res
+      .status(500)
+      .json({
+        success: false,
+        message: 'something bad happend catch in scan api worked',
+      });
   }
 };

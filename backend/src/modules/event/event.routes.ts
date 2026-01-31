@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import {
+  attendance,
   cancelEvent,
   createEvent,
   getAllEvents,
@@ -30,4 +31,5 @@ eventRouter.put(
   updateEvent,
 );
 eventRouter.post('/cancel/:id', requireAuth, cancelEvent);
+eventRouter.post('/attendance', attendance);
 export default eventRouter;
