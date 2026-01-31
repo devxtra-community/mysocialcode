@@ -124,19 +124,30 @@ export const getAllEvents = async (req: AuthReq, res: Response) => {
 export const getSingleEvent = async (req: AuthReq, res: Response) => {
   try {
     const id = req.params.id;
-    logger.info({ id }, 'id from params');
+    const userId = req.user?.id;
+
     const event = await getEventRepository.findOne({
-      where: {
-        id: id,
-      },
-      relations: ['image'],
+      where: { id },
+      relations: ['image', 'user'],
     });
-    console.log(event);
-    res.status(200).json({ message: 'found', event });
+
+    if (!event) {
+      return res.status(404).json({ message: 'Event not found' });
+    }
+    logger.info(event.user.id);
+
+    const host = event.user?.id === userId;
+
+    res.status(200).json({
+      message: 'found',
+      event,
+      host,
+    });
   } catch (err) {
-    res
-      .status(500)
-      .json({ error: err, message: 'catch in get single event workec' });
+    console.log('REAL ERROR:', err);
+    res.status(500).json({
+      message: 'Error fetching event',
+    });
   }
 };
 
@@ -457,11 +468,9 @@ export const attendance = async (req: AuthReq, res: Response) => {
     return res.status(200).json({ success: true, message: 'entry is allowed' });
   } catch (err) {
     logger.error({ err }, 'catch in scan api worked');
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: 'something bad happend catch in scan api worked',
-      });
+    res.status(500).json({
+      success: false,
+      message: 'something bad happend catch in scan api worked',
+    });
   }
 };
