@@ -63,7 +63,6 @@ export const createEvent = async (req: AuthReq, res: Response) => {
   }
 };
 
-
 export const getAllEvents = async (req: AuthReq, res: Response) => {
   try {
     if (!req.user) {
