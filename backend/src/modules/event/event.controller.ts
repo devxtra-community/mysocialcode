@@ -9,6 +9,9 @@ import { getUserRepository } from '../user/user.repository';
 import { uploadEventImage } from './event.upload';
 import { appDataSource } from '../../data-source';
 import { Not } from 'typeorm';
+// import { redisClient } from '../../utils/redis';
+// import { id } from 'zod/v4/locales';
+import { TicketStatus } from '../../entities/Tickets';
 
 export interface AuthReq extends Request {
   user?: {
@@ -387,5 +390,60 @@ export const cancelEvent = async (req: AuthReq, res: Response) => {
       success: false,
       message: 'Something went wrong',
     });
+  }
+};
+
+export const attendance = async (req: AuthReq, res: Response) => {
+  try {
+    const { qrCode, eventId } = req.body;
+    // const userId = req.user?.id;
+
+    if (!qrCode || !eventId) {
+      return res.status(400).json({
+        success: false,
+        message: 'qrCode and eventId are required',
+      });
+    }
+
+    const scan = await getTicketRepository.findOne({
+      where: {
+        qrCode: qrCode,
+      },
+      relations: ['events', 'user'],
+    });
+
+    if (!scan) {
+      return res.status(404).json({
+        success: false,
+        message: 'Invalid ticket',
+      });
+    }
+
+    if (scan.event.id !== eventId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Ticket not valid for this event',
+      });
+    }
+
+    if (scan.status == TicketStatus.USED) {
+      return res.status(400).json({
+        success: false,
+        message: 'ticket already used',
+      });
+    }
+
+    scan.status = TicketStatus.USED;
+    await getTicketRepository.save(scan);
+
+    return res.status(200).json({ success: true, message: 'entry is allowed' });
+  } catch (err) {
+    logger.error({ err }, 'catch in scan api worked');
+    res
+      .status(500)
+      .json({
+        success: false,
+        message: 'something bad happend catch in scan api worked',
+      });
   }
 };
