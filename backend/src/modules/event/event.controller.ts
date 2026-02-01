@@ -439,11 +439,9 @@ export const attendance = async (req: AuthReq, res: Response) => {
     return res.status(200).json({ success: true, message: 'entry is allowed' });
   } catch (err) {
     logger.error({ err }, 'catch in scan api worked');
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: 'something bad happend catch in scan api worked',
-      });
+    res.status(500).json({
+      success: false,
+      message: 'something bad happend catch in scan api worked',
+    });
   }
 };
