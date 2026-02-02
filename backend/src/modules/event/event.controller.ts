@@ -474,3 +474,20 @@ export const attendance = async (req: AuthReq, res: Response) => {
     });
   }
 };
+
+export const searach = async(req:AuthReq, res:Response)=>{
+  logger.info('reached here at search api')
+  try{
+      const q = req.query.event as string
+      logger.info(q)
+      if (!q || q.trim() === "") {
+  return res.json([]);
+}
+      const event =await getEventRepository.createQueryBuilder("event").leftJoinAndSelect("event.image", "image").where("event.title ILIKE :q",{ q: `%${q}%` })
+      .orWhere("event.category ILIKE :q", { q: `%${q}%` }).limit(10).getMany();
+      res.json({message:"fetched",events:event})
+  }catch(err){
+    logger.error({err},"catch in seach worked")
+    return res.status(500).json({message:"internal server error"})
+  }
+}

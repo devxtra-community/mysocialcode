@@ -7,6 +7,7 @@ import {
   getMyEvents,
   getSingleEvent,
   joinEvent,
+  searach,
   updateEvent,
 } from './event.controller';
 import { requireAuth } from '../../middleware/auth.middleware';
@@ -31,5 +32,6 @@ eventRouter.put(
   updateEvent,
 );
 eventRouter.post('/cancel/:id', requireAuth, cancelEvent);
-eventRouter.post('/attendance', attendance);
+eventRouter.post('/attendance',requireAuth, attendance);
+eventRouter.get('/search',searach)
 export default eventRouter;
