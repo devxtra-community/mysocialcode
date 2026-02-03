@@ -1,4 +1,12 @@
-import { View, Text, Pressable, StyleSheet, ScrollView, Image, Dimensions } from 'react-native';
+import {
+  View,
+  Text,
+  Pressable,
+  StyleSheet,
+  ScrollView,
+  Image,
+  Dimensions,
+} from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import EventDetailSkeleton from '@/components/comps/skeletonEvent';
