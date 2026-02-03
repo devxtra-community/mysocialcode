@@ -1,7 +1,11 @@
 import { Request, Response } from 'express';
 import { createEventService } from './event.service';
 import { logger } from '../../utils/logger';
-import { getEventRepository, getImageRepository } from './event.repository';
+import {
+  getEventAttendaceRepository,
+  getEventRepository,
+  getImageRepository,
+} from './event.repository';
 import { getTicketRepository } from '../tickets/ticket.repository';
 import { v4 as uuid } from 'uuid';
 import { getUserRepository } from '../user/user.repository';
@@ -106,19 +110,30 @@ export const getAllEvents = async (req: AuthReq, res: Response) => {
 export const getSingleEvent = async (req: AuthReq, res: Response) => {
   try {
     const id = req.params.id;
-    logger.info({ id }, 'id from params');
+    const userId = req.user?.id;
+
     const event = await getEventRepository.findOne({
-      where: {
-        id: id,
-      },
-      relations: ['image'],
+      where: { id },
+      relations: ['image', 'user'],
     });
-    console.log(event);
-    res.status(200).json({ message: 'found', event });
+
+    if (!event) {
+      return res.status(404).json({ message: 'Event not found' });
+    }
+    logger.info(event.user.id);
+
+    const host = event.user?.id === userId;
+
+    res.status(200).json({
+      message: 'found',
+      event,
+      host,
+    });
   } catch (err) {
-    res
-      .status(500)
-      .json({ error: err, message: 'catch in get single event workec' });
+    console.log('REAL ERROR:', err);
+    res.status(500).json({
+      message: 'Error fetching event',
+    });
   }
 };
 
@@ -394,6 +409,7 @@ export const cancelEvent = async (req: AuthReq, res: Response) => {
 };
 
 export const attendance = async (req: AuthReq, res: Response) => {
+  console.log(req.body);
   try {
     const { qrCode, eventId } = req.body;
     // const userId = req.user?.id;
@@ -409,7 +425,7 @@ export const attendance = async (req: AuthReq, res: Response) => {
       where: {
         qrCode: qrCode,
       },
-      relations: ['events', 'user'],
+      relations: ['event', 'user'],
     });
 
     if (!scan) {
@@ -435,7 +451,12 @@ export const attendance = async (req: AuthReq, res: Response) => {
 
     scan.status = TicketStatus.USED;
     await getTicketRepository.save(scan);
-
+    const attendance = getEventAttendaceRepository.create({
+      event: scan.event,
+      user: scan.user,
+      ticket: scan,
+    });
+    await getEventAttendaceRepository.save(attendance);
     return res.status(200).json({ success: true, message: 'entry is allowed' });
   } catch (err) {
     logger.error({ err }, 'catch in scan api worked');
@@ -443,5 +464,27 @@ export const attendance = async (req: AuthReq, res: Response) => {
       success: false,
       message: 'something bad happend catch in scan api worked',
     });
+  }
+};
+
+export const searach = async (req: AuthReq, res: Response) => {
+  logger.info('reached here at search api');
+  try {
+    const q = req.query.event as string;
+    logger.info(q);
+    if (!q || q.trim() === '') {
+      return res.json([]);
+    }
+    const event = await getEventRepository
+      .createQueryBuilder('event')
+      .leftJoinAndSelect('event.image', 'image')
+      .where('event.title ILIKE :q', { q: `%${q}%` })
+      .orWhere('event.category ILIKE :q', { q: `%${q}%` })
+      .limit(10)
+      .getMany();
+    res.json({ message: 'fetched', events: event });
+  } catch (err) {
+    logger.error({ err }, 'catch in seach worked');
+    return res.status(500).json({ message: 'internal server error' });
   }
 };

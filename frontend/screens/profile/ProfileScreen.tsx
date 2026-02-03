@@ -1,8 +1,7 @@
 import api from '@/lib/api';
 import { View, Text, StyleSheet, Pressable, Alert } from 'react-native';
-import { getRefreshToken } from '@/services/token/token.storage';
+import { getRefreshToken, clearTokens } from '@/services/token/token.storage';
 import { router } from 'expo-router';
-import { clearTokens } from '@/services/token/token.storage';
 
 export default function ProfileScreen() {
   const handleLogout = () => {
