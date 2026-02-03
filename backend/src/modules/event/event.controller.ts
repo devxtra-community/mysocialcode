@@ -75,7 +75,7 @@ export const getAllEvents = async (req: AuthReq, res: Response) => {
     const cursor = req.query.cursor as string | undefined;
     const cursorId = req.query.id as string | undefined;
     const cacheKey = `events:limit=${limit}:cursor=${cursor || 'none'}:id=${cursorId || 'none'}`;
-
+//comment
     const cachedData = await redisClient.get(cacheKey);
     if (cachedData) {
       logger.info('Served from Redis');
