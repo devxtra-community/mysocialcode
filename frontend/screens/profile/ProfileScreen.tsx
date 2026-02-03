@@ -1,9 +1,41 @@
 import api from '@/lib/api';
-import { View, Text, StyleSheet, Pressable, Alert } from 'react-native';
+import { View, Text, StyleSheet, Pressable, Alert, Image } from 'react-native';
 import { getRefreshToken, clearTokens } from '@/services/token/token.storage';
 import { router } from 'expo-router';
+import { useEffect, useState } from 'react';
+
+export interface UserProfileType {
+  id: string;
+  name: string;
+  email: string | null;
+  phoneNumber: string | null;
+  age: number | null;
+  gender: string | null;
+  interests: string[] | null;
+  profileImageUrl: string | null;
+  isPhoneVerified: boolean;
+  createdAt: string;
+}
 
 export default function ProfileScreen() {
+  const [user, setUser] = useState<UserProfileType | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    fetchProfile();
+  }, []);
+
+  async function fetchProfile() {
+    try {
+      const res = await api.get('/user/me');
+      setUser(res.data.user);
+    } catch (err) {
+      console.error('Failed to fetch profile', err);
+    } finally {
+      setLoading(false);
+    }
+  }
+
   const handleLogout = () => {
     Alert.alert('Log out', 'Are you sure bro?', [
       {
@@ -26,6 +58,7 @@ export default function ProfileScreen() {
       },
     ]);
   };
+
   async function handleLogoutTest() {
     const refreshToken = await getRefreshToken();
     const res = await api.post('/auth/logout', { refreshToken });
@@ -37,6 +70,18 @@ export default function ProfileScreen() {
     }
   }
 
+  const handleProfile = async () => {
+    router.push('/profile/edit');
+  };
+
+  if (loading) {
+    return <Text>Loading...</Text>;
+  }
+
+  if (!user) {
+    return <Text>Failed to load profile</Text>;
+  }
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -44,15 +89,25 @@ export default function ProfileScreen() {
       </View>
 
       <View style={styles.userCard}>
-        <View style={styles.avatar} />
+        <Image
+          source={
+            user.profileImageUrl
+              ? { uri: user.profileImageUrl }
+              : require('@/assets/images/OIP.jpeg')
+          }
+          style={styles.avatar}
+        />
+
         <View>
-          <Text style={styles.name}>Your Name</Text>
-          <Text style={styles.subText}>+91 XXXXX XXXXX</Text>
+          <Text style={styles.name}>{user.name}</Text>
+          <Text style={styles.subText}>
+            {user.phoneNumber || 'Phone not added'}
+          </Text>
         </View>
       </View>
 
       <View style={styles.section}>
-        <Pressable style={styles.row}>
+        <Pressable style={styles.row} onPress={handleProfile}>
           <Text style={styles.rowText}>Edit Profile</Text>
         </Pressable>
 
@@ -92,13 +147,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 32,
+    gap: 16,
   },
   avatar: {
     width: 56,
     height: 56,
     borderRadius: 28,
     backgroundColor: '#e5e7eb',
-    marginRight: 16,
   },
   name: {
     fontSize: 16,

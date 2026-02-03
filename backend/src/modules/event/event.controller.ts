@@ -12,9 +12,8 @@ import { getUserRepository } from '../user/user.repository';
 // import { EventImage } from '../../entities/EventImage';
 import { uploadEventImage } from './event.upload';
 import { appDataSource } from '../../data-source';
-import { Not } from 'typeorm';
-// import { redisClient } from '../../utils/redis';
-// import { id } from 'zod/v4/locales';
+import { redisClient } from '../../utils/redis';
+
 import { TicketStatus } from '../../entities/Tickets';
 
 export interface AuthReq extends Request {
@@ -72,36 +71,64 @@ export const createEvent = async (req: AuthReq, res: Response) => {
 
 export const getAllEvents = async (req: AuthReq, res: Response) => {
   try {
-    if (!req.user) {
-      return res.status(401).json({
-        success: false,
-        message: 'Unauthorized',
-      });
+    const limit = Number(req.query.limit) || 10;
+    const cursor = req.query.cursor as string | undefined;
+    const cursorId = req.query.id as string | undefined;
+
+    const cacheKey = `events:limit=${limit}:cursor=${cursor || 'none'}:id=${cursorId || 'none'}`;
+
+    const cachedData = await redisClient.get(cacheKey);
+    if (cachedData) {
+      logger.info('Served from Redis');
+      return res.status(200).json(JSON.parse(cachedData));
     }
 
-    const userId: string = req.user.id;
+    const now = new Date();
 
-    const events = await getEventRepository.find({
-      where: {
-        status: 'published',
-        user: {
-          id: Not(userId),
-        },
-      },
-      relations: ['image', 'user'],
-      order: { startDate: 'ASC' },
-    });
+    const qb = getEventRepository
+      .createQueryBuilder('event')
+      .leftJoinAndSelect('event.image', 'image')
+      .where('event.status = :status', { status: 'published' })
+      .andWhere('event.startDate >= :now', { now })
+      .andWhere('event.userId != :userId', { userId: req.user?.id });
 
-    return res.status(200).json({
-      message: 'Fetched data successfully',
+    if (cursor && cursorId) {
+      qb.andWhere(
+        `(event.startDate > :cursor OR (event.startDate = :cursor AND event.id > :id))`,
+        { cursor, id: cursorId },
+      );
+    }
+
+    qb.orderBy('event.startDate', 'ASC')
+      .addOrderBy('event.id', 'ASC')
+      .take(limit + 1);
+
+    const events = await qb.getMany();
+
+    let hasMore = false;
+    if (events.length > limit) {
+      hasMore = true;
+      events.pop();
+    }
+
+    const lastEvent = events[events.length - 1];
+
+    const responseData = {
       success: true,
       events,
-    });
+      hasMore,
+      nextCursor: lastEvent
+        ? { startDate: lastEvent.startDate, id: lastEvent.id }
+        : null,
+    };
+
+    await redisClient.setEx(cacheKey, 60, JSON.stringify(responseData));
+
+    return res.status(200).json(responseData);
   } catch (err) {
-    logger.error({ err }, 'Error in getAllEvents');
     return res.status(400).json({
-      message: 'Failed to fetch events',
       success: false,
+      message: 'failed to fetch events',
       error: err,
     });
   }
@@ -412,7 +439,6 @@ export const attendance = async (req: AuthReq, res: Response) => {
   console.log(req.body);
   try {
     const { qrCode, eventId } = req.body;
-    // const userId = req.user?.id;
 
     if (!qrCode || !eventId) {
       return res.status(400).json({

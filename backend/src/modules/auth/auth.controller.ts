@@ -1,7 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { logger } from '../../utils/logger';
 import { registerSchema, phoneSchema, loginSchema } from './auth.schema';
-// import { sendOtpSms } from '../../Services/sms.service';
 import { generateotp } from '../../utils/otp';
 import { appDataSource } from '../../data-source';
 import { Otp } from '../../entities/otp';
