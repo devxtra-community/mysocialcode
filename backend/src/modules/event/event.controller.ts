@@ -13,7 +13,7 @@ import { getUserRepository } from '../user/user.repository';
 import { uploadEventImage } from './event.upload';
 import { appDataSource } from '../../data-source';
 import { redisClient } from '../../utils/redis';
-import { id } from 'zod/v4/locales';
+
 import { TicketStatus } from '../../entities/Tickets';
 
 export interface AuthReq extends Request {
@@ -121,7 +121,9 @@ export const getAllEvents = async (req: AuthReq, res: Response) => {
 
     return res.status(200).json(responseData);
   } catch (err) {
-    res.status(400).json({ success: false, message: 'failed to fetch events' });
+    res
+      .status(400)
+      .json({ success: false, message: 'failed to fetch events', err });
   }
 };
 
@@ -430,7 +432,6 @@ export const attendance = async (req: AuthReq, res: Response) => {
   console.log(req.body);
   try {
     const { qrCode, eventId } = req.body;
-    const userId = req.user?.id;
 
     if (!qrCode || !eventId) {
       return res.status(400).json({
