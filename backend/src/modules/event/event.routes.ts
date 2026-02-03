@@ -32,6 +32,6 @@ eventRouter.put(
   updateEvent,
 );
 eventRouter.post('/cancel/:id', requireAuth, cancelEvent);
-eventRouter.post('/attendance',requireAuth, attendance);
-eventRouter.get('/search',searach)
+eventRouter.post('/attendance', requireAuth, attendance);
+eventRouter.get('/search', searach);
 export default eventRouter;
