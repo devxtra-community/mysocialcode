@@ -1,7 +1,11 @@
 import { Request, Response } from 'express';
 import { createEventService } from './event.service';
 import { logger } from '../../utils/logger';
-import { getEventAttendaceRepository, getEventRepository, getImageRepository } from './event.repository';
+import {
+  getEventAttendaceRepository,
+  getEventRepository,
+  getImageRepository,
+} from './event.repository';
 import { getTicketRepository } from '../tickets/ticket.repository';
 import { v4 as uuid } from 'uuid';
 import { getUserRepository } from '../user/user.repository';
@@ -423,7 +427,7 @@ export const cancelEvent = async (req: AuthReq, res: Response) => {
 };
 
 export const attendance = async (req: AuthReq, res: Response) => {
-  console.log(req.body)
+  console.log(req.body);
   try {
     const { qrCode, eventId } = req.body;
     const userId = req.user?.id;
@@ -465,12 +469,12 @@ export const attendance = async (req: AuthReq, res: Response) => {
 
     scan.status = TicketStatus.USED;
     await getTicketRepository.save(scan);
-      const attendance = getEventAttendaceRepository.create({
-  event: scan.event,
-  user: scan.user,
-  ticket: scan,
-});
-await getEventAttendaceRepository.save(attendance);
+    const attendance = getEventAttendaceRepository.create({
+      event: scan.event,
+      user: scan.user,
+      ticket: scan,
+    });
+    await getEventAttendaceRepository.save(attendance);
     return res.status(200).json({ success: true, message: 'entry is allowed' });
   } catch (err) {
     logger.error({ err }, 'catch in scan api worked');
