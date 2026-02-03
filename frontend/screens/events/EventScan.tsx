@@ -21,7 +21,7 @@ export default function ScanTicketsScreen() {
     setScanned(true);
 
     try {
-      const res = await api.post('/ticket/scan', {
+      const res = await api.post('/event/attendance', {
         qrCode: data,
         eventId,
       });
