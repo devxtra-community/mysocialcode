@@ -21,7 +21,7 @@ export default function ProfileScreen() {
   const [user, setUser] = useState<UserProfileType | null>(null);
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => { 
+  useEffect(() => {
     fetchProfile();
   }, []);
 
@@ -89,9 +89,8 @@ export default function ProfileScreen() {
       </View>
 
       <View style={styles.userCard}>
-
         <Image
-          key={user.profileImageUrl} 
+          key={user.profileImageUrl}
           source={
             user.profileImageUrl
               ? { uri: user.profileImageUrl }

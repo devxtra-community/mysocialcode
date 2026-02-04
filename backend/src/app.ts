@@ -26,7 +26,6 @@ app.use(
   }),
 );
 
-
 app.disable('etag');
 connectRedis();
 app.use(

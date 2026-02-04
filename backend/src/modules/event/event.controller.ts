@@ -278,7 +278,7 @@ export const updateEvent = async (req: AuthReq, res: Response) => {
 
     const event = await getEventRepository.findOne({
       where: { id: eventId },
-      relations: ['image', 'user'], 
+      relations: ['image', 'user'],
     });
 
     if (!event) {
