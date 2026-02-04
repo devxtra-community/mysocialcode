@@ -278,7 +278,7 @@ export const updateEvent = async (req: AuthReq, res: Response) => {
 
     const event = await getEventRepository.findOne({
       where: { id: eventId },
-      relations: ['image', 'user'], // ✅ FIXED
+      relations: ['image', 'user'], 
     });
 
     if (!event) {
@@ -344,7 +344,6 @@ export const updateEvent = async (req: AuthReq, res: Response) => {
         .json({ message: 'End date cannot be before start date' });
     }
 
-    // ✅ Image handling
     let keepImages: string[] = [];
     if (existingImages) {
       keepImages = Array.isArray(existingImages)

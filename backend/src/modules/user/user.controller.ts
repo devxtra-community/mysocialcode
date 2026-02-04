@@ -4,25 +4,24 @@ import { r2 } from '../../utils/r2';
 import { appDataSource } from '../../data-source';
 import { User } from '../../entities/User';
 import { logger } from '../../utils/logger';
-// import bcrypt from 'bcrypt';
-export const uploadAvatar = async (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) => {
+
+export const uploadAvatar = async (req: Request, res: Response) => {
   try {
-    if (!req.user) {
+    // console.log('uploadAvatar controller HIT');
+
+    const userId = req.user?.id;
+    if (!userId) {
       return res.status(401).json({ message: 'Unauthorized' });
     }
 
-    if (!req.file) {
+    const file = req.file;
+    if (!file) {
       return res.status(400).json({ message: 'Avatar is required' });
     }
 
-    const userId = req.user.id; // ✅ string, not undefined
-    const file = req.file;
+    // console.log('uploading to R2...');
 
-    const key = `avatars/${userId}-${Date.now()}`;
+    const key = `avatars/${userId}-${Date.now()}.jpg`;
 
     await r2.send(
       new PutObjectCommand({
@@ -35,17 +34,18 @@ export const uploadAvatar = async (
 
     const imageUrl = `${process.env.R2_ENDPOINT}/${process.env.R2_BUCKET_NAME}/${key}`;
 
-    const userRepo = appDataSource.getRepository(User);
-    await userRepo.update({ id: userId }, { profileImageUrl: imageUrl });
+    // console.log('saving image url to DB:', imageUrl);
 
-    return res.status(200).json({
-      success: true,
-      message: 'Profile picture uploaded',
-      url: imageUrl,
-    });
+    await appDataSource
+      .getRepository(User)
+      .update({ id: userId }, { profileImageUrl: imageUrl });
+
+    // console.log('avatar upload complete');
+
+    return res.status(200).json({ url: imageUrl });
   } catch (err) {
-    logger.error({ err }, 'error in upload image');
-    next(err);
+    console.error('upload avatar failed:', err);
+    return res.status(500).json({ message: 'Upload failed' });
   }
 };
 

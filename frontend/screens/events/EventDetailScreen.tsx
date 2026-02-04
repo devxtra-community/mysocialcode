@@ -107,6 +107,9 @@ export default function EventDetailScreen() {
 
       <Text style={styles.description}>{event.description}</Text>
 
+      <Text style={styles.date}>{event.startDate}</Text>
+      <Text style={styles.date}>{event.endDate}</Text>
+
       <View style={styles.infoRow}>
         <Text>Category: {event.category}</Text>
         <Text>Status: {event.status}</Text>
@@ -189,6 +192,10 @@ const styles = StyleSheet.create({
     fontSize: 15,
     lineHeight: 22,
     marginBottom: 16,
+  },
+  date: {
+    fontSize: 14,
+    marginBottom: 4,
   },
   infoRow: {
     flexDirection: 'row',

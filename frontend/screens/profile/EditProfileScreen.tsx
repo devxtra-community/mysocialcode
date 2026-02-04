@@ -11,6 +11,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { useEffect, useState } from 'react';
 import api from '@/lib/api';
 import { router } from 'expo-router';
+import { getAccessToken } from '@/services/token/token.storage';
 
 export default function EditProfileScreen() {
   const [form, setForm] = useState({
@@ -44,8 +45,15 @@ export default function EditProfileScreen() {
   }
 
   async function pickImage() {
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    if (!permission.granted) {
+      Alert.alert('Permission required', 'Please allow photo access');
+      return;
+    }
+
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [1, 1],
       quality: 0.7,
@@ -59,14 +67,24 @@ export default function EditProfileScreen() {
   async function uploadAvatar() {
     if (!avatar || avatar.startsWith('http')) return;
 
-    const formData = new FormData();
-    formData.append('avatar', {
-      uri: avatar,
-      name: 'avatar.jpg',
-      type: 'image/jpeg',
-    } as any);
+    const imageResponse = await fetch(avatar);
+    const blob = await imageResponse.blob();
 
-    await api.post('/user/me/avatar', formData);
+    const formData = new FormData();
+    formData.append('avatar', blob, 'avatar.jpg');
+
+    const token = await getAccessToken();
+
+    const res = await fetch('http://172.28.32.1:4000/upload/avatar', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: formData,
+    });
+
+    const data = await res.json();
+    setAvatar(data.url);
   }
 
   async function handleSave() {
@@ -134,22 +152,6 @@ export default function EditProfileScreen() {
         onChangeText={(v) => setForm({ ...form, email: v })}
         style={styles.input}
       />
-
-      {/* <TextInput
-        placeholder="Confirm Password"
-        secureTextEntry
-        value={form.confirmPassword}
-        onChangeText={(v) => setForm({ ...form, confirmPassword: v })}
-        style={styles.input}
-      />
-
-      <TextInput
-        placeholder="New Password"
-        secureTextEntry
-        value={form.password}
-        onChangeText={(v) => setForm({ ...form, password: v })}
-        style={styles.input}
-      /> */}
 
       <Pressable
         style={[styles.button, uploading && { opacity: 0.6 }]}
