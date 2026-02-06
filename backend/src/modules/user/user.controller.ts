@@ -7,7 +7,7 @@ import { logger } from '../../utils/logger';
 
 export const uploadAvatar = async (req: Request, res: Response) => {
   try {
-    // console.log('uploadAvatar controller HIT');
+    console.log('uploadAvatar controller HIT');
 
     const userId = req.user?.id;
     if (!userId) {
@@ -19,7 +19,7 @@ export const uploadAvatar = async (req: Request, res: Response) => {
       return res.status(400).json({ message: 'Avatar is required' });
     }
 
-    // console.log('uploading to R2...');
+    console.log('uploading to R2...');
 
     const key = `avatars/${userId}-${Date.now()}.jpg`;
 
@@ -34,13 +34,13 @@ export const uploadAvatar = async (req: Request, res: Response) => {
 
     const imageUrl = `${process.env.R2_ENDPOINT}/${process.env.R2_BUCKET_NAME}/${key}`;
 
-    // console.log('saving image url to DB:', imageUrl);
+    console.log('saving image url to DB:', imageUrl);
 
     await appDataSource
       .getRepository(User)
       .update({ id: userId }, { profileImageUrl: imageUrl });
 
-    // console.log('avatar upload complete');
+    console.log('avatar upload complete');
 
     return res.status(200).json({ url: imageUrl });
   } catch (err) {
@@ -105,7 +105,7 @@ export const updateMyProfile = async (
 
     const userId = req.user.id;
 
-    const { name, age, gender, interests, email, phoneNumber } = req.body;
+    const { name, age, gender, interests, phoneNumber } = req.body;
 
     const userRepo = appDataSource.getRepository(User);
     const user = await userRepo.findOneBy({ id: userId });
@@ -114,7 +114,6 @@ export const updateMyProfile = async (
       return res.status(404).json({ message: 'User not found' });
     }
 
-    if (email !== undefined) user.email = email;
     if (phoneNumber !== undefined) user.phoneNumber = phoneNumber;
     if (name !== undefined) user.name = name;
     if (age !== undefined && age !== '') {

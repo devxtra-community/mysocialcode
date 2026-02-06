@@ -11,7 +11,6 @@ import * as ImagePicker from 'expo-image-picker';
 import { useEffect, useState } from 'react';
 import api from '@/lib/api';
 import { router } from 'expo-router';
-import { getAccessToken } from '@/services/token/token.storage';
 
 export default function EditProfileScreen() {
   const [form, setForm] = useState({
@@ -67,44 +66,55 @@ export default function EditProfileScreen() {
   }
 
   async function uploadAvatar() {
-    if (!avatar || avatar.startsWith('http')) return;
-
-    const imageResponse = await fetch(avatar);
-    const blob = await imageResponse.blob();
+    if (!avatar || avatar.startsWith('http')) return avatar;
 
     const formData = new FormData();
-    formData.append('avatar', blob, 'avatar.jpg');
 
-    const token = await getAccessToken();
+    formData.append('avatar', {
+      uri: avatar,
+      name: 'avatar.jpg',
+      type: 'image/jpeg',
+    } as any);
 
-    const res = await fetch('http://172.28.32.1:4000/upload/avatar', {
-      method: 'POST',
+    const res = await api.post('/upload/avatar', formData, {
       headers: {
-        Authorization: `Bearer ${token}`,
+        'Content-Type': 'multipart/form-data',
       },
-      body: formData,
     });
 
-    const data = await res.json();
-    setAvatar(data.url);
+    return res.data.url;
   }
 
   async function handleSave() {
     try {
       setUploading(true);
 
-      await uploadAvatar();
+      let avatarUrl = avatar;
 
-      await api.put('/user/me/edit', {
-        name: form.name,
-        age: Number(form.age),
-        gender: form.gender,
-        email: form.email,
+      if (avatar && !avatar.startsWith('http')) {
+        avatarUrl = await uploadAvatar();
+      }
+
+      const formData = new FormData();
+
+      formData.append('name', form.name);
+      formData.append('age', form.age);
+      formData.append('gender', form.gender);
+
+      if (avatarUrl) {
+        formData.append('profileImageUrl', avatarUrl);
+      }
+
+      await api.put('/user/me/edit', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
       });
 
       Alert.alert('Success', 'Profile updated successfully');
       router.back();
     } catch (err) {
+      console.error(err);
       Alert.alert('Error', 'Failed to update profile');
     } finally {
       setUploading(false);
@@ -143,13 +153,6 @@ export default function EditProfileScreen() {
         placeholder="Gender"
         value={form.gender}
         onChangeText={(v) => setForm({ ...form, gender: v })}
-        style={styles.input}
-      />
-
-      <TextInput
-        placeholder="Email"
-        value={form.email}
-        onChangeText={(v) => setForm({ ...form, email: v })}
         style={styles.input}
       />
 

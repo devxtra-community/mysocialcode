@@ -18,7 +18,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 import { showError } from '@/utils/toast';
 import { useLocalSearchParams, router } from 'expo-router';
-export default function CreateEventScreen() {
+export default function UpdateEventScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
 
   const [title, setTitle] = useState('');
@@ -103,8 +103,6 @@ export default function CreateEventScreen() {
 
       form.append('title', title);
       form.append('description', description);
-      // form.append('startDate', startDate?.toISOString() || '');
-      // form.append('endDate', endDate?.toISOString() || '');
       form.append('isFree', String(isFree));
       form.append('price', isFree ? '0' : price);
       form.append('location', location);
