@@ -8,43 +8,31 @@ import {
   refreshAccessToken,
 } from './auth.controller';
 
-// import { validate } from '../../middleware/validate';
-// import {
-//   phoneSchema,
-//   registerSchema,
-//   loginSchema,
-//   verifyOtpSchema,
-//   refreshTokenSchema,
-// } from './auth.schema';
-// import { createLimiter } from '../../middleware/rateLimit';
-
-// const otpLimiter = createLimiter({
-//   windowMs: 10 * 60 * 1000,
-//   max: 3,
-//   keyPrefix: 'otp:',
-// });
-
-// const loginLimiter = createLimiter({
-//   windowMs: 10 * 60 * 1000,
-//   max: 5,
-//   keyPrefix: 'login:',
-// });
+import { validate } from '../../middleware/validate';
+import {
+  phoneSchema,
+  registerSchema,
+  loginSchema,
+  verifyOtpSchema,
+  refreshTokenSchema,
+} from './auth.schema';
 
 const authRouter = Router();
 
-authRouter.post('/send-otp', sendOtp);
+authRouter.post('/send-otp',  validate(phoneSchema), sendOtp);
 authRouter.post(
   '/verify-otp',
 
+  validate(verifyOtpSchema),
   verifyotp,
 );
-authRouter.post('/login', login);
-authRouter.post('/register', register);
+authRouter.post('/login', validate(loginSchema), login);
+authRouter.post('/register', validate(registerSchema), register);
 authRouter.post(
   '/refresh-token',
-
+  validate(refreshTokenSchema),
   refreshAccessToken,
 );
-authRouter.post('/logout', logout);
+authRouter.post('/logout', validate(refreshTokenSchema), logout);
 
 export default authRouter;
