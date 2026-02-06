@@ -1,7 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { logger } from '../../utils/logger';
 import { registerSchema, phoneSchema, loginSchema } from './auth.schema';
-// import { sendOtpSms } from '../../Services/sms.service';
 import { generateotp } from '../../utils/otp';
 import { appDataSource } from '../../data-source';
 import { Otp } from '../../entities/otp';
@@ -32,7 +31,7 @@ export const sendOtp = async (
       });
     }
 
-    const phoneNumber = result.data.phoneNumber;
+    const phoneNumber = result.data.phoneNumber.trim();
 
     const userRepo = appDataSource.getRepository(User);
     const otpRepo = appDataSource.getRepository(Otp);
@@ -102,44 +101,64 @@ export const verifyotp = async (
   res: Response,
   next: NextFunction,
 ) => {
-  console.log(req.body);
-
   try {
     const { phoneNumber, otp } = req.body;
-    if (!otp || !phoneNumber) {
-      return res
-        .status(400)
-        .json({ message: ' otp and phoneNumber are required' });
-    }
+
+    const normalizedPhone = phoneNumber.trim();
+    const otpInput = String(otp).trim();
+
     const otpRepo = appDataSource.getRepository(Otp);
+
     const otpRecord = await otpRepo.findOne({
       where: {
-        phoneNumber,
-        verified: false,
+        phoneNumber: normalizedPhone,
+        consumed: false,
       },
       order: {
         createdAt: 'DESC',
       },
     });
+
     if (!otpRecord) {
       return res.status(400).json({
-        messge: 'Ivalid or expired OTP',
+        message: 'Invalid or expired OTP',
       });
     }
 
     if (otpRecord.expiresAt < new Date()) {
-      return res.status(400).json({ message: 'OTP has expired' });
+      otpRecord.consumed = true;
+      await otpRepo.save(otpRecord);
+
+      return res.status(400).json({
+        message: 'Invalid or expired OTP',
+      });
     }
-    if (otpRecord.otp != otp.toString()) {
-      return res.status(400).json({ message: 'Invalid OTP' });
+
+    if (otpRecord.attempts >= 5) {
+      otpRecord.consumed = true;
+      await otpRepo.save(otpRecord);
+
+      return res.status(429).json({
+        message: 'Too many invalid attempts',
+      });
     }
+
+    if (otpRecord.otp !== otpInput) {
+      otpRecord.attempts += 1;
+      await otpRepo.save(otpRecord);
+
+      return res.status(400).json({
+        message: 'Invalid or expired OTP',
+      });
+    }
+
     otpRecord.verified = true;
+    otpRecord.consumed = true;
     await otpRepo.save(otpRecord);
 
     return res.status(200).json({
       success: true,
-      userExists: false,
-      message: 'OTP verified, new user',
+      message: 'OTP verified successfully',
       otpId: otpRecord.id,
     });
   } catch (err) {
@@ -267,13 +286,13 @@ export const login = async (
 
     if (!user) {
       return res.status(401).json({
-        message: 'Invalid phone number or password',
+        message: 'Invalid credentials',
       });
     }
 
     if (!user.passwordHash || !user.isPhoneVerified) {
-      return res.status(403).json({
-        message: 'Account not fully registered',
+      return res.status(401).json({
+        message: 'Invalid credentials',
       });
     }
 
@@ -281,7 +300,7 @@ export const login = async (
 
     if (!isPasswordValid) {
       return res.status(401).json({
-        message: 'Invalid phone number or password',
+        message: 'Invalid credentials',
       });
     }
 

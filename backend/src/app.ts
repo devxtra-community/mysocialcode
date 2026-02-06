@@ -11,11 +11,21 @@ import eventRouter from './modules/event/event.routes';
 import path from 'path';
 import { connectRedis } from './utils/redis';
 import ticketRouter from './modules/tickets/ticket.route';
+import uploadRouter from './modules/user/upload.routes';
 
 const app = express();
 app.use(cors());
+
+app.use('/upload', uploadRouter);
+
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(
+  express.urlencoded({
+    extended: true,
+    type: 'application/x-www-form-urlencoded',
+  }),
+);
+
 app.disable('etag');
 connectRedis();
 app.use(

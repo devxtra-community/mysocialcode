@@ -7,6 +7,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
+
 import { User } from './User';
 import { EventImage } from './EventImage';
 @Entity()
@@ -29,7 +30,9 @@ export class Events {
   @ManyToOne(() => User, (user) => user.events, { onDelete: 'CASCADE' })
   user!: User;
 
-  @OneToMany(() => EventImage, (image) => image.event, { onDelete: 'CASCADE' })
+  @OneToMany(() => EventImage, (image) => image.event, {
+    cascade: true,
+  })
   image!: EventImage[];
 
   @Column({ type: 'int' })

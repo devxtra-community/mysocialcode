@@ -14,9 +14,6 @@ import { router } from 'expo-router';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import api from '@/lib/api';
-import { FlatList } from 'react-native';
-
-/* ---------- Skeleton ---------- */
 
 function EventSkeleton() {
   return (
@@ -33,13 +30,9 @@ function EventSkeleton() {
   );
 }
 
-/* ---------- Helpers ---------- */
-
 function isPastEvent(endDate: string) {
   return new Date(endDate).getTime() < Date.now();
 }
-
-/* ---------- Screen ---------- */
 
 export default function EventsScreen() {
   const [events, setEvents] = useState<any[]>([]);
@@ -95,7 +88,6 @@ export default function EventsScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* ---------- Header ---------- */}
       <View style={styles.header}>
         <View style={styles.headerRow}>
           <Text style={styles.title}>Events</Text>
@@ -118,7 +110,6 @@ export default function EventsScreen() {
         </View>
       </View>
 
-      {/* ---------- Content ---------- */}
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <Text style={styles.sectionTitle}>My Events</Text>
 
@@ -147,7 +138,6 @@ export default function EventsScreen() {
                     imageStyle={styles.eventImageRadius}
                   >
                     <View style={styles.overlay}>
-                      {/* PAST BADGE */}
                       {past && (
                         <View style={styles.pastBadge}>
                           <Text style={styles.pastBadgeText}>PAST</Text>

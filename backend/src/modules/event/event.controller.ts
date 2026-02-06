@@ -74,18 +74,23 @@ export const getAllEvents = async (req: AuthReq, res: Response) => {
     const limit = Number(req.query.limit) || 10;
     const cursor = req.query.cursor as string | undefined;
     const cursorId = req.query.id as string | undefined;
+
     const cacheKey = `events:limit=${limit}:cursor=${cursor || 'none'}:id=${cursorId || 'none'}`;
-    //comment
+
     const cachedData = await redisClient.get(cacheKey);
     if (cachedData) {
       logger.info('Served from Redis');
       return res.status(200).json(JSON.parse(cachedData));
     }
 
+    const now = new Date();
+
     const qb = getEventRepository
       .createQueryBuilder('event')
       .leftJoinAndSelect('event.image', 'image')
-      .where('event.status = :status', { status: 'published' });
+      .where('event.status = :status', { status: 'published' })
+      .andWhere('event.startDate >= :now', { now })
+      .andWhere('event.userId != :userId', { userId: req.user?.id });
 
     if (cursor && cursorId) {
       qb.andWhere(
@@ -121,9 +126,11 @@ export const getAllEvents = async (req: AuthReq, res: Response) => {
 
     return res.status(200).json(responseData);
   } catch (err) {
-    res
-      .status(400)
-      .json({ success: false, message: 'failed to fetch events', err });
+    return res.status(400).json({
+      success: false,
+      message: 'failed to fetch events',
+      error: err,
+    });
   }
 };
 
@@ -271,7 +278,7 @@ export const updateEvent = async (req: AuthReq, res: Response) => {
 
     const event = await getEventRepository.findOne({
       where: { id: eventId },
-      relations: ['image', 'user'], // ✅ FIXED
+      relations: ['image', 'user'],
     });
 
     if (!event) {
@@ -337,7 +344,6 @@ export const updateEvent = async (req: AuthReq, res: Response) => {
         .json({ message: 'End date cannot be before start date' });
     }
 
-    // ✅ Image handling
     let keepImages: string[] = [];
     if (existingImages) {
       keepImages = Array.isArray(existingImages)
