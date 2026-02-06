@@ -11,7 +11,6 @@ import * as ImagePicker from 'expo-image-picker';
 import { useEffect, useState } from 'react';
 import api from '@/lib/api';
 import { router } from 'expo-router';
-import { getAccessToken } from '@/services/token/token.storage';
 
 export default function EditProfileScreen() {
   const [form, setForm] = useState({
@@ -75,18 +74,9 @@ export default function EditProfileScreen() {
     const formData = new FormData();
     formData.append('avatar', blob, 'avatar.jpg');
 
-    const token = await getAccessToken();
-
-    const res = await fetch('http://172.28.32.1:4000/upload/avatar', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      body: formData,
+    await api.post('/user/me/avatar', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
     });
-
-    const data = await res.json();
-    setAvatar(data.url);
   }
 
   async function handleSave() {

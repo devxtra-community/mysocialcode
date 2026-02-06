@@ -286,13 +286,13 @@ export const login = async (
 
     if (!user) {
       return res.status(401).json({
-        message: 'Invalid credentials',
+        message: 'user not found',
       });
     }
 
     if (!user.passwordHash || !user.isPhoneVerified) {
       return res.status(401).json({
-        message: 'Invalid credentials',
+        message: 'not verified',
       });
     }
 
