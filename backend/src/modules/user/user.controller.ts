@@ -32,9 +32,8 @@ export const uploadAvatar = async (req: Request, res: Response) => {
       }),
     );
 
-    const imageUrl = `${process.env.R2_ENDPOINT}/${process.env.R2_BUCKET_NAME}/${key}`;
-
-    console.log('saving image url to DB:', imageUrl);
+    const imageUrl = `${process.env.R2_PUBLIC_URL}/${key}`;
+    // console.log('saving image url to DB:', imageUrl);
 
     await appDataSource
       .getRepository(User)
