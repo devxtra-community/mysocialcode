@@ -16,19 +16,6 @@ import {
 //   verifyOtpSchema,
 //   refreshTokenSchema,
 // } from './auth.schema';
-// import { createLimiter } from '../../middleware/rateLimit';
-
-// const otpLimiter = createLimiter({
-//   windowMs: 10 * 60 * 1000,
-//   max: 3,
-//   keyPrefix: 'otp:',
-// });
-
-// const loginLimiter = createLimiter({
-//   windowMs: 10 * 60 * 1000,
-//   max: 5,
-//   keyPrefix: 'login:',
-// });
 
 const authRouter = Router();
 
