@@ -48,7 +48,6 @@
 
 //     password: z.string().min(8, 'Password required'),
 //   })
-  
 
 // export const registerSchema = z
 //   .object({

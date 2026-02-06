@@ -25,7 +25,7 @@ authRouter.post(
 
   verifyotp,
 );
-authRouter.post('/login',  login);
+authRouter.post('/login', login);
 authRouter.post('/register', register);
 authRouter.post(
   '/refresh-token',
