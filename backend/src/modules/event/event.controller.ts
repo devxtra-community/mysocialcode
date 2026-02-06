@@ -430,7 +430,7 @@ export const attendance = async (req: AuthReq, res: Response) => {
   console.log(req.body);
   try {
     const { qrCode, eventId } = req.body;
-   // const userId = req.user?.id;
+    // const userId = req.user?.id;
 
     if (!qrCode || !eventId) {
       return res.status(400).json({
