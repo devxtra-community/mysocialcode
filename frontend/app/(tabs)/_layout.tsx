@@ -58,6 +58,7 @@ export default function TabLayout() {
       <Tabs.Screen name="tickets/ticket" options={{ href: null }} />
       <Tabs.Screen name="events/update/[id]" options={{ href: null }} />
       <Tabs.Screen name="events/[id]/scan" options={{ href: null }} />
+      <Tabs.Screen name="profile/edit/index" options={{ href: null }} />
     </Tabs>
   );
 }

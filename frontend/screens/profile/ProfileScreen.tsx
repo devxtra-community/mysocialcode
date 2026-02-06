@@ -3,6 +3,8 @@ import { View, Text, StyleSheet, Pressable, Alert, Image } from 'react-native';
 import { getRefreshToken, clearTokens } from '@/services/token/token.storage';
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
+import { ActivityIndicator } from 'react-native';
+
 
 export interface UserProfileType {
   id: string;
@@ -27,16 +29,21 @@ export default function ProfileScreen() {
 
   const defaultAvatar = require('@/assets/images/OIP.jpeg');
 
-  async function fetchProfile() {
-    try {
-      const res = await api.get('/user/me');
-      setUser(res.data.user);
-    } catch (err) {
-      console.error('Failed to fetch profile', err);
-    } finally {
-      setLoading(false);
-    }
+ async function fetchProfile() {
+  try {
+    setLoading(true); 
+
+    const res = await api.get('/user/me');
+    console.log(res.data);
+    console.log("Avatar URL:", res.data.user.profileImageUrl);
+
+    setUser(res.data.user);
+  } catch (err) {
+    console.error('Failed to fetch profile', err);
+  } finally {
+    setLoading(false);
   }
+}
 
   const handleLogout = () => {
     Alert.alert('Log out', 'Are you sure bro?', [
@@ -76,9 +83,14 @@ export default function ProfileScreen() {
     router.push('/profile/edit');
   };
 
-  if (loading) {
-    return <Text>Loading...</Text>;
-  }
+ if (loading) {
+  return (
+    <View style={styles.loaderContainer}>
+      <ActivityIndicator size="large" color="#4f46e5" />
+    </View>
+  );
+}
+
 
   if (!user) {
     return <Text>Failed to load profile</Text>;
@@ -181,4 +193,9 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: 'red',
   },
+  loaderContainer: {
+  flex: 1,
+  justifyContent: 'center',
+  alignItems: 'center',
+},
 });

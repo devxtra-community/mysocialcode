@@ -7,7 +7,7 @@ import { logger } from '../../utils/logger';
 
 export const uploadAvatar = async (req: Request, res: Response) => {
   try {
-    // console.log('uploadAvatar controller HIT');
+    console.log('uploadAvatar controller HIT');
 
     const userId = req.user?.id;
     if (!userId) {
@@ -32,8 +32,7 @@ export const uploadAvatar = async (req: Request, res: Response) => {
       }),
     );
 
-    const imageUrl = `${process.env.R2_ENDPOINT}/${process.env.R2_BUCKET_NAME}/${key}`;
-
+   const imageUrl = `${process.env.R2_PUBLIC_URL}/${key}`;
     // console.log('saving image url to DB:', imageUrl);
 
     await appDataSource
