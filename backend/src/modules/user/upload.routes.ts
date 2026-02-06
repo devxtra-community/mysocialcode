@@ -9,7 +9,7 @@ uploadRouter.post(
   '/me/avatar',
   upload.single('avatar'),
   requireAuth,
-  uploadAvatar
+  uploadAvatar,
 );
 
 export default uploadRouter;

@@ -115,9 +115,7 @@ export default function EditProfileScreen() {
     <View style={styles.container}>
       <View style={styles.avatarContainer}>
         <Image
-          source={
-            avatar ? { uri: avatar } : defaultAvatar
-          }
+          source={avatar ? { uri: avatar } : defaultAvatar}
           style={styles.avatar}
         />
 

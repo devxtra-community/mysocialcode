@@ -25,7 +25,7 @@ export default function ProfileScreen() {
     fetchProfile();
   }, []);
 
-  const defaultAvatar = require('@/assets/images/OIP.jpeg')
+  const defaultAvatar = require('@/assets/images/OIP.jpeg');
 
   async function fetchProfile() {
     try {
@@ -94,9 +94,7 @@ export default function ProfileScreen() {
         <Image
           key={user.profileImageUrl}
           source={
-            user.profileImageUrl
-              ? { uri: user.profileImageUrl }
-              : defaultAvatar
+            user.profileImageUrl ? { uri: user.profileImageUrl } : defaultAvatar
           }
           style={styles.avatar}
         />
