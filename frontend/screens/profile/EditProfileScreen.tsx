@@ -82,9 +82,7 @@ export default function EditProfileScreen() {
   async function handleSave() {
     try {
       setUploading(true);
-
       await uploadAvatar();
-
       await api.put('/user/me/edit', {
         name: form.name,
         age: Number(form.age),
@@ -100,7 +98,7 @@ export default function EditProfileScreen() {
       setUploading(false);
     }
   }
-
+//comment
   return (
     <View style={styles.container}>
       <View style={styles.avatarContainer}>
