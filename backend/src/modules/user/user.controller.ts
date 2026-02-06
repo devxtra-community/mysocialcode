@@ -32,7 +32,7 @@ export const uploadAvatar = async (req: Request, res: Response) => {
       }),
     );
 
-   const imageUrl = `${process.env.R2_PUBLIC_URL}/${key}`;
+    const imageUrl = `${process.env.R2_PUBLIC_URL}/${key}`;
     // console.log('saving image url to DB:', imageUrl);
 
     await appDataSource

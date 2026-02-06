@@ -66,19 +66,18 @@ export default function EditProfileScreen() {
   }
 
   async function uploadAvatar() {
-  if (!avatar || avatar.startsWith('http')) return;
+    if (!avatar || avatar.startsWith('http')) return;
 
-  const imageResponse = await fetch(avatar);
-  const blob = await imageResponse.blob();
+    const imageResponse = await fetch(avatar);
+    const blob = await imageResponse.blob();
 
-  const formData = new FormData();
-  formData.append('avatar', blob, 'avatar.jpg');
+    const formData = new FormData();
+    formData.append('avatar', blob, 'avatar.jpg');
 
-  await api.post('/user/me/avatar', formData, {
-    headers: { 'Content-Type': 'multipart/form-data' },
-  });
-}
-
+    await api.post('/user/me/avatar', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+  }
 
   async function handleSave() {
     try {

@@ -7,6 +7,11 @@ const userRouter = express.Router();
 
 userRouter.put('/me/edit', requireAuth, updateMyProfile);
 userRouter.get('/me', requireAuth, getMyProfile);
-userRouter.post('/me/avatar',requireAuth,upload.single('avatar'),uploadAvatar)
+userRouter.post(
+  '/me/avatar',
+  requireAuth,
+  upload.single('avatar'),
+  uploadAvatar,
+);
 
 export default userRouter;
