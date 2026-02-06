@@ -1,15 +1,15 @@
 import express from 'express';
-import { upload } from '../../middleware/upload';
-import { requireAuth } from '../../middleware/auth.middleware';
 import { uploadAvatar } from './user.controller';
+import { requireAuth } from '../../middleware/auth.middleware';
+import { upload } from '../../middleware/upload';
 
 const uploadRouter = express.Router();
 
 uploadRouter.post(
-  '/avatar',
+  '/me/avatar',
   upload.single('avatar'),
   requireAuth,
-  uploadAvatar,
+  uploadAvatar
 );
 
 export default uploadRouter;

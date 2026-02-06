@@ -29,6 +29,8 @@ export default function EditProfileScreen() {
     loadProfile();
   }, []);
 
+  const defaultAvatar = require('@/assets/images/OIP.jpeg');
+
   async function loadProfile() {
     const res = await api.get('/user/me');
     const u = res.data.user;
@@ -114,7 +116,7 @@ export default function EditProfileScreen() {
       <View style={styles.avatarContainer}>
         <Image
           source={
-            avatar ? { uri: avatar } : require('@/assets/images/OIP.jpeg')
+            avatar ? { uri: avatar } : defaultAvatar
           }
           style={styles.avatar}
         />
