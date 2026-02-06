@@ -35,16 +35,16 @@ const authRouter = Router();
 authRouter.post('/send-otp', sendOtp);
 authRouter.post(
   '/verify-otp',
-  
+
   verifyotp,
 );
 authRouter.post('/login', login);
 authRouter.post('/register', register);
 authRouter.post(
   '/refresh-token',
-  
+
   refreshAccessToken,
 );
-authRouter.post('/logout',  logout);
+authRouter.post('/logout', logout);
 
 export default authRouter;
