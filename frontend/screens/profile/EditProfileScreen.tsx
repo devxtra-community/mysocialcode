@@ -98,7 +98,7 @@ export default function EditProfileScreen() {
       setUploading(false);
     }
   }
-//comment
+  //comment
   return (
     <View style={styles.container}>
       <View style={styles.avatarContainer}>
