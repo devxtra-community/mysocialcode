@@ -1,38 +1,40 @@
-// // import { z } from 'zod';
-// // export const phoneSchema = z.object({
-// //   phoneNumber: z.string().min(10, 'Invalid phone number'),
-// // });
+import { z } from 'zod';
+export const phoneSchema = z.object({
+  phoneNumber: z.string().min(10, 'Invalid phone number'),
+});
 
-// // export const registerSchema = z
-// //   .object({
-// //     otpId: z.string().uuid(),
+export const registerSchema = z
+  .object({
+    otpId: z.string().uuid(),
 
-// //     name: z.string().min(1, 'Name is required'),
+    name: z.string().min(1, 'Name is required'),
 
-// //     age: z.number().int().positive().optional(),
+    age: z.number().int().positive().optional(),
 
-// //     gender: z.enum(['male', 'female', 'other']).optional(),
+    gender: z.enum(['male', 'female', 'other']).optional(),
 
-// //     interests: z.array(z.string()).optional(),
+    interests: z.array(z.string()).optional(),
 
-// //     email: z.string().email('Invalid email address'),
+    email: z.string().email('Invalid email address'),
 
-// //     password: z.string().min(8, 'Password must be at least 8 characters'),
+    password: z.string().min(8, 'Password must be at least 8 characters'),
 
-// //     confirmPassword: z
-// //       .string()
-// //       .min(8, 'Confirm password must be at least 8 characters'),
-// //   })
-// //   .refine((data) => data.password === data.confirmPassword, {
-// //     message: 'Passwords do not match',
-// //     path: ['confirmPassword'],
-// //   });
+    confirmPassword: z
+      .string()
+      .min(8, 'Confirm password must be at least 8 characters'),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: 'Passwords do not match',
+    path: ['confirmPassword'],
+  });
 
-// // export const loginSchema = z.object({
-// //   phoneNumber: z.string().min(10, 'Phone number is required'),
+export const loginSchema = z.object({
+  phoneNumber: z.string().min(10, 'Phone number is required'),
 
-// //   password: z.string().min(1, 'Password is required'),
-// // });
+  password: z.string().min(1, 'Password is required'),
+});
+
+
 
 // import { z } from 'zod';
 
@@ -48,6 +50,7 @@
 
 //     password: z.string().min(8, 'Password required'),
 //   })
+//   .strict();
 
 // export const registerSchema = z
 //   .object({

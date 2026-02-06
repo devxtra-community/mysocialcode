@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { logger } from '../../utils/logger';
+import { registerSchema, phoneSchema, loginSchema } from './auth.schema';
 import { generateotp } from '../../utils/otp';
 import { appDataSource } from '../../data-source';
 import { Otp } from '../../entities/otp';
@@ -22,7 +23,15 @@ export const sendOtp = async (
   try {
     logger.info('reached');
 
-    const phoneNumber = req.body.phoneNumber.trim();
+    const result = phoneSchema.safeParse(req.body);
+    if (!result.success) {
+      return res.status(400).json({
+        message: 'validation failed',
+        error: result.error.format(),
+      });
+    }
+
+    const phoneNumber = result.data.phoneNumber.trim();
 
     const userRepo = appDataSource.getRepository(User);
     const otpRepo = appDataSource.getRepository(Otp);
@@ -164,6 +173,14 @@ export const register = async (
   next: NextFunction,
 ) => {
   try {
+    const result = registerSchema.safeParse(req.body);
+    if (!result.success) {
+      return res.status(400).json({
+        message: 'invalid registration data',
+        errors: result.error.format(),
+      });
+    }
+
     const {
       otpId,
       name,
@@ -173,7 +190,7 @@ export const register = async (
       email,
       password,
       confirmPassword,
-    } = req.body;
+    } = result.data;
 
     if (!otpId) {
       return res.status(400).json({ message: 'otpId required' });
@@ -251,7 +268,15 @@ export const login = async (
   next: NextFunction,
 ) => {
   try {
-    const { phoneNumber, password } = req.body;
+    const result = loginSchema.safeParse(req.body);
+    if (!result.success) {
+      return res.status(400).json({
+        message: 'Invalid login data',
+        errors: result.error.format(),
+      });
+    }
+
+    const { phoneNumber, password } = result.data;
 
     const userRepo = appDataSource.getRepository(User);
 

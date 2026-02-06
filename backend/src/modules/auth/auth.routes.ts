@@ -29,7 +29,7 @@ authRouter.post('/login', login);
 authRouter.post('/register', register);
 authRouter.post(
   '/refresh-token',
-
+  
   refreshAccessToken,
 );
 authRouter.post('/logout', logout);
