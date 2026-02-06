@@ -5,7 +5,6 @@ import app from './app';
 import { logger } from './utils/logger';
 import { appDataSource } from './data-source';
 import { connectRabbitMQ } from './messaging/rabbitmq/connect';
-import './config/env';
 
 const PORT = process.env.PORT;
 
