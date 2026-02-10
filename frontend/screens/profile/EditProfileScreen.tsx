@@ -53,12 +53,12 @@ export default function EditProfileScreen() {
       return;
     }
 
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 0.7,
-    });
+   const result = await ImagePicker.launchImageLibraryAsync({
+         allowsMultipleSelection: true,
+         selectionLimit: 1,
+         mediaTypes: ['images'],
+         quality: 0.8,
+       });;
 
     if (!result.canceled) {
       setAvatar(result.assets[0].uri);
@@ -66,18 +66,23 @@ export default function EditProfileScreen() {
   }
 
   async function uploadAvatar() {
-    if (!avatar || avatar.startsWith('http')) return;
+  if (!avatar || avatar.startsWith('http')) return;
 
-    const imageResponse = await fetch(avatar);
-    const blob = await imageResponse.blob();
+  const formData = new FormData();
 
-    const formData = new FormData();
-    formData.append('avatar', blob, 'avatar.jpg');
+  formData.append('avatar', {
+    uri: avatar.startsWith('file://') ? avatar : `file://${avatar}`,
+    name: 'avatar.jpg',
+    type: 'image/jpeg',
+  } as any);
 
-    await api.post('/user/me/avatar', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    });
-  }
+  await api.post('/user/me/avatar', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+}
+
 
   async function handleSave() {
     try {

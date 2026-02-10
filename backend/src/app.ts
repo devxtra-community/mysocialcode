@@ -12,6 +12,7 @@ import path from 'path';
 import { connectRedis } from './utils/redis';
 import ticketRouter from './modules/tickets/ticket.route';
 import uploadRouter from './modules/user/upload.routes';
+import boostRouter from './modules/boosts/boost.routes';
 
 const app = express();
 app.use(cors());
@@ -48,6 +49,7 @@ app.use('/auth', authRouter);
 app.use('/event', eventRouter);
 app.use('/user', userRouter);
 app.use('/ticket', ticketRouter);
+app.use('/boost',boostRouter)
 app.use(notFound);
 app.use(errorHandler);
 export default app;
