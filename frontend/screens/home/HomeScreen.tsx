@@ -43,10 +43,10 @@ export default function HomeScreen() {
 
   async function fetchBoosted() {
     try {
-      const res = await api.get("/boost/active");
+      const res = await api.get('/boost/active');
       setBoostedEvents(res.data.events || []);
     } catch (err) {
-      console.log("Failed boosted fetch", err);
+      console.log('Failed boosted fetch', err);
     }
   }
 
@@ -56,7 +56,7 @@ export default function HomeScreen() {
     setLoading(true);
 
     try {
-      let url = "/event/all-events?limit=10";
+      let url = '/event/all-events?limit=10';
 
       if (cursor) {
         url += `&cursor=${cursor.startDate}&id=${cursor.id}`;
@@ -65,12 +65,12 @@ export default function HomeScreen() {
       const res = await api.get(url);
 
       if (res.data.success) {
-        setEvents(prev => [...prev, ...res.data.events]);
+        setEvents((prev) => [...prev, ...res.data.events]);
         setHasMore(res.data.hasMore);
         setCursor(res.data.nextCursor);
       }
     } catch (err) {
-      console.log("Failed to load events", err);
+      console.log('Failed to load events', err);
     } finally {
       setLoading(false);
     }
@@ -94,10 +94,8 @@ export default function HomeScreen() {
         contentContainerStyle={styles.scrollContent}
         onEndReached={fetchEvents}
         onEndReachedThreshold={0.6}
-
         ListHeaderComponent={
           <>
-           
             {boostedEvents.length > 0 && (
               <View style={{ marginBottom: 16 }}>
                 <Text style={styles.sectionTitle}> sponsered</Text>
@@ -109,9 +107,7 @@ export default function HomeScreen() {
                   showsHorizontalScrollIndicator={false}
                   renderItem={({ item }) => (
                     <Pressable
-                      onPress={() =>
-                        router.push(`/(tabs)/events/${item.id}`)
-                      }
+                      onPress={() => router.push(`/(tabs)/events/${item.id}`)}
                       style={styles.boostedCard}
                     >
                       <ImageBackground
@@ -120,9 +116,7 @@ export default function HomeScreen() {
                         imageStyle={{ borderRadius: 12 }}
                       >
                         <View style={styles.overlay}>
-                          <Text style={styles.eventTitle}>
-                            {item.title}
-                          </Text>
+                          <Text style={styles.eventTitle}>{item.title}</Text>
                         </View>
                       </ImageBackground>
                     </Pressable>
@@ -134,7 +128,6 @@ export default function HomeScreen() {
             <Text style={styles.sectionTitle}>All Events</Text>
           </>
         }
-
         ListFooterComponent={
           loading ? (
             <HomeSkeleton />
@@ -142,11 +135,8 @@ export default function HomeScreen() {
             <Text style={styles.emptyText}>No more events</Text>
           ) : null
         }
-
         renderItem={({ item: event }) => (
-          <Pressable
-            onPress={() => router.push(`/(tabs)/events/${event.id}`)}
-          >
+          <Pressable onPress={() => router.push(`/(tabs)/events/${event.id}`)}>
             <Card style={styles.eventCard}>
               <ImageBackground
                 source={{ uri: event.image?.[0]?.imageUrl }}
@@ -155,12 +145,8 @@ export default function HomeScreen() {
               >
                 <View style={styles.overlay}>
                   <Text style={styles.eventTitle}>{event.title}</Text>
-                  <Text style={styles.eventLocation}>
-                    {event.location}
-                  </Text>
-                  <Text style={styles.eventDate}>
-                    {event.startDate}
-                  </Text>
+                  <Text style={styles.eventLocation}>{event.location}</Text>
+                  <Text style={styles.eventDate}>{event.startDate}</Text>
                 </View>
               </ImageBackground>
             </Card>
@@ -172,39 +158,39 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fff" },
+  container: { flex: 1, backgroundColor: '#fff' },
 
   header: { padding: 16 },
 
-  title: { fontSize: 24, fontWeight: "700", marginBottom: 12 },
+  title: { fontSize: 24, fontWeight: '700', marginBottom: 12 },
 
   searchBox: {
-    backgroundColor: "#f3f4f6",
+    backgroundColor: '#f3f4f6',
     borderRadius: 12,
     paddingHorizontal: 12,
     height: 44,
-    justifyContent: "center",
+    justifyContent: 'center',
   },
 
   scrollContent: { paddingHorizontal: 16 },
 
   sectionTitle: {
     fontSize: 18,
-    fontWeight: "600",
+    fontWeight: '600',
     marginBottom: 12,
   },
 
-  emptyText: { color: "#6b7280", textAlign: "center" },
+  emptyText: { color: '#6b7280', textAlign: 'center' },
 
   eventCard: {
     marginBottom: 14,
     padding: 0,
-    overflow: "hidden",
+    overflow: 'hidden',
   },
 
   eventImage: {
     height: 180,
-    justifyContent: "flex-end",
+    justifyContent: 'flex-end',
   },
 
   eventImageRadius: {
@@ -212,23 +198,23 @@ const styles = StyleSheet.create({
   },
 
   overlay: {
-    backgroundColor: "rgba(0,0,0,0.45)",
+    backgroundColor: 'rgba(0,0,0,0.45)',
     padding: 12,
   },
 
   eventTitle: {
     fontSize: 16,
-    fontWeight: "700",
-    color: "#fff",
+    fontWeight: '700',
+    color: '#fff',
   },
 
   eventLocation: {
-    color: "#e5e7eb",
+    color: '#e5e7eb',
     marginTop: 4,
   },
 
   eventDate: {
-    color: "#d1d5db",
+    color: '#d1d5db',
     marginTop: 2,
     fontSize: 12,
   },
@@ -245,6 +231,6 @@ const styles = StyleSheet.create({
 
   boostedImage: {
     height: 140,
-    justifyContent: "flex-end",
+    justifyContent: 'flex-end',
   },
 });

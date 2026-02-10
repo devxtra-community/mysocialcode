@@ -131,13 +131,19 @@ export default function EventDetailScreen() {
         </Text>
       </Pressable>
       {isHost && (
-        <Pressable style={styles.scanBtn} onPress={() => router.push(`/(tabs)/events/${id}/scan`)}>
-          <Text style={styles.scanText} >scan for joinees</Text>
+        <Pressable
+          style={styles.scanBtn}
+          onPress={() => router.push(`/(tabs)/events/${id}/scan`)}
+        >
+          <Text style={styles.scanText}>scan for joinees</Text>
         </Pressable>
       )}
       {isHost && (
-        <Pressable style={styles.boostBtn} onPress={() => router.push(`/(tabs)/events/${id}/boost`)}>
-          <Text style={styles.boostText} >Boost Event </Text>
+        <Pressable
+          style={styles.boostBtn}
+          onPress={() => router.push(`/(tabs)/events/${id}/boost`)}
+        >
+          <Text style={styles.boostText}>Boost Event </Text>
         </Pressable>
       )}
 
@@ -265,46 +271,43 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   scanBtn: {
-  backgroundColor: "#00B894",
-  paddingVertical: 12,
-  paddingHorizontal: 18,
-  borderRadius: 10,
-  alignItems: "center",
-  marginTop: 10,
+    backgroundColor: '#00B894',
+    paddingVertical: 12,
+    paddingHorizontal: 18,
+    borderRadius: 10,
+    alignItems: 'center',
+    marginTop: 10,
 
+    shadowColor: '#000',
+    shadowOpacity: 0.12,
+    shadowRadius: 3,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
+  },
 
-  shadowColor: "#000",
-  shadowOpacity: 0.12,
-  shadowRadius: 3,
-  shadowOffset: { width: 0, height: 2 },
-  elevation: 2,
-},
-
-scanText: {
-  color: "#fff",
-  fontSize: 15,
-  fontWeight: "600",
-},
+  scanText: {
+    color: '#fff',
+    fontSize: 15,
+    fontWeight: '600',
+  },
   boostBtn: {
-  backgroundColor: "#6C5CE7",
-  paddingVertical: 12,
-  paddingHorizontal: 18,
-  borderRadius: 10,
-  alignItems: "center",
-  marginTop: 12,
+    backgroundColor: '#6C5CE7',
+    paddingVertical: 12,
+    paddingHorizontal: 18,
+    borderRadius: 10,
+    alignItems: 'center',
+    marginTop: 12,
 
+    shadowColor: '#000',
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 3,
+  },
 
-  shadowColor: "#000",
-  shadowOpacity: 0.15,
-  shadowRadius: 4,
-  shadowOffset: { width: 0, height: 2 },
-  elevation: 3,
-},
-
-boostText: {
-  color: "#fff",
-  fontSize: 16,
-  fontWeight: "600",
-}
-
+  boostText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
 });

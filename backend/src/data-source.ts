@@ -16,6 +16,14 @@ export const appDataSource = new DataSource({
   ssl: {
     rejectUnauthorized: false,
   },
-  entities: [User, Otp, RefreshTokenEntity, Events, EventImage, EventTicket,Boost],
+  entities: [
+    User,
+    Otp,
+    RefreshTokenEntity,
+    Events,
+    EventImage,
+    EventTicket,
+    Boost,
+  ],
   synchronize: true,
 });

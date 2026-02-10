@@ -1,34 +1,40 @@
-import { Column,PrimaryGeneratedColumn,CreateDateColumn, Entity, OneToMany, ManyToOne } from "typeorm";
-
+import {
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  Entity,
+  OneToMany,
+  ManyToOne,
+} from 'typeorm';
 
 import { Events } from './Event';
-import { User } from "./User";
+import { User } from './User';
 @Entity('boosts')
-export class Boost{
-    @PrimaryGeneratedColumn('uuid')
-    id!:string
+export class Boost {
+  @PrimaryGeneratedColumn('uuid')
+  id!: string;
 
-    @ManyToOne(()=>Events,{onDelete:"CASCADE"})
-    event!:Events
+  @ManyToOne(() => Events, { onDelete: 'CASCADE' })
+  event!: Events;
 
-    @ManyToOne(()=>User,{onDelete:"CASCADE"})
-    user!:User
+  @ManyToOne(() => User, { onDelete: 'CASCADE' })
+  user!: User;
 
-    @Column({type:"timestamptz"})
-    startTime!:Date
+  @Column({ type: 'timestamptz' })
+  startTime!: Date;
 
-    @Column({type:"timestamptz"})
-    endTime!:Date
-    
-    @Column({default:"active"})
-    status!:"active" | "expired" | "cancelled"
+  @Column({ type: 'timestamptz' })
+  endTime!: Date;
 
-    @Column()
-    paymentId!:string;
+  @Column({ default: 'active' })
+  status!: 'active' | 'expired' | 'cancelled';
 
-    @Column("decimal")
-    amount!:number
+  @Column()
+  paymentId!: string;
 
-    @CreateDateColumn()
-    createdAt!:Date
+  @Column('decimal')
+  amount!: number;
+
+  @CreateDateColumn()
+  createdAt!: Date;
 }

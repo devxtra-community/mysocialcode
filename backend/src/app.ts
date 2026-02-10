@@ -49,7 +49,7 @@ app.use('/auth', authRouter);
 app.use('/event', eventRouter);
 app.use('/user', userRouter);
 app.use('/ticket', ticketRouter);
-app.use('/boost',boostRouter)
+app.use('/boost', boostRouter);
 app.use(notFound);
 app.use(errorHandler);
 export default app;
