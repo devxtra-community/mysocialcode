@@ -8,4 +8,3 @@ export const signAccessToken = (payload: { userId: string }) => {
 export const verifyAccessToken = (token: string) => {
   return jwt.verify(token, process.env.ACCESS_TOKEN_SECRET!);
 };
-

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -6,54 +6,40 @@ import {
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
-  Alert
-} from "react-native";
+  Alert,
+} from 'react-native';
 
-import api from "@/lib/api";
+import api from '@/lib/api';
 
 export default function ForgotPasswordScreen() {
-
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleForgotPassword = async () => {
-
     if (!email) {
-      Alert.alert("Error", "Please enter your email");
+      Alert.alert('Error', 'Please enter your email');
       return;
     }
 
     try {
-
       setLoading(true);
 
       const res = await api.post(`/auth/forget-password`, { email });
 
-      Alert.alert("Success", res.data.message);
-
+      Alert.alert('Success', res.data.message);
     } catch (err: any) {
-
       Alert.alert(
-        "Error",
-        err.response?.data?.message ||
-        "Something went wrong"
+        'Error',
+        err.response?.data?.message || 'Something went wrong',
       );
-
     } finally {
-
       setLoading(false);
-
     }
-
   };
 
   return (
-
     <View style={styles.container}>
-
-      <Text style={styles.title}>
-        Forgot Password
-      </Text>
+      <Text style={styles.title}>Forgot Password</Text>
 
       <TextInput
         style={styles.input}
@@ -69,56 +55,47 @@ export default function ForgotPasswordScreen() {
         onPress={handleForgotPassword}
         disabled={loading}
       >
-
         {loading ? (
           <ActivityIndicator color="#fff" />
         ) : (
-          <Text style={styles.buttonText}>
-            Send Reset Link
-          </Text>
+          <Text style={styles.buttonText}>Send Reset Link</Text>
         )}
-
       </TouchableOpacity>
-
     </View>
-
   );
-
 }
 
 const styles = StyleSheet.create({
-
   container: {
     flex: 1,
-    justifyContent: "center",
-    padding: 20
+    justifyContent: 'center',
+    padding: 20,
   },
 
   title: {
     fontSize: 24,
-    fontWeight: "bold",
+    fontWeight: 'bold',
     marginBottom: 20,
-    textAlign: "center"
+    textAlign: 'center',
   },
 
   input: {
     borderWidth: 1,
-    borderColor: "#ccc",
+    borderColor: '#ccc',
     padding: 12,
     borderRadius: 6,
-    marginBottom: 20
+    marginBottom: 20,
   },
 
   button: {
-    backgroundColor: "#007BFF",
+    backgroundColor: '#007BFF',
     padding: 15,
     borderRadius: 6,
-    alignItems: "center"
+    alignItems: 'center',
   },
 
   buttonText: {
-    color: "#fff",
-    fontWeight: "bold"
-  }
-
+    color: '#fff',
+    fontWeight: 'bold',
+  },
 });

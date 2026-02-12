@@ -1,45 +1,38 @@
 import { z } from 'zod';
 
-export const createEventSchema = z.object({
+export const createEventSchema = z
+  .object({
+    title: z.string().min(3),
 
-  title: z.string().min(3),
+    description: z.string().min(10),
 
-  description: z.string().min(10),
+    startDate: z.coerce.date(),
 
-  startDate: z.coerce.date(),
+    endDate: z.coerce.date(),
 
-  endDate: z.coerce.date(),
+    isFree: z.coerce.boolean(),
 
-  isFree: z.coerce.boolean(),
+    price: z
+      .union([z.coerce.number(), z.literal('')])
+      .transform((val) => (val === '' ? undefined : val))
+      .optional(),
 
-  price: z
-    .union([z.coerce.number(), z.literal("")])
-    .transform(val => val === "" ? undefined : val)
-    .optional(),
+    location: z.string().min(3),
 
-  location: z.string().min(3),
+    capacity: z.coerce.number().int().min(1),
 
-  capacity: z.coerce.number().int().min(1),
+    category: z.string(),
 
-  category: z.string(),
-
-  rules: z.string().optional(),
-
-})
-.refine(
-  data => data.isFree || data.price !== undefined,
-  {
-    message: "Paid events must have price",
-    path: ["price"]
-  }
-)
-.refine(
-  data => data.endDate > data.startDate,
-  {
-    message: "End date must be after start date",
-    path: ["endDate"]
-  }
-);
+    rules: z.string().optional(),
+  })
+  .refine((data) => data.isFree || data.price !== undefined, {
+    message: 'Paid events must have price',
+    path: ['price'],
+  })
+  .refine((data) => data.endDate > data.startDate, {
+    message: 'End date must be after start date',
+    path: ['endDate'],
+  });
 
 export const updateEventSchema = z.object({
   title: z.string().min(3).optional(),

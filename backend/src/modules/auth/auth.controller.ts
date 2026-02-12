@@ -12,7 +12,7 @@ import { publish } from '../../messaging/rabbitmq/publish';
 import { v4 as uuid } from 'uuid';
 import { refreshAccessTokenService } from './auth.service';
 import { RefreshTokenEntity } from '../../entities/refreshToken';
-import { sendOtpEmail} from '../../Services/email.service';
+import { sendOtpEmail } from '../../Services/email.service';
 import { signPasswordResetToken } from '../../Services/passwordReset.service';
 import { redisClient } from '../../utils/redis';
 
@@ -378,9 +378,9 @@ export const forgetPassword = async (req: Request, res: Response) => {
     if (!email) {
       return res.status(400).json({ message: 'Email is required' });
     }
-    
-console.log("email" + "req.body");
-console.log(email, req.body);
+
+    console.log('email' + 'req.body');
+    console.log(email, req.body);
 
     const userRepo = appDataSource.getRepository(User);
 
@@ -394,8 +394,8 @@ console.log(email, req.body);
         .json({ message: 'If email exists, reset link sent' });
     }
 
-console.log("user" + "userRepo");
-console.log(user, userRepo);
+    console.log('user' + 'userRepo');
+    console.log(user, userRepo);
 
     const resetToken = signPasswordResetToken(user.id);
 
@@ -404,18 +404,18 @@ console.log(user, userRepo);
       resetToken,
       {
         EX: 900,
-      }
+      },
     );
-    
-console.log("redis: " + redis)
-console.log("resetToken: " + resetToken)
+
+    console.log('redis: ' + redis);
+    console.log('resetToken: ' + resetToken);
 
     const resetLink = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
 
     const m = await sendOtpEmail(email, resetLink);
 
-console.log("resetLink: " + resetLink);
-console.log("sendpasswordreset email: " + m);
+    console.log('resetLink: ' + resetLink);
+    console.log('sendpasswordreset email: ' + m);
 
     return res
       .status(200)

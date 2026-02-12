@@ -4,7 +4,6 @@ import { z } from 'zod';
 export const validate =
   (schema: z.ZodSchema) =>
   (req: Request, res: Response, next: NextFunction) => {
-
     const result = schema.safeParse(req.body);
 
     if (!result.success) {
@@ -12,7 +11,7 @@ export const validate =
 
       return res.status(400).json({
         success: false,
-        message: firstIssue.message,   
+        message: firstIssue.message,
         field: firstIssue.path[0] ?? null,
       });
     }

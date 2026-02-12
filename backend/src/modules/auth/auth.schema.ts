@@ -52,8 +52,7 @@ export const registerSchema = z
   })
   .strict();
 
-export const forgotPasswordSchema = z.
-object({
+export const forgotPasswordSchema = z.object({
   email: z
     .string()
     .trim()

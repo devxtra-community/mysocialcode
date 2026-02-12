@@ -15,10 +15,7 @@ import { requireAuth } from '../../middleware/auth.middleware';
 import { upload } from '../../middleware/upload';
 import { validate } from '../../middleware/validate';
 
-import {
-  createEventSchema,
-  updateEventSchema,
-} from './event.schema';
+import { createEventSchema, updateEventSchema } from './event.schema';
 
 const eventRouter = Router();
 
@@ -30,29 +27,13 @@ eventRouter.post(
   createEvent,
 );
 
-eventRouter.get(
-  '/all-events',
-  requireAuth,
-  getAllEvents,
-);
+eventRouter.get('/all-events', requireAuth, getAllEvents);
 
-eventRouter.get(
-  '/getEvent/:id',
-  requireAuth,
-  getSingleEvent,
-);
+eventRouter.get('/getEvent/:id', requireAuth, getSingleEvent);
 
-eventRouter.post(
-  '/join-event/:id',
-  requireAuth,
-  joinEvent,
-);
+eventRouter.post('/join-event/:id', requireAuth, joinEvent);
 
-eventRouter.get(
-  '/my-events',
-  requireAuth,
-  getMyEvents,
-);
+eventRouter.get('/my-events', requireAuth, getMyEvents);
 
 eventRouter.put(
   '/update/:id',
@@ -62,22 +43,10 @@ eventRouter.put(
   updateEvent,
 );
 
-eventRouter.post(
-  '/cancel/:id',
-  requireAuth,
-  cancelEvent,
-);
+eventRouter.post('/cancel/:id', requireAuth, cancelEvent);
 
-eventRouter.post(
-  '/attendance',
-  requireAuth,
-  attendance,
-);
+eventRouter.post('/attendance', requireAuth, attendance);
 
-eventRouter.get(
-  '/search',
-  searach,
-);
-
+eventRouter.get('/search', searach);
 
 export default eventRouter;
