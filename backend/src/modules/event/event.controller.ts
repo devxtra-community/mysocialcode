@@ -89,8 +89,7 @@ export const getAllEvents = async (req: AuthReq, res: Response) => {
       .createQueryBuilder('event')
       .leftJoinAndSelect('event.image', 'image')
       .where('event.status = :status', { status: 'published' })
-      .andWhere('event.startDate >= :now', { now })
-      .andWhere('event.userId != :userId', { userId: req.user?.id });
+      .andWhere('event.endDate >= :now', { now })
 
     if (cursor && cursorId) {
       qb.andWhere(

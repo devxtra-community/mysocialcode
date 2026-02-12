@@ -17,7 +17,6 @@ export default function EditProfileScreen() {
     name: '',
     age: '',
     gender: '',
-    email: '',
     interest: '',
   });
 
@@ -38,7 +37,6 @@ export default function EditProfileScreen() {
       name: u.name || '',
       age: u.age?.toString() || '',
       gender: u.gender || '',
-      email: u.email || '',
       interest: u.interests || '',
     });
 
@@ -66,49 +64,27 @@ export default function EditProfileScreen() {
   }
 
   async function uploadAvatar() {
-    if (!avatar || avatar.startsWith('http')) return avatar;
+    if (!avatar || avatar.startsWith('http')) return;
+
+    const imageResponse = await fetch(avatar);
+    const blob = await imageResponse.blob();
 
     const formData = new FormData();
+    formData.append('avatar', blob, 'avatar.jpg');
 
-    formData.append('avatar', {
-      uri: avatar,
-      name: 'avatar.jpg',
-      type: 'image/jpeg',
-    } as any);
-
-    const res = await api.post('/upload/avatar', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
+    await api.post('/user/me/avatar', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
     });
-
-    return res.data.url;
   }
 
   async function handleSave() {
     try {
       setUploading(true);
-
-      let avatarUrl = avatar;
-
-      if (avatar && !avatar.startsWith('http')) {
-        avatarUrl = await uploadAvatar();
-      }
-
-      const formData = new FormData();
-
-      formData.append('name', form.name);
-      formData.append('age', form.age);
-      formData.append('gender', form.gender);
-
-      if (avatarUrl) {
-        formData.append('profileImageUrl', avatarUrl);
-      }
-
-      await api.put('/user/me/edit', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
+      await uploadAvatar();
+      await api.put('/user/me/edit', {
+        name: form.name,
+        age: Number(form.age),
+        gender: form.gender,
       });
 
       Alert.alert('Success', 'Profile updated successfully');
@@ -120,7 +96,7 @@ export default function EditProfileScreen() {
       setUploading(false);
     }
   }
-
+  //comment
   return (
     <View style={styles.container}>
       <View style={styles.avatarContainer}>

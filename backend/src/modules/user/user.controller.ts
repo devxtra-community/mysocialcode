@@ -66,7 +66,6 @@ export const getMyProfile = async (
       where: { id: userId },
       select: {
         id: true,
-        email: true,
         phoneNumber: true,
         name: true,
         age: true,

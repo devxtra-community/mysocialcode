@@ -1,6 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
 import { logger } from '../../utils/logger';
-import { registerSchema, phoneSchema, loginSchema } from './auth.schema';
 import { generateotp } from '../../utils/otp';
 import { appDataSource } from '../../data-source';
 import { Otp } from '../../entities/otp';
@@ -11,9 +10,11 @@ import bcrypt from 'bcrypt';
 import { hashRefreshToken } from '../../Services/refreshToken';
 import { publish } from '../../messaging/rabbitmq/publish';
 import { v4 as uuid } from 'uuid';
-
 import { refreshAccessTokenService } from './auth.service';
 import { RefreshTokenEntity } from '../../entities/refreshToken';
+import { sendOtpEmail} from '../../Services/email.service';
+import { signPasswordResetToken } from '../../Services/passwordReset.service';
+import { redisClient } from '../../utils/redis';
 
 export const sendOtp = async (
   req: Request,
@@ -23,15 +24,15 @@ export const sendOtp = async (
   try {
     logger.info('reached');
 
-    const result = phoneSchema.safeParse(req.body);
-    if (!result.success) {
-      return res.status(400).json({
-        message: 'validation failed',
-        error: result.error.format(),
-      });
-    }
+    // const result = phoneSchema.safeParse(req.body);
+    // if (!result.success) {
+    //   return res.status(400).json({
+    //     message: 'validation failed',
+    //     error: result.error.format(),
+    //   });
+    // }
 
-    const phoneNumber = result.data.phoneNumber.trim();
+    const phoneNumber = req.body.phoneNumber.trim();
 
     const userRepo = appDataSource.getRepository(User);
     const otpRepo = appDataSource.getRepository(Otp);
@@ -173,13 +174,13 @@ export const register = async (
   next: NextFunction,
 ) => {
   try {
-    const result = registerSchema.safeParse(req.body);
-    if (!result.success) {
-      return res.status(400).json({
-        message: 'invalid registration data',
-        errors: result.error.format(),
-      });
-    }
+    // const result = registerSchema.safeParse(req.body);
+    // if (!result.success) {
+    //   return res.status(400).json({
+    //     message: 'invalid registration data',
+    //     errors: result.error.format(),
+    //   });
+    // }
 
     const {
       otpId,
@@ -190,7 +191,7 @@ export const register = async (
       email,
       password,
       confirmPassword,
-    } = result.data;
+    } = req.body;
 
     if (!otpId) {
       return res.status(400).json({ message: 'otpId required' });
@@ -268,15 +269,15 @@ export const login = async (
   next: NextFunction,
 ) => {
   try {
-    const result = loginSchema.safeParse(req.body);
-    if (!result.success) {
-      return res.status(400).json({
-        message: 'Invalid login data',
-        errors: result.error.format(),
-      });
-    }
+    // const result = loginSchema.safeParse(req.body);
+    // if (!result.success) {
+    //   return res.status(400).json({
+    //     message: 'Invalid login data',
+    //     errors: result.error.format(),
+    //   });
+    // }
 
-    const { phoneNumber, password } = result.data;
+    const { phoneNumber, password } = req.body;
 
     const userRepo = appDataSource.getRepository(User);
 
@@ -368,5 +369,60 @@ export const refreshAccessToken = async (req: Request, res: Response) => {
     return res
       .status(403)
       .json({ message: 'Invalid refresh token', error: err });
+  }
+};
+
+export const forgetPassword = async (req: Request, res: Response) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return res.status(400).json({ message: 'Email is required' });
+    }
+    
+console.log("email" + "req.body");
+console.log(email, req.body);
+
+    const userRepo = appDataSource.getRepository(User);
+
+    const user = await userRepo.findOne({
+      where: { email },
+    });
+
+    if (!user) {
+      return res
+        .status(200)
+        .json({ message: 'If email exists, reset link sent' });
+    }
+
+console.log("user" + "userRepo");
+console.log(user, userRepo);
+
+    const resetToken = signPasswordResetToken(user.id);
+
+    const redis = await redisClient.set(
+      `password_reset:${user.id}`,
+      resetToken,
+      {
+        EX: 900,
+      }
+    );
+    
+console.log("redis: " + redis)
+console.log("resetToken: " + resetToken)
+
+    const resetLink = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
+
+    const m = await sendOtpEmail(email, resetLink);
+
+console.log("resetLink: " + resetLink);
+console.log("sendpasswordreset email: " + m);
+
+    return res
+      .status(200)
+      .json({ message: 'If account exists, reset link sent' });
+  } catch (err) {
+    console.error(err);
+
+    return res.status(500).json({ message: 'Failed to send reset email' });
   }
 };

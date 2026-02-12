@@ -44,4 +44,10 @@ export class User {
 
   @CreateDateColumn()
   createdAt!: Date;
+
+  @Column({ nullable: true })
+  passwordResetToken!: string;
+
+  @Column({ type: 'timestamp', nullable: true })
+  passwordResetExpires!: Date;
 }

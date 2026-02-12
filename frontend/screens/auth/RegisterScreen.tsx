@@ -53,6 +53,10 @@ export default function RegisterScreen() {
     setStep(2);
   };
 
+  const handlePrevious = () => {
+    setStep(1);
+  };
+
   const handleFinish = async () => {
     if (!otpId) {
       Alert.alert('Error', 'OTP session expired');
@@ -86,13 +90,19 @@ export default function RegisterScreen() {
       });
 
       if (res?.success) {
+        await storeTokens(res.accessToken, res.refreshToken);
         router.replace('/(tabs)/home');
-        storeTokens(res.accesstoken, res.refreshtoken);
       } else {
+        console.log('REGISTER ERROR:', res);
         Alert.alert('Registration failed', res?.message || 'Try again');
       }
-    } catch (err) {
-      Alert.alert('Error', 'Something went wrong');
+    } catch (err: any) {
+      console.log('REGISTER EXCEPTION:', err);
+
+      Alert.alert(
+        'Error',
+        err?.message || 'Network error or server unreachable',
+      );
     }
   };
 
@@ -153,6 +163,12 @@ export default function RegisterScreen() {
 
         {step === 2 && (
           <>
+            <TouchableOpacity
+              style={styles.previousBtn}
+              onPress={handlePrevious}
+            >
+              <Text style={styles.previousText}>Previous</Text>
+            </TouchableOpacity>
             <Text style={styles.title}>Finish setup</Text>
 
             <Text style={styles.label}>Select interests</Text>
@@ -213,6 +229,18 @@ const styles = StyleSheet.create({
     padding: 20,
     flex: 1,
     justifyContent: 'center',
+  },
+  previousBtn: {
+    borderWidth: 1,
+    borderColor: '#000',
+    padding: 14,
+    borderRadius: 10,
+    marginTop: 10,
+    alignItems: 'center',
+  },
+  previousText: {
+    color: '#000',
+    fontWeight: '600',
   },
   title: {
     fontSize: 22,

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import {
   View,
   Text,
-  ScrollView,
+  FlatList,
   Pressable,
   TextInput,
   StyleSheet,
@@ -14,7 +14,6 @@ import { router } from 'expo-router';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import api from '@/lib/api';
-import { FlatList } from 'react-native';
 
 function HomeSkeleton() {
   return (

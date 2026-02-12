@@ -6,32 +6,28 @@ import {
   login,
   logout,
   refreshAccessToken,
+  forgetPassword,
 } from './auth.controller';
-
-// import { validate } from '../../middleware/validate';
-// import {
-//   phoneSchema,
-//   registerSchema,
-//   loginSchema,
-//   verifyOtpSchema,
-//   refreshTokenSchema,
-// } from './auth.schema';
+import { validate } from '../../middleware/validate';
+import { loginSchema, phoneSchema, registerSchema } from './auth.schema';
 
 const authRouter = Router();
 
-authRouter.post('/send-otp', sendOtp);
+authRouter.post('/send-otp', validate(phoneSchema), sendOtp);
 authRouter.post(
   '/verify-otp',
 
   verifyotp,
 );
-authRouter.post('/login', login);
-authRouter.post('/register', register);
+authRouter.post('/login', validate(loginSchema), login);
+authRouter.post('/register', validate(registerSchema), register);
 authRouter.post(
   '/refresh-token',
 
   refreshAccessToken,
 );
 authRouter.post('/logout', logout);
+
+authRouter.post('/forget-password', forgetPassword);
 
 export default authRouter;
