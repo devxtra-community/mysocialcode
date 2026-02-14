@@ -62,22 +62,20 @@ export const forgotPasswordSchema = z.object({
     .email('Invalid email format'),
 });
 
-export const forgetPasswordSchema = z
-.object({
+export const forgetPasswordSchema = z.object({
   email: z.string().email(),
-})
+});
 
-export const resetPasswordSchema = z
-.object({
+export const resetPasswordSchema = z.object({
   token: z.string(),
   newPassword: z
-      .string()
-      .min(8)
-      .regex(/[A-Z]/, 'Must contain uppercase letter')
-      .regex(/[a-z]/, 'Must contain lowercase letter')
-      .regex(/[0-9]/, 'Must contain number')
-      .regex(/[@$!%*?&]/, 'Must contain special character'),
-})
+    .string()
+    .min(8)
+    .regex(/[A-Z]/, 'Must contain uppercase letter')
+    .regex(/[a-z]/, 'Must contain lowercase letter')
+    .regex(/[0-9]/, 'Must contain number')
+    .regex(/[@$!%*?&]/, 'Must contain special character'),
+});
 
 // export const verifyOtpSchema = z
 //   .object({

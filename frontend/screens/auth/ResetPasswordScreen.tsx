@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -7,10 +7,10 @@ import {
   StyleSheet,
   ActivityIndicator,
   Alert,
-} from "react-native";
+} from 'react-native';
 
-import { useRoute, RouteProp } from "@react-navigation/native";
-import api from "@/lib/api";
+import { useRoute, RouteProp } from '@react-navigation/native';
+import api from '@/lib/api';
 
 type RouteParams = {
   params: {
@@ -19,40 +19,36 @@ type RouteParams = {
 };
 
 export default function ResetPasswordScreen() {
-  const route = useRoute<RouteProp<RouteParams, "params">>();
+  const route = useRoute<RouteProp<RouteParams, 'params'>>();
 
   const token = route.params?.token;
 
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleResetPassword = async () => {
     if (!password || !confirmPassword) {
-      Alert.alert("Error", "Enter all fields");
+      Alert.alert('Error', 'Enter all fields');
       return;
     }
 
     if (password !== confirmPassword) {
-      Alert.alert("Error", "Passwords do not match");
+      Alert.alert('Error', 'Passwords do not match');
       return;
     }
 
     try {
       setLoading(true);
 
-      const res = await api.put("/auth/reset-password", {
+      const res = await api.put('/auth/reset-password', {
         token,
         newPassword: password,
       });
 
-      Alert.alert("Success", res.data.message);
-
+      Alert.alert('Success', res.data.message);
     } catch (err: any) {
-      Alert.alert(
-        "Error",
-        err.response?.data?.message || "Reset failed"
-      );
+      Alert.alert('Error', err.response?.data?.message || 'Reset failed');
     } finally {
       setLoading(false);
     }
@@ -86,9 +82,7 @@ export default function ResetPasswordScreen() {
         {loading ? (
           <ActivityIndicator color="#fff" />
         ) : (
-          <Text style={styles.buttonText}>
-            Reset Password
-          </Text>
+          <Text style={styles.buttonText}>Reset Password</Text>
         )}
       </TouchableOpacity>
     </View>
@@ -96,38 +90,36 @@ export default function ResetPasswordScreen() {
 }
 
 const styles = StyleSheet.create({
-
   container: {
     flex: 1,
-    justifyContent: "center",
+    justifyContent: 'center',
     padding: 20,
   },
 
   title: {
     fontSize: 24,
-    fontWeight: "bold",
+    fontWeight: 'bold',
     marginBottom: 20,
-    textAlign: "center",
+    textAlign: 'center',
   },
 
   input: {
     borderWidth: 1,
-    borderColor: "#ccc",
+    borderColor: '#ccc',
     padding: 12,
     borderRadius: 6,
     marginBottom: 20,
   },
 
   button: {
-    backgroundColor: "#007BFF",
+    backgroundColor: '#007BFF',
     padding: 15,
     borderRadius: 6,
-    alignItems: "center",
+    alignItems: 'center',
   },
 
   buttonText: {
-    color: "#fff",
-    fontWeight: "bold",
+    color: '#fff',
+    fontWeight: 'bold',
   },
-
 });

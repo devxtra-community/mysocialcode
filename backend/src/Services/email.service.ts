@@ -52,22 +52,19 @@ export const sendLinkEmail = async (to: string, url: string): Promise<void> => {
     await mg.messages.create(process.env.MAILGUN_DOMAIN!, {
       from: process.env.MAIL_FROM_EMAIL!,
       to,
-      subject: "Reset your SocialCode password",
+      subject: 'Reset your SocialCode password',
 
       text: `Reset your password using this link: ${url}`,
 
-      html: resetTemplate(url), 
+      html: resetTemplate(url),
     });
 
-    console.log("Reset email sent successfully");
-
+    console.log('Reset email sent successfully');
   } catch (error) {
-    console.error("Error sending reset email:", error);
+    console.error('Error sending reset email:', error);
     throw error;
   }
 };
-
-
 
 // export const sendLinkEmail = async (to: string, url: string): Promise<void> => {
 //   try {
@@ -87,7 +84,7 @@ export const sendLinkEmail = async (to: string, url: string): Promise<void> => {
 //             Click the button below to reset your password:
 //           </p>
 
-//           <a href="${url}" 
+//           <a href="${url}"
 //              style="
 //                display:inline-block;
 //                padding:10px 20px;
