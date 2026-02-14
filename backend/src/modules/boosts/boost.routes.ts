@@ -6,5 +6,5 @@ import { razorPayWebHook } from './webhook';
 const boostRouter = express.Router();
 boostRouter.post('/purchase', requireAuth, boostEvent);
 boostRouter.get('/active', requireAuth, getBoostEvents);
-boostRouter.post('/webhook',razorPayWebHook)
+boostRouter.post('/webhook', razorPayWebHook);
 export default boostRouter;

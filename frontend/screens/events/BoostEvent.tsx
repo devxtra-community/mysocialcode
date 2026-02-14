@@ -8,22 +8,20 @@ import { Linking } from 'react-native';
 export default function EventBoostScrees() {
   const [duration, setDuration] = useState('');
   const { id } = useLocalSearchParams();
-async function handleBoost() {
-  try {
-    if (!duration) return;
+  async function handleBoost() {
+    try {
+      if (!duration) return;
 
-    const res = await api.post('/boost/purchase', {
-      eventId: id,
-      duration: Number(duration),
-    });
+      const res = await api.post('/boost/purchase', {
+        eventId: id,
+        duration: Number(duration),
+      });
 
-    Linking.openURL(res.data.url);
-
-  } catch (err) {
-    console.log("Boost error", err);
+      Linking.openURL(res.data.url);
+    } catch (err) {
+      console.log('Boost error', err);
+    }
   }
-}
-
 
   return (
     <SafeAreaView>

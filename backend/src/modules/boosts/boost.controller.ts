@@ -49,15 +49,14 @@ export const boostEvent = async (req: AuthReq, res: Response) => {
     if (!eventId || !duration) {
       return res.status(400).json({ message: 'Missing Fields' });
     }
-    const pricePerPay =50;
+    const pricePerPay = 50;
     const days = Number(duration);
 
-if (!days || days < 1 || days > 30) {
-  return res.status(400).json({ message: 'invalid duration' });
-}
+    if (!days || days < 1 || days > 30) {
+      return res.status(400).json({ message: 'invalid duration' });
+    }
 
-const amount = days * pricePerPay * 100;
-
+    const amount = days * pricePerPay * 100;
 
     // const paymentId = `test${Date.now()}`;
     // const boost = getBoostRepository.create({
@@ -70,37 +69,36 @@ const amount = days * pricePerPay * 100;
     //   amount,
     // });
     // await getBoostRepository.save(boost);
-  const link = await razorpay.paymentLink.create({
-  amount: amount, 
-  currency: "INR",
-  description: "Event Boost Payment",
+    const link = await razorpay.paymentLink.create({
+      amount: amount,
+      currency: 'INR',
+      description: 'Event Boost Payment',
 
-  customer: {
-    name: "User",
-    email: "test@test.com",
-    contact: "1234567890"
-  },
+      customer: {
+        name: 'User',
+        email: 'test@test.com',
+        contact: '1234567890',
+      },
 
-  notify: {
-    sms: false,
-    email: false
-  },
+      notify: {
+        sms: false,
+        email: false,
+      },
 
-  reminder_enable: false,
+      reminder_enable: false,
 
-  notes: {
-    eventId: String(eventId),
-    duration: String(days),
-    userId: String(userId)
-  }
-});
+      notes: {
+        eventId: String(eventId),
+        duration: String(days),
+        userId: String(userId),
+      },
+    });
 
     res.json({
-  url: link.short_url
-});
-
+      url: link.short_url,
+    });
   } catch (err) {
     logger.error({ err }, 'catch in boostEvent worked');
-    res.status(500).json({ message: "order failed" });
+    res.status(500).json({ message: 'order failed' });
   }
 };
