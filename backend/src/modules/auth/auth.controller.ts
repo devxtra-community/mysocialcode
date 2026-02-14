@@ -12,8 +12,8 @@ import { publish } from '../../messaging/rabbitmq/publish';
 import { v4 as uuid } from 'uuid';
 import { refreshAccessTokenService } from './auth.service';
 import { RefreshTokenEntity } from '../../entities/refreshToken';
-import { sendOtpEmail } from '../../Services/email.service';
-import { signPasswordResetToken } from '../../Services/passwordReset.service';
+import { sendLinkEmail } from '../../Services/email.service';
+import { signPasswordResetToken, verifyPasswordResetToken } from '../../Services/passwordReset.service';
 import { redisClient } from '../../utils/redis';
 
 export const sendOtp = async (
@@ -400,8 +400,8 @@ export const forgetPassword = async (req: Request, res: Response) => {
     const resetToken = signPasswordResetToken(user.id);
 
     const redis = await redisClient.set(
-      `password_reset:${user.id}`,
-      resetToken,
+      `password_reset:${resetToken}`,
+      user.id.toString(),
       {
         EX: 900,
       },
@@ -412,7 +412,7 @@ export const forgetPassword = async (req: Request, res: Response) => {
 
     const resetLink = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
 
-    const m = await sendOtpEmail(email, resetLink);
+    const m = await sendLinkEmail(email, resetLink);
 
     console.log('resetLink: ' + resetLink);
     console.log('sendpasswordreset email: ' + m);
@@ -426,3 +426,51 @@ export const forgetPassword = async (req: Request, res: Response) => {
     return res.status(500).json({ message: 'Failed to send reset email' });
   }
 };
+
+export const resetPassword = async (req: Request, res: Response) => {
+  try {
+    const {  token, newPassword } = req.body;
+
+    if(!token || !newPassword) {
+      return res.status(400).json({ message: "Token and password required" });
+    }
+    const decoded = verifyPasswordResetToken(token);
+
+    if (decoded.purpose !== "password_reset") {
+      return res.status(400).json({ message: "Invalid token purpose" });
+    }
+
+    const userId = decoded.userId;
+
+    const redisUserId = await redisClient.get(`password_reset:${token}`)
+
+    if (!redisUserId || redisUserId !== userId) {
+      return res.status(400).json({ message: "Token is expired or invalid" })
+    }
+
+    const userRepo = appDataSource.getRepository(User);
+
+    const user = await userRepo.findOne({
+      where: { id: userId }
+    })
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" })
+    }
+
+    const hashedPassword = await bcrypt.hash( newPassword, 10 );
+
+    user.passwordHash = hashedPassword;
+
+    await userRepo.save(user);
+
+    await redisClient.del(`password_reset:${token}`)
+
+    return res.status(200).json({ message: "password reset successfully" })
+
+  } catch (err) {
+    console.error(err);
+
+    return res.status(400).json({ message: "invalid or expired token" })
+  }
+}

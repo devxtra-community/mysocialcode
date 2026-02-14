@@ -7,9 +7,10 @@ import {
   logout,
   refreshAccessToken,
   forgetPassword,
+  resetPassword,
 } from './auth.controller';
 import { validate } from '../../middleware/validate';
-import { loginSchema, phoneSchema, registerSchema } from './auth.schema';
+import { forgetPasswordSchema, loginSchema, phoneSchema, registerSchema, resetPasswordSchema } from './auth.schema';
 
 const authRouter = Router();
 
@@ -28,6 +29,7 @@ authRouter.post(
 );
 authRouter.post('/logout', logout);
 
-authRouter.post('/forget-password', forgetPassword);
+authRouter.post('/forget-password', validate(forgetPasswordSchema), forgetPassword);
+authRouter.put('/reset-password', validate(resetPasswordSchema), resetPassword);
 
 export default authRouter;
