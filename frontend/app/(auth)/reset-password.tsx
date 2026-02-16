@@ -1,4 +1,5 @@
 import ResetPasswordScreen from '@/screens/auth/ResetPasswordScreen';
-export default function PasswordResetScreen() {
+
+export default function ResetPasswordPage() {
   return <ResetPasswordScreen />;
 }

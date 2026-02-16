@@ -1,66 +1,63 @@
-import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  ActivityIndicator,
-  Alert,
-} from 'react-native';
-
-import { useRoute, RouteProp } from '@react-navigation/native';
-import api from '@/lib/api';
-
-type RouteParams = {
-  params: {
-    token: string;
-  };
-};
+import api from "@/lib/api";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { useEffect, useState } from "react";
+import { ActivityIndicator, Alert, Text, TextInput, TouchableOpacity, View, StyleSheet } from "react-native";
 
 export default function ResetPasswordScreen() {
-  const route = useRoute<RouteProp<RouteParams, 'params'>>();
+    const router = useRouter();
+    const { token } = useLocalSearchParams<{ token: string }>();
 
-  const token = route.params?.token;
+    const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [loading, setLoading] = useState(false);
 
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [loading, setLoading] = useState(false);
+    useEffect(() => {
+        if(!token) {
+            Alert.alert('Error', 'Invalid or missing token');
+        }
+    }, [token]);
 
-  const handleResetPassword = async () => {
-    if (!password || !confirmPassword) {
-      Alert.alert('Error', 'Enter all fields');
-      return;
+    const handleResetPassword = async () => {
+        if (!password || !confirmPassword) {
+            Alert.alert('Error', 'Please fill all fields');
+            return;
+        }
+
+        if (password !== confirmPassword) {
+            Alert.alert('Error', 'Passwords do not match');
+            return;
+        }
+
+        if (password.length < 8) {
+            Alert.alert('Error', 'Password must be at least 8 characters');
+            return;
+        }
+
+        try {
+            setLoading(true);
+
+            const res = await api.post('/auth/reset-password', {
+                token,
+                newPassword: password,
+            })
+
+            Alert.alert('Success', res.data.message);
+
+            router.replace('/login');
+        } catch (err: any) {
+            Alert.alert('Error', err.response?.dat?.message || 'Something went wrong')
+        } finally {
+            setLoading(false);
+        }
     }
 
-    if (password !== confirmPassword) {
-      Alert.alert('Error', 'Passwords do not match');
-      return;
-    }
-
-    try {
-      setLoading(true);
-
-      const res = await api.put('/auth/reset-password', {
-        token,
-        newPassword: password,
-      });
-
-      Alert.alert('Success', res.data.message);
-    } catch (err: any) {
-      Alert.alert('Error', err.response?.data?.message || 'Reset failed');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <View style={styles.container}>
+    return (
+        <View style={styles.container}>
       <Text style={styles.title}>Reset Password</Text>
 
       <TextInput
         style={styles.input}
-        placeholder="New password"
+        placeholder="New Password"
         secureTextEntry
         value={password}
         onChangeText={setPassword}
@@ -68,7 +65,7 @@ export default function ResetPasswordScreen() {
 
       <TextInput
         style={styles.input}
-        placeholder="Confirm password"
+        placeholder="Confirm Password"
         secureTextEntry
         value={confirmPassword}
         onChangeText={setConfirmPassword}
@@ -86,10 +83,11 @@ export default function ResetPasswordScreen() {
         )}
       </TouchableOpacity>
     </View>
-  );
+    )
 }
 
 const styles = StyleSheet.create({
+
   container: {
     flex: 1,
     justifyContent: 'center',
@@ -122,4 +120,5 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
   },
+
 });
