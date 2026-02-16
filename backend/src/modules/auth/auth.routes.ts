@@ -40,6 +40,10 @@ authRouter.post(
   validate(forgetPasswordSchema),
   forgetPassword,
 );
-authRouter.put('/reset-password', validate(resetPasswordSchema), resetPassword);
+authRouter.post(
+  '/reset-password',
+  validate(resetPasswordSchema),
+  resetPassword,
+);
 
 export default authRouter;

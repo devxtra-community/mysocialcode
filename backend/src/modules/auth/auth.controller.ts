@@ -413,7 +413,7 @@ export const forgetPassword = async (req: Request, res: Response) => {
     console.log('redis: ' + redis);
     console.log('resetToken: ' + resetToken);
 
-    const resetLink = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
+    const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${encodeURIComponent(resetToken)}`;
 
     const m = await sendLinkEmail(email, resetLink);
 
@@ -437,6 +437,7 @@ export const resetPassword = async (req: Request, res: Response) => {
     if (!token || !newPassword) {
       return res.status(400).json({ message: 'Token and password required' });
     }
+
     const decoded = verifyPasswordResetToken(token);
 
     if (decoded.purpose !== 'password_reset') {
@@ -462,6 +463,12 @@ export const resetPassword = async (req: Request, res: Response) => {
     }
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    if (user.passwordHash === hashedPassword) {
+      return res
+        .status(400)
+        .json({ message: "password can't be same as last 3 passwords" });
+    }
 
     user.passwordHash = hashedPassword;
 
