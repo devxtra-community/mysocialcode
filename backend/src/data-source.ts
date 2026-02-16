@@ -6,6 +6,7 @@ import { RefreshTokenEntity } from './entities/refreshToken';
 import { Events } from './entities/Event';
 import { EventImage } from './entities/EventImage';
 import { EventTicket } from './entities/Tickets';
+import { Boost } from './entities/Boost';
 if (!process.env.DATABASE_URL) {
   throw new Error('DATABASE_URL is not defined');
 }
@@ -15,6 +16,14 @@ export const appDataSource = new DataSource({
   ssl: {
     rejectUnauthorized: false,
   },
-  entities: [User, Otp, RefreshTokenEntity, Events, EventImage, EventTicket],
+  entities: [
+    User,
+    Otp,
+    RefreshTokenEntity,
+    Events,
+    EventImage,
+    EventTicket,
+    Boost,
+  ],
   synchronize: true,
 });
