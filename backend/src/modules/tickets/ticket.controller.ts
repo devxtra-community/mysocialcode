@@ -47,6 +47,8 @@ export const getMyTickets = async (req: AuthReq, res: Response) => {
       tickets: ticketsWithQR,
     });
   } catch (err) {
-    return res.status(500).json({ message: 'Failed to fetch tickets' });
+    return res
+      .status(500)
+      .json({ message: 'Failed to fetch tickets', error: err });
   }
 };

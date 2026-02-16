@@ -6,7 +6,7 @@ import { upload } from '../../middleware/upload';
 const uploadRouter = express.Router();
 
 uploadRouter.post(
-  '/me/avatar',
+  '/avatar',
   upload.single('avatar'),
   requireAuth,
   uploadAvatar,

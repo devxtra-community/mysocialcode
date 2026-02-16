@@ -17,7 +17,6 @@ export default function EditProfileScreen() {
     name: '',
     age: '',
     gender: '',
-    email: '',
     interest: '',
   });
 
@@ -38,7 +37,6 @@ export default function EditProfileScreen() {
       name: u.name || '',
       age: u.age?.toString() || '',
       gender: u.gender || '',
-      email: u.email || '',
       interest: u.interests || '',
     });
 
@@ -91,12 +89,12 @@ export default function EditProfileScreen() {
         name: form.name,
         age: Number(form.age),
         gender: form.gender,
-        email: form.email,
       });
 
       Alert.alert('Success', 'Profile updated successfully');
       router.back();
     } catch (err) {
+      console.error(err);
       Alert.alert('Error', 'Failed to update profile');
     } finally {
       setUploading(false);
@@ -135,13 +133,6 @@ export default function EditProfileScreen() {
         placeholder="Gender"
         value={form.gender}
         onChangeText={(v) => setForm({ ...form, gender: v })}
-        style={styles.input}
-      />
-
-      <TextInput
-        placeholder="Email"
-        value={form.email}
-        onChangeText={(v) => setForm({ ...form, email: v })}
         style={styles.input}
       />
 

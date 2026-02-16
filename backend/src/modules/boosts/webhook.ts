@@ -23,6 +23,6 @@ export const razorPayWebHook = async (req: Request, res: Response) => {
     }
     res.status(200).json({ status: 'ok', message: 'boost created' });
   } catch (err) {
-    logger.error('error in razor pay workerd');
+    logger.error('error in razor pay workerd', err);
   }
 };

@@ -67,6 +67,9 @@ export default function LoginScreen() {
           <Text style={styles.linkText}>Create new account</Text>
         </TouchableOpacity>
       </View>
+      <TouchableOpacity onPress={() => router.push('/(auth)/forgetPassword')}>
+        <Text style={{ color: 'blue' }}>Forgot Password?</Text>
+      </TouchableOpacity>
     </SafeAreaView>
   );
 }
