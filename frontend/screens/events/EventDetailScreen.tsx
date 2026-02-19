@@ -12,6 +12,7 @@ import { useEffect, useState } from 'react';
 import EventDetailSkeleton from '@/components/comps/skeletonEvent';
 import Carousel from 'react-native-reanimated-carousel';
 import api from '@/lib/api';
+import { Linking } from 'react-native';
 
 interface EventType {
   id: string;
@@ -53,28 +54,30 @@ export default function EventDetailScreen() {
     setIsHost(res.data.host);
   }
 
-  async function handleJoin() {
-    try {
-      await api.post(`/event/join-event/${eventId}`);
+ async function handleJoin() {
+  try {
+    const res = await api.post(`/event/join-event/${eventId}`);
 
-      setEvent((prev) =>
-        prev
-          ? {
-              ...prev,
-              capacity: prev.capacity - 1,
-              status: 'joined',
-            }
-          : prev,
-      );
-
-      setShowConfirm(false);
-
-      alert('Successfully joined event');
-    } catch (err: any) {
-      alert(err.response?.data?.message || 'Failed to join event');
-      console.log('Join error:', err.response?.data);
+    if (res.data.pay && res.data.url) {
+      await Linking.openURL(res.data.url);
+      return;
     }
+    setEvent((prev) =>
+      prev
+        ? {
+            ...prev,
+            capacity: prev.capacity - 1,
+            status: "joined",
+          }
+        : prev
+    );
+
+    alert("Successfully joined event");
+
+  } catch (err: any) {
+    alert(err.response?.data?.message || "Failed to join event");
   }
+}
 
   if (!event) {
     return <EventDetailSkeleton />;
@@ -123,11 +126,13 @@ export default function EventDetailScreen() {
         onPress={() => setShowConfirm(true)}
       >
         <Text style={styles.joinText}>
-          {event.status === 'published'
-            ? 'Join Event'
-            : event.status === 'joined'
-              ? 'Joined'
-              : 'Not Available'}
+         {event.status === 'joined'
+  ? 'Joined'
+  : event.status === 'published'
+    ? Number(event.price) > 0
+      ? `Join Event · ₹${event.price}`
+      : 'Join Event · Free'
+    : 'Not Available'}
         </Text>
       </Pressable>
       {isHost && (

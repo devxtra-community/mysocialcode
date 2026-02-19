@@ -13,8 +13,9 @@ import { getUserRepository } from '../user/user.repository';
 import { uploadEventImage } from './event.upload';
 import { appDataSource } from '../../data-source';
 import { redisClient } from '../../utils/redis';
-
+import refunds from 'razorpay/dist/types/refunds';
 import { TicketStatus } from '../../entities/Tickets';
+import { razorpay } from '../payment/razorpay';
 
 export interface AuthReq extends Request {
   user?: {
@@ -22,6 +23,7 @@ export interface AuthReq extends Request {
   };
 }
 export const createEvent = async (req: AuthReq, res: Response) => {
+  console.log("reached create event")
   console.log(req.body);
   console.log('files', req.files);
 
@@ -64,6 +66,7 @@ export const createEvent = async (req: AuthReq, res: Response) => {
       .status(201)
       .json({ message: 'event created', event: event, success: true });
   } catch (err) {
+    console.log(err);
     logger.error({ err }, 'catch in create event worked');
     res.status(400).json({ error: err });
   }
@@ -194,7 +197,7 @@ export const joinEvent = async (req: AuthReq, res: Response) => {
     const userId = req.user?.id;
 
     if (!userId) {
-      return res.status(401).json({ message: 'Unauthorized' });
+      return res.status(401).json({ message: "Unauthorized" });
     }
 
     const event = await getEventRepository.findOne({
@@ -202,27 +205,19 @@ export const joinEvent = async (req: AuthReq, res: Response) => {
     });
 
     if (!event) {
-      return res.status(404).json({ message: 'Event not found' });
+      return res.status(404).json({ message: "Event not found" });
     }
 
-    if (event.status !== 'published') {
-      return res.status(400).json({ message: 'Event is not open for joining' });
+    if (event.status !== "published") {
+      return res.status(400).json({ message: "Event not open" });
     }
 
     if (new Date(event.endDate) < new Date()) {
-      return res.status(400).json({ message: 'Cannot join a past event' });
+      return res.status(400).json({ message: "Event ended" });
     }
 
     if (event.capacity <= 0) {
-      return res.status(400).json({ message: 'Event is full' });
-    }
-
-    const user = await getUserRepository.findOne({
-      where: { id: userId },
-    });
-
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      return res.status(400).json({ message: "Event full" });
     }
 
     const existingTicket = await getTicketRepository.findOne({
@@ -233,38 +228,78 @@ export const joinEvent = async (req: AuthReq, res: Response) => {
     });
 
     if (existingTicket) {
-      return res.status(409).json({ message: 'You already joined this event' });
+      return res.status(409).json({ message: "Already joined" });
     }
 
-    const qrCode = `SC${uuid()}`;
-
-    const ticket = getTicketRepository.create({
-      event,
-      user,
-      qrCode,
+    const user = await getUserRepository.findOne({
+      where: { id: userId },
     });
 
-    await getTicketRepository.save(ticket);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
 
-    event.capacity -= 1;
-    await getEventRepository.save(event);
+  
+    if (event.isFree) {
+      logger.info("got inside  if event is free")
+      const ticket = getTicketRepository.create({
+        event,
+        user,
+        qrCode: `SC${uuid()}`,
+      });
 
-    return res.status(200).json({
-      success: true,
-      message: 'Joined event',
-      ticket: {
-        id: ticket.id,
-        qrCode: ticket.qrCode,
-        status: ticket.status,
-      },
+      await getTicketRepository.save(ticket);
+
+      event.capacity -= 1;
+      await getEventRepository.save(event);
+
+      return res.json({
+        success: true,
+        message: "Joined free event",
+        ticket,
+      });
+    }
+
+  logger.error("after the free event just below this is crateing the paid event ")
+   const link = await razorpay.paymentLink.create({
+  amount: event.price * 100,
+  currency: "INR",
+  description: "Event Ticket",
+
+ customer: {
+  name: user.name,
+  email: user.email,
+  contact: user.phoneNumber,
+},
+
+  notify: {
+    sms: false,
+    email: false,
+  },
+
+  reminder_enable: false,
+
+  callback_url: "mysocialcode://payments/success",
+  callback_method: "get",
+
+  notes: {
+    type: "ticket",
+    eventId: String(eventId),
+    userId: String(userId),
+  },
+});
+
+    return res.json({
+      pay: true,
+      url: link.short_url,
     });
+
   } catch (err) {
-    console.error('Join Event Error:', err);
-    return res
-      .status(500)
-      .json({ message: 'Something went wrong', error: err });
+    console.error("Join Event Error:", err);
+    return res.status(500).json({ message: "Something went wrong" });
   }
 };
+
 
 export const updateEvent = async (req: AuthReq, res: Response) => {
   try {

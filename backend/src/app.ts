@@ -13,9 +13,16 @@ import { connectRedis } from './utils/redis';
 import ticketRouter from './modules/tickets/ticket.route';
 import uploadRouter from './modules/user/upload.routes';
 import boostRouter from './modules/boosts/boost.routes';
+import adminRouter from './modules/admin/auth/authRouter';
 
 const app = express();
-app.use(cors());
+app.use(
+  cors({
+    origin: true, 
+    credentials: true,
+  })
+);
+;
 
 app.use('/upload', uploadRouter);
 
@@ -50,6 +57,7 @@ app.use('/event', eventRouter);
 app.use('/user', userRouter);
 app.use('/ticket', ticketRouter);
 app.use('/boost', boostRouter);
+app.use('/admin',adminRouter)
 app.use(notFound);
 app.use(errorHandler);
 export default app;

@@ -18,6 +18,7 @@ import {
   verifyPasswordResetToken,
 } from '../../Services/passwordReset.service';
 import { redisClient } from '../../utils/redis';
+import { Admin } from '../../entities/Admin';
 
 export const sendOtp = async (
   req: Request,

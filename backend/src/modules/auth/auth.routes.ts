@@ -45,5 +45,4 @@ authRouter.post(
   validate(resetPasswordSchema),
   resetPassword,
 );
-
 export default authRouter;
