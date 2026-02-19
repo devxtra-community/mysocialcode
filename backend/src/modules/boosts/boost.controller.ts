@@ -23,7 +23,7 @@ export const getBoostEvents = async (req: AuthReq, res: Response) => {
       .limit(10)
       .getMany();
 
-    const boostIds = boosts.map(b => b.id);
+    const boostIds = boosts.map((b) => b.id);
 
     if (boostIds.length) {
       await getBoostRepository
@@ -36,15 +36,13 @@ export const getBoostEvents = async (req: AuthReq, res: Response) => {
 
     res.json({
       success: true,
-      events: boosts.map(b => b.event),
+      events: boosts.map((b) => b.event),
     });
-
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'internal server err' });
   }
 };
-
 
 export const boostEvent = async (req: AuthReq, res: Response) => {
   try {
@@ -78,8 +76,8 @@ export const boostEvent = async (req: AuthReq, res: Response) => {
         email: 'test@test.com',
         contact: '1234567890',
       },
-      callback_url:"mysocialcode://payments/success",
-      callback_method:"get",
+      callback_url: 'mysocialcode://payments/success',
+      callback_method: 'get',
 
       notify: {
         sms: false,
@@ -89,7 +87,7 @@ export const boostEvent = async (req: AuthReq, res: Response) => {
       reminder_enable: false,
 
       notes: {
-        type:"boost",
+        type: 'boost',
         eventId: String(eventId),
         duration: String(days),
         userId: String(userId),

@@ -16,7 +16,7 @@ export const createEventService = async (
   rules: string,
   files: Express.Multer.File[],
 ) => {
-  logger.info("iside create event service")
+  logger.info('iside create event service');
   const user = await getUserRepository.findOne({
     where: { id: userId },
   });

@@ -44,10 +44,9 @@ export default function HomeScreen() {
   async function fetchBoosted() {
     try {
       const res = await api.get('/boost/active');
-      console.log("inside fetch boosted")
-      console.log(res.data)
+      console.log('inside fetch boosted');
+      console.log(res.data);
       setBoostedEvents(res.data.events || []);
-
     } catch (err) {
       console.log('Failed boosted fetch', err);
     }

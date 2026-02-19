@@ -1,5 +1,5 @@
-import type { ReactNode } from 'react'
-import Sidebar from '@/components/admin/sideBar'
+import type { ReactNode } from 'react';
+import Sidebar from '@/components/admin/sideBar';
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   return (
@@ -9,5 +9,5 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         {children}
       </div>
     </div>
-  )
+  );
 }

@@ -18,12 +18,10 @@ import adminRouter from './modules/admin/auth/authRouter';
 const app = express();
 app.use(
   cors({
-    origin: true, 
+    origin: true,
     credentials: true,
-  })
+  }),
 );
-;
-
 app.use('/upload', uploadRouter);
 
 app.use(express.json());
@@ -57,7 +55,7 @@ app.use('/event', eventRouter);
 app.use('/user', userRouter);
 app.use('/ticket', ticketRouter);
 app.use('/boost', boostRouter);
-app.use('/admin',adminRouter)
+app.use('/admin', adminRouter);
 app.use(notFound);
 app.use(errorHandler);
 export default app;

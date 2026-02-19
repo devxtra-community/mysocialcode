@@ -37,6 +37,6 @@ export class Boost {
   @CreateDateColumn()
   createdAt!: Date;
 
-  @Column({default:0})
-  impressions!:number
+  @Column({ default: 0 })
+  impressions!: number;
 }
