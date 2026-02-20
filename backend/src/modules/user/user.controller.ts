@@ -4,6 +4,7 @@ import { r2 } from '../../utils/r2';
 import { appDataSource } from '../../data-source';
 import { User } from '../../entities/User';
 import { logger } from '../../utils/logger';
+import { env } from '../../config/env';
 
 export const uploadAvatar = async (req: Request, res: Response) => {
   try {
@@ -25,14 +26,14 @@ export const uploadAvatar = async (req: Request, res: Response) => {
 
     await r2.send(
       new PutObjectCommand({
-        Bucket: process.env.R2_BUCKET_NAME!,
+        Bucket: env.R2_BUCKET_NAME!,
         Key: key,
         Body: file.buffer,
         ContentType: file.mimetype,
       }),
     );
 
-    const imageUrl = `${process.env.R2_PUBLIC_URL}/${key}`;
+    const imageUrl = `${env.R2_PUBLIC_URL}/${key}`;
     // console.log('saving image url to DB:', imageUrl);
 
     await appDataSource
@@ -71,8 +72,10 @@ export const getMyProfile = async (
         age: true,
         gender: true,
         interests: true,
+        email: true,
         profileImageUrl: true,
         isPhoneVerified: true,
+        isEmailVerified: true,
         createdAt: true,
       },
     });

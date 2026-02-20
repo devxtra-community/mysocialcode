@@ -1,6 +1,7 @@
 import jwt from 'jsonwebtoken';
+import { env } from '../config/env';
 
-const PASSWORD_RESET_SECRET = process.env.PASSWORD_RESET_SECRET!;
+const PASSWORD_RESET_SECRET = env.PASSWORD_RESET_SECRET!;
 
 export const signPasswordResetToken = (userId: string) => {
   return jwt.sign(

@@ -5,8 +5,9 @@ import app from './app';
 import { logger } from './utils/logger';
 import { appDataSource } from './data-source';
 import { connectRabbitMQ } from './messaging/rabbitmq/connect';
+import { env } from './config/env';
 
-const PORT = process.env.PORT;
+const PORT = env.PORT;
 
 if (!PORT) {
   throw new Error('PORT is not defined in environment variables');

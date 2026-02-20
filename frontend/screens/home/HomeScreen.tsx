@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -30,6 +30,8 @@ function HomeSkeleton() {
 }
 
 export default function HomeScreen() {
+  const loadingRef = useRef(false);
+
   const [events, setEvents] = useState<any[]>([]);
   const [boostedEvents, setBoostedEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -51,27 +53,41 @@ export default function HomeScreen() {
   }
 
   async function fetchEvents() {
-    if (loading || !hasMore) return;
+    if (loadingRef.current || !hasMore) return;
 
+    loadingRef.current = true;
     setLoading(true);
 
     try {
       let url = '/event/all-events?limit=10';
 
       if (cursor) {
-        url += `&cursor=${cursor.startDate}&id=${cursor.id}`;
+        url += `&cursor=${encodeURIComponent(
+          new Date(cursor.startDate).toISOString()
+        )}&id=${cursor.id}`;
       }
 
       const res = await api.get(url);
 
       if (res.data.success) {
-        setEvents((prev) => [...prev, ...res.data.events]);
+        // setEvents((prev) => [...prev, ...res.data.events]);
+        setEvents((prev) => {
+          const existingIds = new Set(prev.map((e) => e.id));
+
+          const newEvents = res.data.events.filter(
+            (e: any) => !existingIds.has(e.id),
+          );
+
+          return [...prev, ...newEvents];
+        });
+
         setHasMore(res.data.hasMore);
         setCursor(res.data.nextCursor);
       }
     } catch (err) {
       console.log('Failed to load events', err);
     } finally {
+      loadingRef.current = false;
       setLoading(false);
     }
   }
@@ -93,7 +109,8 @@ export default function HomeScreen() {
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.scrollContent}
         onEndReached={fetchEvents}
-        onEndReachedThreshold={0.6}
+        onEndReachedThreshold={0.3}
+        removeClippedSubviews={true}
         ListHeaderComponent={
           <>
             {boostedEvents.length > 0 && (

@@ -12,12 +12,13 @@ import { publish } from '../../messaging/rabbitmq/publish';
 import { v4 as uuid } from 'uuid';
 import { refreshAccessTokenService } from './auth.service';
 import { RefreshTokenEntity } from '../../entities/refreshToken';
-import { sendLinkEmail } from '../../Services/email.service';
+import { sendLinkEmail, sendOtpEmail } from '../../Services/email.service';
 import {
   signPasswordResetToken,
   verifyPasswordResetToken,
 } from '../../Services/passwordReset.service';
 import { redisClient } from '../../utils/redis';
+import { env } from '../../config/env';
 
 export const sendOtp = async (
   req: Request,
@@ -26,14 +27,6 @@ export const sendOtp = async (
 ) => {
   try {
     logger.info('reached');
-
-    // const result = phoneSchema.safeParse(req.body);
-    // if (!result.success) {
-    //   return res.status(400).json({
-    //     message: 'validation failed',
-    //     error: result.error.format(),
-    //   });
-    // }
 
     const phoneNumber = req.body.phoneNumber.trim();
 
@@ -67,8 +60,10 @@ export const sendOtp = async (
       });
     }
 
-    const otpCode = generateotp();
+    const otpCode = generateotp().toString();
     logger.debug('OTP generated');
+
+    const hashedOtp = await bcrypt.hash(otpCode, 10);
 
     const requestId = uuid();
 
@@ -76,7 +71,7 @@ export const sendOtp = async (
 
     await otpRepo.save({
       phoneNumber,
-      otp: otpCode.toString(),
+      otp: hashedOtp,
       requestId,
       sent: false,
       expiresAt: new Date(Date.now() + 5 * 60 * 1000),
@@ -147,10 +142,11 @@ export const verifyotp = async (
       });
     }
 
-    if (otpRecord.otp !== otpInput) {
+    const isValid = await bcrypt.compare(otpInput, otpRecord.otp);
+
+    if (!isValid) {
       otpRecord.attempts += 1;
       await otpRepo.save(otpRecord);
-
       return res.status(400).json({
         message: 'Invalid or expired OTP',
       });
@@ -177,14 +173,6 @@ export const register = async (
   next: NextFunction,
 ) => {
   try {
-    // const result = registerSchema.safeParse(req.body);
-    // if (!result.success) {
-    //   return res.status(400).json({
-    //     message: 'invalid registration data',
-    //     errors: result.error.format(),
-    //   });
-    // }
-
     const {
       otpId,
       name,
@@ -378,6 +366,7 @@ export const refreshAccessToken = async (req: Request, res: Response) => {
 export const forgetPassword = async (req: Request, res: Response) => {
   try {
     const { email } = req.body;
+
     if (!email) {
       return res.status(400).json({ message: 'Email is required' });
     }
@@ -413,7 +402,7 @@ export const forgetPassword = async (req: Request, res: Response) => {
     console.log('redis: ' + redis);
     console.log('resetToken: ' + resetToken);
 
-    const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${encodeURIComponent(resetToken)}`;
+    const resetLink = `${env.FRONTEND_URL}/reset-password?token=${encodeURIComponent(resetToken)}`;
 
     const m = await sendLinkEmail(email, resetLink);
 
@@ -462,6 +451,14 @@ export const resetPassword = async (req: Request, res: Response) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
+    const samePassword = await bcrypt.compare(newPassword, user.passwordHash!);
+
+    if (samePassword) {
+      return res.status(400).json({
+        message: 'New password cannot be same as old password',
+      });
+    }
+
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
     if (user.passwordHash === hashedPassword) {
@@ -481,5 +478,260 @@ export const resetPassword = async (req: Request, res: Response) => {
     console.error(err);
 
     return res.status(400).json({ message: 'invalid or expired token' });
+  }
+};
+
+export const changePassword = async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    console.log('USERID:', userId);
+    console.log('REQ.USERID:', req.user?.id, typeof req.user?.id, req.user);
+    if (!userId) {
+      return res.status(401).json({
+        message: 'Unauthorized',
+      });
+    }
+
+    const { currentPassword, newPassword, confirmNewPassword } = req.body;
+
+    console.log('BODY:', req.body);
+    console.log('currentPassword:', currentPassword);
+    console.log('newPassword:', newPassword);
+    console.log('confirmNewPassword:', confirmNewPassword);
+
+    if (!currentPassword || !newPassword || !confirmNewPassword) {
+      return res.status(400).json({
+        message: 'All password fields are required',
+      });
+    }
+
+    if (newPassword !== confirmNewPassword) {
+      return res.status(400).json({
+        message: 'New password and confirm new password do not match',
+      });
+    }
+
+    if (newPassword.length < 8) {
+      return res.status(400).json({
+        message: 'Password must be at least 8 characters',
+      });
+    }
+
+    const userRepo = appDataSource.getRepository(User);
+
+    const user = await userRepo.findOne({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        message: 'User not found',
+      });
+    }
+
+    console.log('USER:', user);
+    console.log('passwordHash:', user.passwordHash);
+    console.log('type:', typeof user.passwordHash);
+
+    const key = `change_password_attempts:${userId}`;
+
+    const isMatch = await bcrypt.compare(currentPassword, user.passwordHash!);
+
+    if (!isMatch) {
+      const attempts = await redisClient.incr(key);
+
+      // rate limiting
+      if (attempts === 1) {
+        await redisClient.expire(key, 300);
+      }
+
+      if (attempts > 5) {
+        return res
+          .status(429)
+          .json({ message: 'Too many attempts. Try again later.' });
+      }
+
+      return res.status(400).json({
+        message: 'Current password is incorrect',
+      });
+    }
+
+    const samePassword = await bcrypt.compare(newPassword, user.passwordHash!);
+
+    if (samePassword) {
+      return res.status(400).json({
+        message: 'New password cannot be same as old password',
+      });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    user.passwordHash = hashedPassword;
+
+    await userRepo.save(user);
+
+    const refreshTokenRepo = appDataSource.getRepository(RefreshTokenEntity);
+
+    await refreshTokenRepo.delete({
+      user: { id: userId },
+    });
+
+    console.log('MATCHED:', isMatch);
+    console.log('SAMEPASSWORD:', samePassword);
+    console.log('HASHED:', hashedPassword);
+
+    await redisClient.del(key);
+    return res.status(200).json({
+      success: true,
+      message: 'Password changed successfully',
+    });
+  } catch (err) {
+    console.error(err);
+
+    return res.status(500).json({
+      message: 'Failed to change password',
+    });
+  }
+};
+
+export const sendEmailVerificationOtp = async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      return res.status(401).json({
+        message: 'Unauthorized',
+      });
+    }
+
+    const userRepo = appDataSource.getRepository(User);
+
+    const user = await userRepo.findOne({
+      where: { id: userId },
+    });
+
+    if (!user || !user.email) {
+      return res.status(404).json({
+        message: 'User not found or email not set',
+      });
+    }
+
+    if (user.isEmailVerified) {
+      return res.status(400).json({
+        message: 'Email already verified',
+      });
+    }
+
+    const sendAttemptKey = `email_verify_send_attempt:${userId}`;
+
+    const sendAttempts = await redisClient.incr(sendAttemptKey);
+
+    if (sendAttempts === 1) {
+      await redisClient.expire(sendAttemptKey, 30); // 30 sec
+    }
+
+    if (sendAttempts > 1) {
+      return res.status(429).json({
+        message: 'Please wait before requesting another OTP',
+      });
+    }
+
+    const otpCode = generateotp().toString();
+
+    const hashedOtp = await bcrypt.hash(otpCode, 10);
+
+    const redisKey = `email_verify:${userId}`;
+
+    await redisClient.set(redisKey, hashedOtp, {
+      EX: 300,
+    });
+
+    const sendOtpEmailResult = await sendOtpEmail(user.email, Number(otpCode));
+    console.log('sendOtpEmailResult: ' + sendOtpEmailResult);
+
+    return res.status(200).json({
+      success: true,
+      message: 'Email verification OTP sent successfully',
+    });
+  } catch (err) {
+    console.error(err);
+
+    return res.status(500).json({
+      message: 'Failed to send email verification OTP',
+    });
+  }
+};
+
+export const verifyEmailOtp = async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      return res.status(401).json({
+        message: 'Unauthorized',
+      });
+    }
+
+    const { otp } = req.body;
+
+    if (!otp) {
+      return res.status(400).json({ message: 'OTP is required' });
+    }
+
+    const redisKey = `email_verify:${userId}`;
+    const attemptKey = `email_verify_attempts:${userId}`;
+
+    const storedHash = await redisClient.get(redisKey);
+
+    if (!storedHash) {
+      return res.status(400).json({ message: 'OTP expired or invalid' });
+    }
+
+    const attempts = await redisClient.incr(attemptKey);
+
+    if (attempts === 1) {
+      await redisClient.expire(attemptKey, 300); //5 mins
+    }
+
+    if (attempts > 5) {
+      return res
+        .status(429)
+        .json({ message: 'Too many attempts. Try again later.' });
+    }
+
+    const isValid = await bcrypt.compare(otp.toString(), storedHash);
+
+    if (!isValid) {
+      return res.status(400).json({ message: 'OTP expired or invalid' });
+    }
+
+    const userRepo = appDataSource.getRepository(User);
+
+    const user = await userRepo.findOne({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        message: 'User not found',
+      });
+    }
+
+    user.isEmailVerified = true;
+
+    await userRepo.save(user);
+
+    await redisClient.del(redisKey);
+    await redisClient.del(attemptKey);
+
+    return res.status(200).json({
+      success: true,
+      message: 'Email verified successfully',
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({
+      message: 'Failed to verify OTP',
+    });
   }
 };

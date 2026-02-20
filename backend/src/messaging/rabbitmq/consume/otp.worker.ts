@@ -19,8 +19,12 @@ const startOtpWorker = async () => {
   channel.prefetch(1);
   console.log('OTP Worker running');
 
-  channel.consume(QUEUES.SEND_OTP, async (msg: ConsumeMessage | null) => {
+  channel.consume(
+    QUEUES.SEND_OTP, 
+    async (msg: ConsumeMessage | null) => {
     if (!msg) return;
+
+    try {
 
     let job: SendOtpJob;
 
@@ -41,6 +45,12 @@ const startOtpWorker = async () => {
       return;
     }
 
+    if(otpRecord.expiresAt < new Date()) {
+      console.log('OTP expired before sending, skipping...');
+      channel.ack(msg);
+      return;
+    }
+
     try {
       console.log(
         `Sending OTP to ${job.phone} (attempt ${job.retryCount + 1})`,
@@ -56,10 +66,10 @@ const startOtpWorker = async () => {
     } catch (err) {
       console.error('OTP sending failed', err);
 
-      if (job.retryCount < MAX_RETRIES) {
+      if ((job.retryCount ?? 0) < MAX_RETRIES) {
         const retryJob: SendOtpJob = {
           ...job,
-          retryCount: job.retryCount + 1,
+          retryCount: (job.retryCount ?? 0) + 1,
         };
 
         try {
@@ -93,6 +103,9 @@ const startOtpWorker = async () => {
           return;
         }
       }
+    }
+    } catch (err) {
+      console.error('Worker error', err);
     }
   });
 };

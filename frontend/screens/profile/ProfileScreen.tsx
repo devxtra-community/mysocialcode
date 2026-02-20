@@ -1,9 +1,8 @@
 import api from '@/lib/api';
-import { View, Text, StyleSheet, Pressable, Alert, Image } from 'react-native';
+import { View, Text, StyleSheet, Pressable, Alert, Image, ActivityIndicator } from 'react-native';
 import { getRefreshToken, clearTokens } from '@/services/token/token.storage';
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator } from 'react-native';
 
 export interface UserProfileType {
   id: string;
@@ -78,6 +77,10 @@ export default function ProfileScreen() {
     }
   }
 
+  const handleSettings = () => {
+    router.push('/profile/setting');
+  }
+
   const handleProfile = async () => {
     router.push('/profile/edit');
   };
@@ -122,7 +125,7 @@ export default function ProfileScreen() {
           <Text style={styles.rowText}>Edit Profile</Text>
         </Pressable>
 
-        <Pressable style={styles.row}>
+        <Pressable style={styles.row} onPress={handleSettings}>
           <Text style={styles.rowText}>Settings</Text>
         </Pressable>
 
@@ -134,7 +137,7 @@ export default function ProfileScreen() {
           <Text style={styles.LogOut}>Log Out</Text>
         </Pressable>
         <Pressable style={styles.row} onPress={handleLogoutTest}>
-          <Text style={styles.LogOut}>Logt out for web</Text>
+          <Text style={styles.LogOut}>Log out for web</Text>
         </Pressable>
       </View>
     </View>

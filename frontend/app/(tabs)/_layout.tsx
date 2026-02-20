@@ -60,6 +60,9 @@ export default function TabLayout() {
       <Tabs.Screen name="events/[id]/scan" options={{ href: null }} />
       <Tabs.Screen name="profile/edit/index" options={{ href: null }} />
       <Tabs.Screen name="events/[id]/boost" options={{ href: null }} />
+      <Tabs.Screen name="profile/change-password" options={{ href: null }} />
+      <Tabs.Screen name="profile/setting" options={{ href: null }} />
+      <Tabs.Screen name="profile/verify-email" options={{ href: null }} />
     </Tabs>
   );
 }
