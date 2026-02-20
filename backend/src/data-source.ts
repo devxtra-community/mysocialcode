@@ -8,6 +8,8 @@ import { EventImage } from './entities/EventImage';
 import { EventTicket } from './entities/Tickets';
 import { Boost } from './entities/Boost';
 import { env } from './config/env';
+import { Admin } from './entities/Admin';
+
 if (!env.DATABASE_URL) {
   throw new Error('DATABASE_URL is not defined');
 }
@@ -25,6 +27,7 @@ export const appDataSource = new DataSource({
     EventImage,
     EventTicket,
     Boost,
+    Admin,
   ],
   synchronize: false,
   migrations: ['src/migrations/*.ts'],

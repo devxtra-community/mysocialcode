@@ -14,25 +14,33 @@ export const getBoostEvents = async (req: AuthReq, res: Response) => {
 
     const boosts = await getBoostRepository
       .createQueryBuilder('boost')
-      .distinctOn(['event.id'])
       .leftJoinAndSelect('boost.event', 'event')
       .leftJoinAndSelect('event.image', 'image')
       .where('boost.endTime > :now', { now })
       .andWhere('boost.status = :status', { status: 'active' })
-      .orderBy('event.id')
-      .addOrderBy('boost.createdAt', 'DESC')
-      .take(10)
+      .orderBy('boost.impressions', 'ASC')
+      .addOrderBy('RANDOM()')
+      .limit(10)
       .getMany();
 
-    const events = boosts.map((b) => b.event);
+    const boostIds = boosts.map((b) => b.id);
+
+    if (boostIds.length) {
+      await getBoostRepository
+        .createQueryBuilder()
+        .update()
+        .set({ impressions: () => 'impressions + 1' })
+        .whereInIds(boostIds)
+        .execute();
+    }
 
     res.json({
       success: true,
-      events,
+      events: boosts.map((b) => b.event),
     });
-  } catch (Err) {
-    console.log(Err);
-    res.status(500).json({ message: 'internal server err', error: Err });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'internal server err' });
   }
 };
 
@@ -58,17 +66,6 @@ export const boostEvent = async (req: AuthReq, res: Response) => {
 
     const amount = days * pricePerPay * 100;
 
-    // const paymentId = `test${Date.now()}`;
-    // const boost = getBoostRepository.create({
-    //   event: { id: eventId },
-    //   user: { id: userId },
-    //   startTime: new Date(),
-    //   endTime: new Date(Date.now() + duration * oneDay),
-    //   status: 'active',
-    //   paymentId,
-    //   amount,
-    // });
-    // await getBoostRepository.save(boost);
     const link = await razorpay.paymentLink.create({
       amount: amount,
       currency: 'INR',
@@ -79,6 +76,8 @@ export const boostEvent = async (req: AuthReq, res: Response) => {
         email: 'test@test.com',
         contact: '1234567890',
       },
+      callback_url: 'mysocialcode://payments/success',
+      callback_method: 'get',
 
       notify: {
         sms: false,
@@ -88,6 +87,7 @@ export const boostEvent = async (req: AuthReq, res: Response) => {
       reminder_enable: false,
 
       notes: {
+        type: 'boost',
         eventId: String(eventId),
         duration: String(days),
         userId: String(userId),

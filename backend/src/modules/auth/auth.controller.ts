@@ -19,6 +19,7 @@ import {
 } from '../../Services/passwordReset.service';
 import { redisClient } from '../../utils/redis';
 import { env } from '../../config/env';
+// import { Admin } from '../../entities/Admin';
 
 export const sendOtp = async (
   req: Request,

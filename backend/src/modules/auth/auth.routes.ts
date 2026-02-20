@@ -60,4 +60,5 @@ authRouter.put(
 
 authRouter.post('/send-otp-email', requireAuth, sendEmailVerificationOtp);
 authRouter.post('/verify-otp-email', requireAuth, verifyEmailOtp);
+
 export default authRouter;

@@ -12,6 +12,7 @@ import { useCallback, useEffect, useState } from 'react';
 import EventDetailSkeleton from '@/components/comps/skeletonEvent';
 import Carousel from 'react-native-reanimated-carousel';
 import api from '@/lib/api';
+import { Linking } from 'react-native';
 
 interface EventType {
   id: string;
@@ -61,8 +62,12 @@ export default function EventDetailScreen() {
   [];
   async function handleJoin() {
     try {
-      await api.post(`/event/join-event/${eventId}`);
+      const res = await api.post(`/event/join-event/${eventId}`);
 
+      if (res.data.pay && res.data.url) {
+        await Linking.openURL(res.data.url);
+        return;
+      }
       setEvent((prev) =>
         prev
           ? {
@@ -73,12 +78,9 @@ export default function EventDetailScreen() {
           : prev,
       );
 
-      setShowConfirm(false);
-
       alert('Successfully joined event');
     } catch (err: any) {
       alert(err.response?.data?.message || 'Failed to join event');
-      console.log('Join error:', err.response?.data);
     }
   }
 
@@ -129,10 +131,12 @@ export default function EventDetailScreen() {
         onPress={() => setShowConfirm(true)}
       >
         <Text style={styles.joinText}>
-          {event.status === 'published'
-            ? 'Join Event'
-            : event.status === 'joined'
-              ? 'Joined'
+          {event.status === 'joined'
+            ? 'Joined'
+            : event.status === 'published'
+              ? Number(event.price) > 0
+                ? `Join Event · ₹${event.price}`
+                : 'Join Event · Free'
               : 'Not Available'}
         </Text>
       </Pressable>
