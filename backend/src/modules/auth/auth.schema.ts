@@ -77,6 +77,27 @@ export const resetPasswordSchema = z.object({
     .regex(/[@$!%*?&]/, 'Must contain special character'),
 });
 
+export const changePasswordSchema = z
+  .object({
+    currentPassword: z.string(),
+
+    newPassword: z
+      .string()
+      .min(8, 'New password must be at least 8 characters')
+      .max(50, 'Password too long')
+      .regex(/[A-Z]/, 'Must contain at least one uppercase letter')
+      .regex(/[a-z]/, 'Must contain at least one lowercase letter')
+      .regex(/[0-9]/, 'Must contain at least one number')
+      .regex(/[@$!%*?&#]/, 'Must contain at least one special character'),
+
+    confirmNewPassword: z.string().min(1, 'Please confirm new password'),
+  })
+  .refine((data) => data.newPassword === data.confirmNewPassword, {
+    message: 'New passwords do not match',
+    path: ['confirmNewPassword'],
+  })
+  .strict();
+
 // export const verifyOtpSchema = z
 //   .object({
 //     phoneNumber: z.string().min(10, 'Invalid phone number'),

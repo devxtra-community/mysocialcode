@@ -8,15 +8,20 @@ import {
   refreshAccessToken,
   forgetPassword,
   resetPassword,
+  changePassword,
+  sendEmailVerificationOtp,
+  verifyEmailOtp,
 } from './auth.controller';
 import { validate } from '../../middleware/validate';
 import {
+  changePasswordSchema,
   forgetPasswordSchema,
   loginSchema,
   phoneSchema,
   registerSchema,
   resetPasswordSchema,
 } from './auth.schema';
+import { requireAuth } from '../../middleware/auth.middleware';
 
 const authRouter = Router();
 
@@ -45,4 +50,15 @@ authRouter.post(
   validate(resetPasswordSchema),
   resetPassword,
 );
+
+authRouter.put(
+  '/change-password',
+  requireAuth,
+  validate(changePasswordSchema),
+  changePassword,
+);
+
+authRouter.post('/send-otp-email', requireAuth, sendEmailVerificationOtp);
+authRouter.post('/verify-otp-email', requireAuth, verifyEmailOtp);
+
 export default authRouter;

@@ -22,77 +22,87 @@ const startOtpWorker = async () => {
   channel.consume(QUEUES.SEND_OTP, async (msg: ConsumeMessage | null) => {
     if (!msg) return;
 
-    let job: SendOtpJob;
-
     try {
-      job = JSON.parse(msg.content.toString());
-    } catch {
-      console.error('Invalid message format');
-      channel.ack(msg);
-      return;
-    }
+      let job: SendOtpJob;
 
-    const otpRecord = await otpRepo.findOne({
-      where: { requestId: job.requestId },
-    });
+      try {
+        job = JSON.parse(msg.content.toString());
+      } catch {
+        console.error('Invalid message format');
+        channel.ack(msg);
+        return;
+      }
 
-    if (!otpRecord || otpRecord.sent) {
-      channel.ack(msg);
-      return;
-    }
+      const otpRecord = await otpRepo.findOne({
+        where: { requestId: job.requestId },
+      });
 
-    try {
-      console.log(
-        `Sending OTP to ${job.phone} (attempt ${job.retryCount + 1})`,
-      );
+      if (!otpRecord || otpRecord.sent) {
+        channel.ack(msg);
+        return;
+      }
 
-      await sendOtpSms(job.phone, job.otp);
+      if (otpRecord.expiresAt < new Date()) {
+        console.log('OTP expired before sending, skipping...');
+        channel.ack(msg);
+        return;
+      }
 
-      otpRecord.sent = true;
-      await otpRepo.save(otpRecord);
+      try {
+        console.log(
+          `Sending OTP to ${job.phone} (attempt ${job.retryCount + 1})`,
+        );
 
-      console.log('OTP sent successfully');
-      channel.ack(msg);
-    } catch (err) {
-      console.error('OTP sending failed', err);
+        await sendOtpSms(job.phone, job.otp);
 
-      if (job.retryCount < MAX_RETRIES) {
-        const retryJob: SendOtpJob = {
-          ...job,
-          retryCount: job.retryCount + 1,
-        };
+        otpRecord.sent = true;
+        await otpRepo.save(otpRecord);
 
-        try {
-          channel.sendToQueue(
-            QUEUES.SEND_OTP,
-            Buffer.from(JSON.stringify(retryJob)),
-            { persistent: true },
-          );
+        console.log('OTP sent successfully');
+        channel.ack(msg);
+      } catch (err) {
+        console.error('OTP sending failed', err);
 
-          console.log(`Retry queued (attempt ${retryJob.retryCount})`);
-          channel.ack(msg);
-        } catch (enqueueErr) {
-          console.error('Retry enqueue failed', enqueueErr);
-          return;
-        }
-      } else {
-        try {
-          channel.sendToQueue(
-            QUEUES.SEND_OTP_DLQ,
-            Buffer.from(JSON.stringify(job)),
-            { persistent: true },
-          );
+        if ((job.retryCount ?? 0) < MAX_RETRIES) {
+          const retryJob: SendOtpJob = {
+            ...job,
+            retryCount: (job.retryCount ?? 0) + 1,
+          };
 
-          console.error(
-            `OTP moved to DLQ after ${job.retryCount} retries for ${job.phone}`,
-          );
+          try {
+            channel.sendToQueue(
+              QUEUES.SEND_OTP,
+              Buffer.from(JSON.stringify(retryJob)),
+              { persistent: true },
+            );
 
-          channel.ack(msg);
-        } catch (dlqErr) {
-          console.error('DLQ enqueue failed', dlqErr);
-          return;
+            console.log(`Retry queued (attempt ${retryJob.retryCount})`);
+            channel.ack(msg);
+          } catch (enqueueErr) {
+            console.error('Retry enqueue failed', enqueueErr);
+            return;
+          }
+        } else {
+          try {
+            channel.sendToQueue(
+              QUEUES.SEND_OTP_DLQ,
+              Buffer.from(JSON.stringify(job)),
+              { persistent: true },
+            );
+
+            console.error(
+              `OTP moved to DLQ after ${job.retryCount} retries for ${job.phone}`,
+            );
+
+            channel.ack(msg);
+          } catch (dlqErr) {
+            console.error('DLQ enqueue failed', dlqErr);
+            return;
+          }
         }
       }
+    } catch (err) {
+      console.error('Worker error', err);
     }
   });
 };

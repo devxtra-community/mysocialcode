@@ -7,13 +7,15 @@ import { Events } from './entities/Event';
 import { EventImage } from './entities/EventImage';
 import { EventTicket } from './entities/Tickets';
 import { Boost } from './entities/Boost';
+import { env } from './config/env';
 import { Admin } from './entities/Admin';
-if (!process.env.DATABASE_URL) {
+
+if (!env.DATABASE_URL) {
   throw new Error('DATABASE_URL is not defined');
 }
 export const appDataSource = new DataSource({
   type: 'postgres',
-  url: process.env.DATABASE_URL,
+  url: env.DATABASE_URL,
   ssl: {
     rejectUnauthorized: false,
   },
@@ -27,5 +29,6 @@ export const appDataSource = new DataSource({
     Boost,
     Admin,
   ],
-  synchronize: true,
+  synchronize: false,
+  migrations: ['src/migrations/*.ts'],
 });

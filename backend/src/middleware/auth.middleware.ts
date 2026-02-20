@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { logger } from '../utils/logger';
+import { env } from '../config/env';
 
 interface AuthRequest extends Request {
   user?: {
@@ -22,7 +23,7 @@ export const requireAuth = (
   const token = authHeader.split(' ')[1];
 
   try {
-    const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET!) as {
+    const decoded = jwt.verify(token, env.ACCESS_TOKEN_SECRET!) as {
       userId: string;
     };
 

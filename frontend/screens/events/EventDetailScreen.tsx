@@ -7,8 +7,8 @@ import {
   Image,
   Dimensions,
 } from 'react-native';
-import { router, useLocalSearchParams } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
+import { useCallback, useEffect, useState } from 'react';
 import EventDetailSkeleton from '@/components/comps/skeletonEvent';
 import Carousel from 'react-native-reanimated-carousel';
 import api from '@/lib/api';
@@ -46,6 +46,12 @@ export default function EventDetailScreen() {
     fetchEvent();
   }, [eventId]);
 
+  useFocusEffect(
+    useCallback(() => {
+      fetchEvent();
+    }, [eventId]),
+  );
+
   async function fetchEvent() {
     const res = await api.get(`/event/getEvent/${eventId}`);
     console.log(res.data);
@@ -53,7 +59,7 @@ export default function EventDetailScreen() {
     setEvent(res.data.event);
     setIsHost(res.data.host);
   }
-
+  [];
   async function handleJoin() {
     try {
       const res = await api.post(`/event/join-event/${eventId}`);

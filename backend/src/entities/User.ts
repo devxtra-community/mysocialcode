@@ -33,11 +33,14 @@ export class User {
   @Column({ nullable: true })
   profileImageUrl?: string;
 
-  @Column({ nullable: true })
+  @Column()
   passwordHash?: string;
 
   @Column({ default: false })
   isPhoneVerified!: boolean;
+
+  @Column({ default: false })
+  isEmailVerified!: boolean;
 
   @OneToMany(() => Events, (event) => event.user)
   events!: Events[];

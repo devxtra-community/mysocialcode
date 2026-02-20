@@ -13,7 +13,7 @@ import { getUserRepository } from '../user/user.repository';
 import { uploadEventImage } from './event.upload';
 import { appDataSource } from '../../data-source';
 import { redisClient } from '../../utils/redis';
-import refunds from 'razorpay/dist/types/refunds';
+// import refunds from 'razorpay/dist/types/refunds';
 import { TicketStatus } from '../../entities/Tickets';
 import { razorpay } from '../payment/razorpay';
 
