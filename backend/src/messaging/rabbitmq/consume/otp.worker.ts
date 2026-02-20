@@ -19,91 +19,88 @@ const startOtpWorker = async () => {
   channel.prefetch(1);
   console.log('OTP Worker running');
 
-  channel.consume(
-    QUEUES.SEND_OTP, 
-    async (msg: ConsumeMessage | null) => {
+  channel.consume(QUEUES.SEND_OTP, async (msg: ConsumeMessage | null) => {
     if (!msg) return;
 
     try {
+      let job: SendOtpJob;
 
-    let job: SendOtpJob;
+      try {
+        job = JSON.parse(msg.content.toString());
+      } catch {
+        console.error('Invalid message format');
+        channel.ack(msg);
+        return;
+      }
 
-    try {
-      job = JSON.parse(msg.content.toString());
-    } catch {
-      console.error('Invalid message format');
-      channel.ack(msg);
-      return;
-    }
+      const otpRecord = await otpRepo.findOne({
+        where: { requestId: job.requestId },
+      });
 
-    const otpRecord = await otpRepo.findOne({
-      where: { requestId: job.requestId },
-    });
+      if (!otpRecord || otpRecord.sent) {
+        channel.ack(msg);
+        return;
+      }
 
-    if (!otpRecord || otpRecord.sent) {
-      channel.ack(msg);
-      return;
-    }
+      if (otpRecord.expiresAt < new Date()) {
+        console.log('OTP expired before sending, skipping...');
+        channel.ack(msg);
+        return;
+      }
 
-    if(otpRecord.expiresAt < new Date()) {
-      console.log('OTP expired before sending, skipping...');
-      channel.ack(msg);
-      return;
-    }
+      try {
+        console.log(
+          `Sending OTP to ${job.phone} (attempt ${job.retryCount + 1})`,
+        );
 
-    try {
-      console.log(
-        `Sending OTP to ${job.phone} (attempt ${job.retryCount + 1})`,
-      );
+        await sendOtpSms(job.phone, job.otp);
 
-      await sendOtpSms(job.phone, job.otp);
+        otpRecord.sent = true;
+        await otpRepo.save(otpRecord);
 
-      otpRecord.sent = true;
-      await otpRepo.save(otpRecord);
+        console.log('OTP sent successfully');
+        channel.ack(msg);
+      } catch (err) {
+        console.error('OTP sending failed', err);
 
-      console.log('OTP sent successfully');
-      channel.ack(msg);
-    } catch (err) {
-      console.error('OTP sending failed', err);
+        if ((job.retryCount ?? 0) < MAX_RETRIES) {
+          const retryJob: SendOtpJob = {
+            ...job,
+            retryCount: (job.retryCount ?? 0) + 1,
+          };
 
-      if ((job.retryCount ?? 0) < MAX_RETRIES) {
-        const retryJob: SendOtpJob = {
-          ...job,
-          retryCount: (job.retryCount ?? 0) + 1,
-        };
+          try {
+            channel.sendToQueue(
+              QUEUES.SEND_OTP,
+              Buffer.from(JSON.stringify(retryJob)),
+              { persistent: true },
+            );
 
-        try {
-          channel.sendToQueue(
-            QUEUES.SEND_OTP,
-            Buffer.from(JSON.stringify(retryJob)),
-            { persistent: true },
-          );
+            console.log(`Retry queued (attempt ${retryJob.retryCount})`);
+            channel.ack(msg);
+          } catch (enqueueErr) {
+            console.error('Retry enqueue failed', enqueueErr);
+            return;
+          }
+        } else {
+          try {
+            channel.sendToQueue(
+              QUEUES.SEND_OTP_DLQ,
+              Buffer.from(JSON.stringify(job)),
+              { persistent: true },
+            );
 
-          console.log(`Retry queued (attempt ${retryJob.retryCount})`);
-          channel.ack(msg);
-        } catch (enqueueErr) {
-          console.error('Retry enqueue failed', enqueueErr);
-          return;
-        }
-      } else {
-        try {
-          channel.sendToQueue(
-            QUEUES.SEND_OTP_DLQ,
-            Buffer.from(JSON.stringify(job)),
-            { persistent: true },
-          );
+            console.error(
+              `OTP moved to DLQ after ${job.retryCount} retries for ${job.phone}`,
+            );
 
-          console.error(
-            `OTP moved to DLQ after ${job.retryCount} retries for ${job.phone}`,
-          );
-
-          channel.ack(msg);
-        } catch (dlqErr) {
-          console.error('DLQ enqueue failed', dlqErr);
-          return;
+            channel.ack(msg);
+          } catch (dlqErr) {
+            console.error('DLQ enqueue failed', dlqErr);
+            return;
+          }
         }
       }
-    }
     } catch (err) {
       console.error('Worker error', err);
     }

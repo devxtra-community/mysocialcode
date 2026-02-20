@@ -55,7 +55,7 @@ authRouter.put(
   '/change-password',
   requireAuth,
   validate(changePasswordSchema),
-  changePassword
+  changePassword,
 );
 
 authRouter.post('/send-otp-email', requireAuth, sendEmailVerificationOtp);

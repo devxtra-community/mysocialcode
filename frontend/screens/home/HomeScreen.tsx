@@ -63,7 +63,7 @@ export default function HomeScreen() {
 
       if (cursor) {
         url += `&cursor=${encodeURIComponent(
-          new Date(cursor.startDate).toISOString()
+          new Date(cursor.startDate).toISOString(),
         )}&id=${cursor.id}`;
       }
 

@@ -1,5 +1,5 @@
-import VerifyEmailScreen from "@/screens/profile/VerifyEmailScreen";
+import VerifyEmailScreen from '@/screens/profile/VerifyEmailScreen';
 
 export default function VerifyEmailScreens() {
-  return <VerifyEmailScreen />
+  return <VerifyEmailScreen />;
 }

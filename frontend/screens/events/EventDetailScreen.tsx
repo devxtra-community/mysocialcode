@@ -48,7 +48,7 @@ export default function EventDetailScreen() {
   useFocusEffect(
     useCallback(() => {
       fetchEvent();
-    }, [eventId])
+    }, [eventId]),
   );
 
   async function fetchEvent() {
@@ -58,7 +58,7 @@ export default function EventDetailScreen() {
     setEvent(res.data.event);
     setIsHost(res.data.host);
   }
-[]
+  [];
   async function handleJoin() {
     try {
       await api.post(`/event/join-event/${eventId}`);

@@ -1,5 +1,13 @@
 import api from '@/lib/api';
-import { View, Text, StyleSheet, Pressable, Alert, Image, ActivityIndicator } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Pressable,
+  Alert,
+  Image,
+  ActivityIndicator,
+} from 'react-native';
 import { getRefreshToken, clearTokens } from '@/services/token/token.storage';
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
@@ -79,7 +87,7 @@ export default function ProfileScreen() {
 
   const handleSettings = () => {
     router.push('/profile/setting');
-  }
+  };
 
   const handleProfile = async () => {
     router.push('/profile/edit');

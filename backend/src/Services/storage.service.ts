@@ -16,6 +16,6 @@
 //     Key: key,
 //   });
 
-//     const url = await r2.getSignedUrl(command, { expiresIn: expiresInSeconds });    
+//     const url = await r2.getSignedUrl(command, { expiresIn: expiresInSeconds });
 //     return url;
 // }

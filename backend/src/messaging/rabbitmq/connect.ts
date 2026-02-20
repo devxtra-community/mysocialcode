@@ -2,14 +2,12 @@ import * as amqp from 'amqplib';
 import { QUEUES } from './queues';
 import { env } from '../../config/env';
 
-const RABBITMQ_URL =
-  env.RABBITMQ_URL || 'amqp://guest:guest@localhost:5672';
+const RABBITMQ_URL = env.RABBITMQ_URL || 'amqp://guest:guest@localhost:5672';
 
 let connection: Awaited<ReturnType<typeof amqp.connect>> | undefined;
 let channel: amqp.Channel | undefined;
 
 export const connectRabbitMQ = async (): Promise<void> => {
-
   if (channel) return;
 
   try {
@@ -35,8 +33,7 @@ export const connectRabbitMQ = async (): Promise<void> => {
     }
 
     console.log('RabbitMQ connected');
-    console.log("Connection object:", connection?.constructor.name);
-
+    console.log('Connection object:', connection?.constructor.name);
   } catch (err) {
     console.error('RabbitMQ connect failed:', err);
     setTimeout(connectRabbitMQ, 5000);
