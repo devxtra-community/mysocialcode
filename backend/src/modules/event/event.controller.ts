@@ -13,9 +13,9 @@ import { getUserRepository } from '../user/user.repository';
 import { uploadEventImage } from './event.upload';
 import { appDataSource } from '../../data-source';
 import { redisClient } from '../../utils/redis';
-import refunds from 'razorpay/dist/types/refunds';
 import { TicketStatus } from '../../entities/Tickets';
 import { razorpay } from '../payment/razorpay';
+import { getCoordinates } from '../../utils/geocode';
 
 export interface AuthReq extends Request {
   user?: {
@@ -45,6 +45,7 @@ export const createEvent = async (req: AuthReq, res: Response) => {
         message: 'in side create event  controller no req,user if  case worked',
       });
     }
+    const geo = await getCoordinates(location);
     const userId = req.user?.id;
     const files = req.files as Express.Multer.File[];
     const event = await createEventService(
@@ -55,7 +56,9 @@ export const createEvent = async (req: AuthReq, res: Response) => {
       endDate,
       isFree,
       price,
-      location,
+      geo.location,
+      geo.latitude,
+      geo.longitude,
       capacity,
       category,
       rules,
@@ -545,4 +548,21 @@ export const searach = async (req: AuthReq, res: Response) => {
     logger.error({ err }, 'catch in seach worked');
     return res.status(500).json({ message: 'internal server error' });
   }
+};
+
+export const locationSuggestion = async (req: AuthReq, res: Response) => {
+  logger.error('reached here at location suggestion');
+  try {
+    const q = req.query.q as string;
+
+    if (!q) return res.json([]);
+
+    const response = await fetch(
+      `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=5`,
+    );
+
+    const data = await response.json();
+
+    res.json(data);
+  } catch (err) {}
 };

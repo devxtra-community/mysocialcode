@@ -1,5 +1,5 @@
 import api from '@/lib/api';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import {
   View,
   Pressable,
@@ -31,6 +31,32 @@ export default function CreateEventScreen() {
   const [category, setCategory] = useState('');
   const [rules, setRules] = useState('');
   const [loading, setLoading] = useState(false);
+  const [suggestions, setSuggestions] = useState<any[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const debounceTimer = useRef<any>(null);
+  async function fetchLocations(text: string) {
+    console.log('inside fetch location');
+
+    setLocation(text);
+    if (text.length < 3) {
+      setSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
+
+    clearTimeout(debounceTimer.current);
+    debounceTimer.current = setTimeout(async () => {
+      try {
+        const res = await api.get(`/event/suggestion?q=${text}`);
+        console.log(res.data);
+
+        setSuggestions(res.data);
+        setShowSuggestions(true);
+      } catch (err) {
+        console.log(err);
+      }
+    }, 400);
+  }
 
   async function pickImages() {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -222,14 +248,47 @@ export default function CreateEventScreen() {
             </View>
           )}
 
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Location</Text>
+          <View style={{ position: 'relative', zIndex: 999 }}>
             <TextInput
-              placeholder="Venue or full address"
+              placeholder="Search location..."
               value={location}
-              onChangeText={setLocation}
+              onChangeText={fetchLocations}
               style={styles.input}
             />
+            {showSuggestions && suggestions.length > 0 && (
+              <View
+                style={{
+                  position: 'absolute',
+                  top: 50,
+                  left: 0,
+                  right: 0,
+                  backgroundColor: 'white',
+                  borderRadius: 10,
+                  borderWidth: 1,
+                  borderColor: '#ddd',
+                  zIndex: 999,
+                  elevation: 5,
+                }}
+              >
+                {suggestions.map((item, index) => (
+                  <Pressable
+                    key={index}
+                    style={{
+                      padding: 12,
+                      borderBottomWidth: 1,
+                      borderBottomColor: '#eee',
+                    }}
+                    onPress={() => {
+                      setLocation(item.display_name);
+                      setSuggestions([]);
+                      setShowSuggestions(false);
+                    }}
+                  >
+                    <Text>{item.display_name}</Text>
+                  </Pressable>
+                ))}
+              </View>
+            )}
           </View>
           <View style={styles.inputGroup}>
             <Text style={styles.label}>Capacity</Text>

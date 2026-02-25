@@ -44,6 +44,12 @@ export class Events {
   @Column()
   location!: string;
 
+  @Column({ type: 'double precision', nullable: true })
+  latitude!: number;
+
+  @Column({ type: 'double precision', nullable: true })
+  longitude!: number;
+
   @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
   price!: number;
 

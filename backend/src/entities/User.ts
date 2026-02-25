@@ -48,6 +48,9 @@ export class User {
   @Column({ nullable: true })
   passwordResetToken!: string;
 
+  @Column({ default: 'active' })
+  status!: 'active' | 'inactive' | 'banned';
+
   @Column({ type: 'timestamp', nullable: true })
   passwordResetExpires!: Date;
 }

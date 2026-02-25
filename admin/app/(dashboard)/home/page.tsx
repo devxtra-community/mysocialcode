@@ -6,17 +6,17 @@ const STATS = [
     value: '24,521',
     change: '+12.4%',
     up: true,
-    icon: '👤',
+    icon: '',
   },
-  { label: 'Live Events', value: '138', change: '+3.1%', up: true, icon: '🎯' },
+  { label: 'Live Events', value: '138', change: '+3.1%', up: true, icon: '' },
   {
     label: 'Tickets Sold',
     value: '9,872',
     change: '-1.2%',
     up: false,
-    icon: '🎟️',
+    icon: '',
   },
-  { label: 'Revenue', value: '$48,320', change: '+8.7%', up: true, icon: '💰' },
+  { label: 'Revenue', value: '$48,320', change: '+8.7%', up: true, icon: '' },
 ];
 
 const ACTIVITY = [

@@ -7,6 +7,7 @@ import {
   getMyEvents,
   getSingleEvent,
   joinEvent,
+  locationSuggestion,
   searach,
   updateEvent,
 } from './event.controller';
@@ -48,5 +49,6 @@ eventRouter.post('/cancel/:id', requireAuth, cancelEvent);
 eventRouter.post('/attendance', requireAuth, attendance);
 
 eventRouter.get('/search', searach);
+eventRouter.get('/suggestion', locationSuggestion);
 
 export default eventRouter;

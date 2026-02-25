@@ -20,7 +20,7 @@ export default function Sidebar() {
           ⚡
         </div>
         <span className="font-display font-extrabold text-[17px] tracking-tight text-gray-900">
-          Event<span className="text-cyan-500">OS</span>
+          My<span className="text-cyan-500">Social Code</span>
         </span>
       </div>
 
