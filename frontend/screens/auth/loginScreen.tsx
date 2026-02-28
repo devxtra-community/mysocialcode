@@ -4,12 +4,13 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
-  SafeAreaView,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
 import { loginUser } from '@/services/auth/otp.service';
 import { storeTokens } from '@/services/token/token.storage';
+import { showSuccess, showError } from '@/utils/toast';
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -18,12 +19,19 @@ export default function LoginScreen() {
   const [password, setPassword] = useState('');
 
   async function handleLogin() {
-    const res = await loginUser({ phoneNumber, password });
-    console.log(res);
+    try {
+      const res = await loginUser({ phoneNumber, password });
 
-    if (res?.success) {
-      router.replace('/(tabs)/home');
-      storeTokens(res.accesstoken, res.refreshtoken);
+      if (res?.success) {
+        await storeTokens(res.accessToken, res.refreshToken);
+        showSuccess('Logged in successfully');
+        router.replace('/(tabs)/home');
+      }
+    } catch (err: any) {
+      const message =
+        err?.response?.data?.message || 'Login failed. Try again.';
+
+      showError(message);
     }
   }
 
@@ -59,6 +67,9 @@ export default function LoginScreen() {
           <Text style={styles.linkText}>Create new account</Text>
         </TouchableOpacity>
       </View>
+      <TouchableOpacity onPress={() => router.push('/(auth)/forgetPassword')}>
+        <Text style={{ color: 'blue' }}>Forgot Password?</Text>
+      </TouchableOpacity>
     </SafeAreaView>
   );
 }
