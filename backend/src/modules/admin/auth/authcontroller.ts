@@ -5,7 +5,6 @@ import { logger } from '../../../utils/logger';
 import { signAccessToken } from '../../../Services/jwt.service';
 import { Admin } from '../../../entities/Admin';
 
-
 const adminRepo = appDataSource.getRepository(Admin);
 
 export const adminLogin = async (req: Request, res: Response) => {
@@ -13,35 +12,32 @@ export const adminLogin = async (req: Request, res: Response) => {
     logger.info('reached here at admin login');
 
     const { email, password } = req.body;
-console.log('admin login attempt with email:', email);
-console.log('admin login attempt with password:', password);
+    console.log('admin login attempt with email:', email);
+    console.log('admin login attempt with password:', password);
     if (!email || !password) {
       return res.status(400).json({ message: 'Email and password required' });
     }
 
     const admin = await adminRepo.findOne({ where: { email } });
-console.log('admin found:', admin);
+    console.log('admin found:', admin);
     if (!admin) {
       return res.status(401).json({ message: 'no admin found' });
     }
 
     // const isMatch = await bcrypt.compare(password, admin.passwordHash);
-console.log('password match result:', password === admin.passwordHash);
+    console.log('password match result:', password === admin.passwordHash);
     if (password !== admin.passwordHash) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
-    const token = signAccessToken(
-      { id: admin.id, type: 'ADMIN' },
-    );
-console.log('generated token:', token);
+    const token = signAccessToken({ id: admin.id, type: 'ADMIN' });
+    console.log('generated token:', token);
     res.status(200).json({ success: true, token });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Internal server error' });
   }
 };
-
 
 // const adminRepo = appDataSource.getRepository(User);
 
@@ -106,6 +102,6 @@ console.log('generated token:', token);
 //     res.status(201).json({ success: true, message: 'Admin registered successfully' });
 //   } catch (err) {
 //     console.error(err);
-//     res.status(500).json({ message: 'Internal server error' }); 
+//     res.status(500).json({ message: 'Internal server error' });
 //   }
 // };

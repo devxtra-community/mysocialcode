@@ -60,10 +60,7 @@ export const requireAdmin = async (
   const token = authHeader.split(' ')[1];
 
   try {
-    const decoded = jwt.verify(
-      token,
-      env.ACCESS_TOKEN_SECRET!,
-    ) as TokenPayload;
+    const decoded = jwt.verify(token, env.ACCESS_TOKEN_SECRET!) as TokenPayload;
 
     if (decoded.type !== 'ADMIN') {
       return res.status(403).json({ message: 'Admin access required' });

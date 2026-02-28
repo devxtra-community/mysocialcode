@@ -165,7 +165,10 @@ export default function UsersPage() {
                 ))}
                 {users.length === 0 && (
                   <tr>
-                    <td colSpan={7} className="px-5 py-6 text-center text-gray-700">
+                    <td
+                      colSpan={7}
+                      className="px-5 py-6 text-center text-gray-700"
+                    >
                       No users found
                     </td>
                   </tr>

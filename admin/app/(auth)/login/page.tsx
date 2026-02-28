@@ -19,7 +19,7 @@ export default function LoginPage() {
     try {
       const login = await api.post('/admin/auth/login', { email, password });
       if (login.data.success) {
-        localStorage.setItem('admin_access_token', login.data.token)
+        localStorage.setItem('admin_access_token', login.data.token);
         router.push('/home');
       }
     } catch (err: unknown) {

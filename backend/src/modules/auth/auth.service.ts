@@ -16,5 +16,8 @@ export const refreshAccessTokenService = async (token: string) => {
   if (tokenRecord.expiresAt < new Date()) {
     throw new Error(' token is expired');
   }
-  return signAccessToken({ userId: tokenRecord.user.id, role: tokenRecord.user.role });
+  return signAccessToken({
+    userId: tokenRecord.user.id,
+    role: tokenRecord.user.role,
+  });
 };
