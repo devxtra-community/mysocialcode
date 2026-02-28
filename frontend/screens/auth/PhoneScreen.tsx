@@ -17,17 +17,24 @@ export default function PhoneScreen() {
       const fullPhoneNumber = `+91${phone}`;
       const res = await sendOtp(fullPhoneNumber);
 
-      if (res.success) {
+      if (res?.success) {
         router.push({
           pathname: '/(auth)/otp',
           params: { phone: fullPhoneNumber },
         });
       }
     } catch (err: any) {
-      const data = err?.response?.data;
-      if (data.next == 'login') {
+      console.error('OTP error:', err?.response?.data || err);
+
+      const next = err?.response?.data?.next;
+
+      if (next === 'login') {
         router.push('/(auth)/login');
+        return;
       }
+
+      // Optional: show a message
+      // Alert.alert("Error", "Unable to send OTP. Try again.");
     } finally {
       setLoading(false);
     }
