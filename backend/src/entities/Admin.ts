@@ -14,7 +14,7 @@ export class Admin {
   email!: string;
 
   @Column()
-  password!: string;
+  passwordHash!: string;
 
   @CreateDateColumn()
   createdAt!: Date;

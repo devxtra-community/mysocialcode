@@ -13,7 +13,7 @@ import {
 
 import { requireAuth } from '../../middleware/auth.middleware';
 import { upload } from '../../middleware/upload';
-import { validate } from '../../middleware/validate';
+import { validateBody } from '../../middleware/validate';
 
 import { createEventSchema, updateEventSchema } from './event.schema';
 
@@ -23,7 +23,7 @@ eventRouter.post(
   '/create-event',
   requireAuth,
   upload.array('images', 4),
-  validate(createEventSchema),
+  validateBody(createEventSchema),
   createEvent,
 );
 
@@ -39,7 +39,7 @@ eventRouter.put(
   '/update/:id',
   requireAuth,
   upload.array('images', 4),
-  validate(updateEventSchema),
+  validateBody(updateEventSchema),
   updateEvent,
 );
 

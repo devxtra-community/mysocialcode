@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 
-export const validate =
+export const validateBody =
   (schema: z.ZodSchema) =>
   (req: Request, res: Response, next: NextFunction) => {
     const result = schema.safeParse(req.body);
@@ -19,3 +19,19 @@ export const validate =
     req.body = result.data;
     next();
   };
+
+// export const validateQuery =
+//   (schema: z.ZodSchema) =>
+//   (req: Request, res: Response, next: NextFunction) => {
+//     const result = schema.safeParse(req.query);
+
+//     if (!result.success) {
+//       return res.status(400).json({
+//         success: false,
+//         errors: result.error,
+//       });
+//     }
+
+//     req.query = result.data as any;
+//     next();
+//   };
