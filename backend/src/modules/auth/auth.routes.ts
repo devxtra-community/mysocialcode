@@ -12,7 +12,7 @@ import {
   sendEmailVerificationOtp,
   verifyEmailOtp,
 } from './auth.controller';
-import { validate } from '../../middleware/validate';
+import { validateBody } from '../../middleware/validate';
 import {
   changePasswordSchema,
   forgetPasswordSchema,
@@ -25,14 +25,14 @@ import { requireAuth } from '../../middleware/auth.middleware';
 
 const authRouter = Router();
 
-authRouter.post('/send-otp', validate(phoneSchema), sendOtp);
+authRouter.post('/send-otp', validateBody(phoneSchema), sendOtp);
 authRouter.post(
   '/verify-otp',
 
   verifyotp,
 );
-authRouter.post('/login', validate(loginSchema), login);
-authRouter.post('/register', validate(registerSchema), register);
+authRouter.post('/login', validateBody(loginSchema), login);
+authRouter.post('/register', validateBody(registerSchema), register);
 authRouter.post(
   '/refresh-token',
 
@@ -42,19 +42,19 @@ authRouter.post('/logout', logout);
 
 authRouter.post(
   '/forget-password',
-  validate(forgetPasswordSchema),
+  validateBody(forgetPasswordSchema),
   forgetPassword,
 );
 authRouter.post(
   '/reset-password',
-  validate(resetPasswordSchema),
+  validateBody(resetPasswordSchema),
   resetPassword,
 );
 
 authRouter.put(
   '/change-password',
   requireAuth,
-  validate(changePasswordSchema),
+  validateBody(changePasswordSchema),
   changePassword,
 );
 

@@ -238,7 +238,7 @@ export const register = async (
     await otpRepo.delete({ id: otpId });
 
     const accessToken = signAccessToken({
-      userId: user.id,
+      id: user.id, type: 'USER',
     });
 
     const refreshToken = await createRefreshTokenSession(user);
@@ -298,7 +298,7 @@ export const login = async (
     }
 
     const accessToken = signAccessToken({
-      userId: user.id,
+      id: user.id, type: 'USER',
     });
 
     const refreshToken = await createRefreshTokenSession(user);

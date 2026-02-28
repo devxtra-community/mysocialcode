@@ -20,6 +20,7 @@ import { razorpay } from '../payment/razorpay';
 export interface AuthReq extends Request {
   user?: {
     id: string;
+    type: 'USER' | 'ADMIN';
   };
 }
 export const createEvent = async (req: AuthReq, res: Response) => {

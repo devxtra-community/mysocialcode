@@ -4,18 +4,33 @@ import {
   Column,
   CreateDateColumn,
   OneToMany,
+  DeleteDateColumn,
+  UpdateDateColumn,
+  Index,
 } from 'typeorm';
 import { Events } from './Event';
+import { EventTicket } from './Tickets';
+
+// export enum UserRole {
+//   USER = 'USER',
+//   ADMIN = 'ADMIN',
+// }
+
+export enum UserStatus {
+  ACTIVE = 'ACTIVE',
+  INACTIVE = 'INACTIVE',
+  BANNED = 'BANNED',
+}
 
 @Entity('users')
 export class User {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
-  @Column({ unique: true, nullable: true })
+  @Column({ unique: true })
   email!: string;
 
-  @Column({ unique: true, nullable: true })
+  @Column({ unique: true })
   phoneNumber!: string;
 
   @Column()
@@ -33,8 +48,8 @@ export class User {
   @Column({ nullable: true })
   profileImageUrl?: string;
 
-  @Column()
-  passwordHash?: string;
+  @Column({ nullable: false })
+  passwordHash!: string;
 
   @Column({ default: false })
   isPhoneVerified!: boolean;
@@ -45,12 +60,41 @@ export class User {
   @OneToMany(() => Events, (event) => event.user)
   events!: Events[];
 
+  @OneToMany(() => EventTicket, (ticket) => ticket.user)
+  eventTickets!: EventTicket[];
+
   @CreateDateColumn()
   createdAt!: Date;
 
   @Column({ nullable: true })
-  passwordResetToken!: string;
+  passwordResetToken?: string;
 
   @Column({ type: 'timestamp', nullable: true })
-  passwordResetExpires!: Date;
+  passwordResetExpires?: Date;
+
+  // @Index()
+  // @Column({ enum: UserRole, default: UserRole.USER })
+  // role!: UserRole;
+
+  @Index()
+  @Column({ type: 'enum', enum: UserStatus, default: UserStatus.ACTIVE })
+  status!: UserStatus;
+
+  @Column({ nullable: true })
+  banReason?: string;
+
+  @Column({ type: 'timestamp', nullable: true })
+  bannedAt?: Date;
+
+  @Column({ type: 'timestamp', nullable: true })
+  banExpires?: Date;
+
+  @DeleteDateColumn()
+  deletedAt?: Date;
+
+  @UpdateDateColumn()
+  updatedAt!: Date;
+
+  @Column({ default: false })
+  isFullyVerified!: boolean;
 }

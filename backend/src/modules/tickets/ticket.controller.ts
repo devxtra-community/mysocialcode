@@ -2,12 +2,13 @@ import { Request, Response } from 'express';
 import QRCode from 'qrcode';
 import { getTicketRepository } from './ticket.repository';
 
-export interface AuthReq extends Request {
-  user?: {
-    id: string;
-  };
-}
-export const getMyTickets = async (req: AuthReq, res: Response) => {
+// export interface AuthReq extends Request {
+//   user?: {
+//     id: string;
+//     role: string;
+//   };
+// }
+export const getMyTickets = async (req: Request, res: Response) => {
   try {
     const userId = req.user?.id;
 

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import apiInstance from '@/app/lib/api';
+import api from '@/app/lib/api';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -17,12 +17,14 @@ export default function LoginPage() {
     setLoading(true);
     setError('');
     try {
-      const login = await apiInstance.post('/admin/login', { email, password });
+      const login = await api.post('/admin/auth/login', { email, password });
       if (login.data.success) {
+        localStorage.setItem('admin_access_token', login.data.token)
         router.push('/home');
       }
-    } catch (err: any) {
-      setError(err?.response?.data?.message || 'Invalid email or password');
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { message?: string } } };
+      setError(error?.response?.data?.message || 'Invalid email or password');
     } finally {
       setLoading(false);
     }

@@ -29,6 +29,6 @@ export const appDataSource = new DataSource({
     Boost,
     Admin,
   ],
-  synchronize: false,
+  synchronize: true,
   migrations: ['src/migrations/*.ts'],
 });
