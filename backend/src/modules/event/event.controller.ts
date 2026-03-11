@@ -46,7 +46,7 @@ export const createEvent = async (req: AuthReq, res: Response) => {
       });
     }
     const geo = await getCoordinates(location);
-    console.log("getting geo",geo)
+    console.log('getting geo', geo);
     const userId = req.user?.id;
     const files = req.files as Express.Multer.File[];
     const event = await createEventService(

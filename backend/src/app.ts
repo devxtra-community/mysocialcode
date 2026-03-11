@@ -15,7 +15,6 @@ import uploadRouter from './modules/user/upload.routes';
 import boostRouter from './modules/boosts/boost.routes';
 import adminRouter from './modules/admin/auth/authRouter';
 
-
 const app = express();
 app.use(
   cors({

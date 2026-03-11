@@ -85,10 +85,10 @@ export default function EventDetailScreen() {
     return <EventDetailSkeleton />;
   }
   const openMap = () => {
-  Linking.openURL(
-    `https://www.google.com/maps?q=${event.latitude},${event.longitude}`
-  );
-};
+    Linking.openURL(
+      `https://www.google.com/maps?q=${event.latitude},${event.longitude}`,
+    );
+  };
 
   return (
     <View style={styles.container}>
@@ -115,29 +115,29 @@ export default function EventDetailScreen() {
 
       <Text style={styles.location}>{event.location}</Text>
 
-<View style={styles.mapContainer}>
-  <MapView
-    style={styles.map}
-    initialRegion={{
-      latitude: event.latitude,
-      longitude: event.longitude,
-      latitudeDelta: 0.01,
-      longitudeDelta: 0.01,
-    }}
-  >
-    <Marker
-      coordinate={{
-        latitude: event.latitude,
-        longitude: event.longitude,
-      }}
-      title={event.title}
-      description={event.location}
-    />
-  </MapView>
-</View>
-<Pressable onPress={openMap}>
-  <Text>Open in Maps</Text>
-</Pressable>
+      <View style={styles.mapContainer}>
+        <MapView
+          style={styles.map}
+          initialRegion={{
+            latitude: event.latitude,
+            longitude: event.longitude,
+            latitudeDelta: 0.01,
+            longitudeDelta: 0.01,
+          }}
+        >
+          <Marker
+            coordinate={{
+              latitude: event.latitude,
+              longitude: event.longitude,
+            }}
+            title={event.title}
+            description={event.location}
+          />
+        </MapView>
+      </View>
+      <Pressable onPress={openMap}>
+        <Text>Open in Maps</Text>
+      </Pressable>
 
       <Text style={styles.description}>{event.description}</Text>
 
@@ -347,13 +347,13 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   mapContainer: {
-  height: 200,
-  borderRadius: 12,
-  overflow: 'hidden',
-  marginBottom: 16,
-},
+    height: 200,
+    borderRadius: 12,
+    overflow: 'hidden',
+    marginBottom: 16,
+  },
 
-map: {
-  flex: 1,
-},
+  map: {
+    flex: 1,
+  },
 });
