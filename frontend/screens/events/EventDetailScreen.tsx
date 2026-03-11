@@ -13,6 +13,7 @@ import EventDetailSkeleton from '@/components/comps/skeletonEvent';
 import Carousel from 'react-native-reanimated-carousel';
 import api from '@/lib/api';
 import { Linking } from 'react-native';
+import MapView, { Marker } from 'react-native-maps';
 
 interface EventType {
   id: string;
@@ -20,6 +21,8 @@ interface EventType {
   description: string;
   category: string;
   location: string;
+  latitude: number;
+  longitude: number;
   startDate: string;
   endDate: string;
   price: string;
@@ -81,6 +84,11 @@ export default function EventDetailScreen() {
   if (!event) {
     return <EventDetailSkeleton />;
   }
+  const openMap = () => {
+  Linking.openURL(
+    `https://www.google.com/maps?q=${event.latitude},${event.longitude}`
+  );
+};
 
   return (
     <View style={styles.container}>
@@ -105,7 +113,31 @@ export default function EventDetailScreen() {
 
       <Text style={styles.title}>{event.title}</Text>
 
-      <Text style={styles.location}> {event.location}</Text>
+      <Text style={styles.location}>{event.location}</Text>
+
+<View style={styles.mapContainer}>
+  <MapView
+    style={styles.map}
+    initialRegion={{
+      latitude: event.latitude,
+      longitude: event.longitude,
+      latitudeDelta: 0.01,
+      longitudeDelta: 0.01,
+    }}
+  >
+    <Marker
+      coordinate={{
+        latitude: event.latitude,
+        longitude: event.longitude,
+      }}
+      title={event.title}
+      description={event.location}
+    />
+  </MapView>
+</View>
+<Pressable onPress={openMap}>
+  <Text>Open in Maps</Text>
+</Pressable>
 
       <Text style={styles.description}>{event.description}</Text>
 
@@ -314,4 +346,14 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
+  mapContainer: {
+  height: 200,
+  borderRadius: 12,
+  overflow: 'hidden',
+  marginBottom: 16,
+},
+
+map: {
+  flex: 1,
+},
 });

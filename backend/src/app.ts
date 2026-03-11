@@ -14,7 +14,7 @@ import ticketRouter from './modules/tickets/ticket.route';
 import uploadRouter from './modules/user/upload.routes';
 import boostRouter from './modules/boosts/boost.routes';
 import adminRouter from './modules/admin/auth/authRouter';
-import adminUserRouter from './modules/admin/user/user.router';
+
 
 const app = express();
 app.use(
@@ -57,7 +57,6 @@ app.use('/user', userRouter);
 app.use('/ticket', ticketRouter);
 app.use('/boost', boostRouter);
 app.use('/admin', adminRouter);
-app.use('/admin/users', adminUserRouter);
 app.use(notFound);
 app.use(errorHandler);
 export default app;
